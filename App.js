@@ -6,7 +6,7 @@ import axios from 'axios';
 
 export default function App() {
 
-  const localhost = "192.168.55.35";
+  const localhost = "192.168.55.21";
 
   useEffect(() => {
 
