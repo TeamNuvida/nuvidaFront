@@ -35,7 +35,7 @@ const Signin = () => {
     const handleLogin = async () => {
         setLoading(true);
         try {
-            const response = await axios.post('http://18.188.101.208:8090/botbuddies/signin', {
+            const response = await axios.post({
                 id: loginInfo.id,
                 password: loginInfo.password,
             });
@@ -96,7 +96,7 @@ const Signin = () => {
                         <TouchableOpacity style={[styles.button, styles.buttonLogin]} onPress={handleLogin}>
                             <Text style={styles.buttonText}>로그인</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.button, styles.buttonSignUp]} onPress={() => navigation.navigate('SignUp')}>
+                        <TouchableOpacity style={[styles.button, styles.buttonSignUp]} onPress={() => navigation.navigate('signUp')}>
                             <Text style={styles.buttonText}>회원가입</Text>
                         </TouchableOpacity>
                     </View>
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     inputWrapper: {
         width: '100%',
         alignItems: 'center',
-        marginBottom: 5, // Add margin bottom to space out input fields
+        marginBottom: -5, // Add margin bottom to space out input fields
     },
     inputLabel: {
         fontSize: 15,
