@@ -7,7 +7,7 @@ import axios from 'axios';
 
 export default function CommunityList() {
     const navigation = useNavigation();
-    const [cmtList, setCmtList] = useState(null); // 로딩 상태 추가
+    const [cmtList, setCmtList] = useState(null);
     const userInfo = {user_id:'test', user_nick:'test'}
 
     const localhost = '192.168.55.35';
@@ -41,7 +41,6 @@ export default function CommunityList() {
             console.error('Error fetching plan data:', error);
         }
 
-        // navigation.navigate('CommunityInfo')
     }
 
     const PostItem = ({ item }) => (

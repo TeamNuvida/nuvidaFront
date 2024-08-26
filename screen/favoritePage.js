@@ -1,91 +1,144 @@
-import * as React from "react";
-import {Image, StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView} from "react-native";
+import React, { useState, useEffect, useCallback  } from 'react';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import {Image, StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, FlatList} from "react-native";
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
 import {FontAwesome, Entypo, Ionicons, Feather, AntDesign, MaterialCommunityIcons} from '@expo/vector-icons';
-import {useState} from 'react';
+import axios from "axios";
 
-// 상단 바 컴포넌트
-const topHeader = ({navigation, handleNoticeIconPress}) => {
-    return (
-        <View style={styles.headerContainer}>
-            <View style={styles.flexRow}>
-                <View style={{flex: 1}}></View>
-                <Text style={styles.headerText}>NUVIDA</Text>
-                <View style={styles.headerIconContainer}>
-                    <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('baseballSchedule')}>
-                        <AntDesign name="calendar" size={24} color="black"/>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.headerIcon} onPress={handleNoticeIconPress}>
-                        <MaterialCommunityIcons name="bell-plus" size={24} color="black"/>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </View>
+
+
+const FavoriteList = ({route}) => {
+    const navigation = useNavigation();
+
+    // 로그인 정보
+    const [userInfo, setUserInfo] = useState(route.params.userInfo);
+    const [favoritelist, setFavoritelist] = useState(null);
+
+    const localhost = '192.168.55.35';
+
+    // 관심 데이터 가져오기
+    const getFavorite = async () => {
+        try{
+            const response = await axios.post(`http://${localhost}:8090/nuvida/getFavoriteList`,{
+                user_id: userInfo.user_id
+            });
+            setFavoritelist(response.data)
+        }catch (e) {
+            console.error(e);
+        }
+
+    }
+
+    useFocusEffect(
+        useCallback(() => {
+            getFavorite();
+
+            return () => {
+                // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
+            };
+        }, []) // 의존성으로 route.params.userInfo를 추가하여, 값이 변경될 때마다 렌더링
     );
-};
 
-// 하단 바 컴포넌트
-const bottomHeader = ({navigation, handleNoticeIconPress}) => {
-    return (
-        <View style={styles.tabBar}>
-            <TouchableOpacity style={styles.tabItem}>
-                <Entypo name="home" size={24} color="black"/>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-                <FontAwesome name="calendar-check-o" size={24} color="black"/>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-                <FontAwesome name="calendar-check-o" size={24} color="black"/>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-                <Ionicons name="chatbubbles-outline" size={24} color="black"/>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-                <Feather name="user" size={24} color="black"/>
-            </TouchableOpacity>
-        </View>
-    );
-};
+    const communityInfo = async (post_seq) =>{
+        console.log(post_seq)
+        try {
+            const response = await axios.post(`http://${localhost}:8090/nuvida/getCmtInfo`, {post_seq:post_seq});
+            console.log(response.data);
+            const intResponse = await axios.post(`http://${localhost}:8090/nuvida/getInt`, {post_seq:post_seq, user_id:userInfo.user_id});
+            navigation.navigate('CommunityInfo', {cmtInfo:response.data, intTF:intResponse.data})
+        } catch (error) {
+            console.error('Error fetching plan data:', error);
+        }
 
-const handleNoticeIconPress = () => {
-    console.log("Notice icon pressed");
-};
+    }
 
-const FavoriteCard = ({imageSource, title, subtitle, description, date}) => {
-    return (
+    const handleInt = async (post_seq) => {
+        const response = await axios.post(`http://${localhost}:8090/nuvida/delInt`, {post_seq:post_seq, user_id:userInfo.user_id});
+        getFavorite();
+
+    };
+
+    const PostItem = ({ item }) => (
         <View style={{alignItems: "center"}}>
-            <View style={styles.cardContainer}>
-                <Image source={imageSource} style={styles.image}/>
-                <View style={styles.textContainer}>
-                    <View style={styles.titleRow}>
-                        <Text style={styles.titleText}>{title}</Text>
+        <TouchableOpacity style={styles.cardContainer} onPress={() => communityInfo(item.post_seq)}>
+            {item.image ? <Image source={{ uri: item.image }} style={styles.image} /> : <Image source={{ uri: 'https://firebasestorage.googleapis.com/v0/b/high-service-431903-t6.appspot.com/o/imgtest%2Fprofile.png?alt=media&token=668cdcff-3447-406d-a46c-de24b34235e0' }} style={styles.image} />}
+            <View style={styles.textContainer}>
+                <View style={styles.titleRow}>
+                    <Text style={styles.title}>{item.post_title}</Text>
+                    <TouchableOpacity onPress={()=> handleInt(item.post_seq)}>
                         <AntDesign name="heart" size={24} color="red" style={styles.iconStyle}/>
+                    </TouchableOpacity>
+                </View>
+                <Text style={styles.description}>{item.details}</Text>
+                <View style={styles.iconContainer}>
+                    <View style={styles.iconGroup}>
+                        <FontAwesome name="heart-o" size={20} color="red" />
+                        <Text style={styles.iconText}>{item.intCount}</Text>
                     </View>
-                    <Text style={styles.subtitleText}>{subtitle}</Text>
-                    <Text style={styles.descriptionText}>{description}</Text>
-                    <Text style={styles.dateText}>{date}</Text>
+                    <View style={[styles.icon, styles.iconGroup]}>
+                        <FontAwesome name="comment-o" size={20} color="black" />
+                        <Text style={styles.iconText}>{item.cmtCount}</Text>
+                    </View>
                 </View>
             </View>
+        </TouchableOpacity>
         </View>
     );
-};
 
-const FavoriteList = ({navigation}) => {
+
+    // 상단 바 컴포넌트
+    const topHeader = () => {
+        return (
+            <View style={styles.headerContainer}>
+                <View style={styles.flexRow}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
+                    </TouchableOpacity>
+                    <Text style={styles.headerText}>NUVIDA</Text>
+                </View>
+            </View>
+        );
+    };
+
+    // 하단 바 컴포넌트
+    const bottomHeader = () => {
+        return (
+            <View style={styles.tabBar}>
+                <TouchableOpacity style={styles.tabItem}>
+                    <Entypo name="home" size={24} color="black"/>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem}>
+                    <FontAwesome name="calendar-check-o" size={24} color="black"/>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem}>
+                    <FontAwesome name="calendar-check-o" size={24} color="black"/>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem}>
+                    <Ionicons name="chatbubbles-outline" size={24} color="black"/>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem}>
+                    <Feather name="user" size={24} color="black"/>
+                </TouchableOpacity>
+            </View>
+        );
+    };
 
     return (
         <View style={styles.container}>
-            {topHeader({navigation, handleNoticeIconPress})}
-            <ScrollView>
-                <FavoriteCard
-                    imageSource={require('../assets/profile.png')}
-                    title="축제"
-                    subtitle="함평 나비 축제"
-                    description="전라남도 함평 축제"
-                    date="2024.05.28~2024.05.30"
+            {topHeader()}
+            {favoritelist?(
+                <FlatList
+                    data={favoritelist}
+                    renderItem={({ item }) => <PostItem item={item} />}
+                    keyExtractor={item => item.post_seq}
                 />
-            </ScrollView>
-            {bottomHeader({navigation, handleNoticeIconPress})}
+            ):(
+                <View style={styles.nullItem}>
+                    <Text >관심 목록이 없습니다.</Text>
+                </View>
+            )}
+            {bottomHeader()}
         </View>
 
     );
@@ -187,15 +240,13 @@ const styles = StyleSheet.create({
         width: '90%',
         marginVertical: 10,
         padding: 15,
+        alignItems:"center"
     },
     image: {
         width: 100,
         height: 100,
         borderRadius: 10,
         marginRight: 15,
-    },
-    textContainer: {
-        flex: 1,
     },
     titleText: {
         fontSize: 18,
@@ -223,6 +274,42 @@ const styles = StyleSheet.create({
     },
     iconStyle: {
         marginLeft: 10, // 텍스트와 아이콘 사이의 간격 조정 (선택 사항)
+    },
+
+    textContainer: {
+        flex: 1,
+        marginLeft: 10,
+    },
+    title: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        paddingRight: 10,
+    },
+    description: {
+        fontSize: 14,
+        color: '#666',
+        marginVertical: 5,
+    },
+    iconContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 5,
+    },
+    icon: {
+        marginLeft: 15,
+    },
+
+    iconGroup: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    iconText: {
+        marginLeft: 5, // 아이콘과 텍스트 사이의 간격 조정
+        fontSize: 14,
+        color: '#000',
+    },
+    nullItem:{
+        alignItems: 'center',
     },
 
 });
