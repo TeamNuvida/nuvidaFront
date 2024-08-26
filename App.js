@@ -168,7 +168,7 @@ export default function App() {
 
   return (
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="TripCalendar">
+        <Stack.Navigator initialRouteName="Main">
           <Stack.Screen name="Signin" component={Signin} options={{ headerShown: false }}/>
           <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }}/>
             <Stack.Screen name="Calculate" component={Calculate} options={{ headerShown: false }}/>

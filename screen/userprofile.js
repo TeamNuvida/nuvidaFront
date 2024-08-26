@@ -1,68 +1,227 @@
-import * as React from 'react';
-import {View, Text, StyleSheet, TouchableOpacity, TextInput} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {View, Text, StyleSheet, TouchableOpacity, TextInput, Image, Alert} from 'react-native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
 import {MaterialCommunityIcons, AntDesign} from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ImagePicker from 'expo-image-picker';
+import { initializeApp } from 'firebase/app';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import axios from "axios";
 
-// 상단 바 컴포넌트
-const topHeader = ({navigation, handleNoticeIconPress}) => {
-    return (
-        <View style={styles.headerContainer}>
-            <View style={styles.flexRow}>
-                <View style={{flex: 1}}></View>
-                <Text style={styles.headerText}>NUVIDA</Text>
-                <View style={styles.headerIconContainer}>
-                    <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('baseballSchedule')}>
-                        <AntDesign name="calendar" size={24} color="black"/>
+// Firebase 프로젝트에서 가져온 구성 객체
+const firebaseConfig = {
+    apiKey: "AIzaSyDZuZsmJDYEWp5arnfRc6pSqMd0WAt01kU",
+    authDomain: "high-service-431903-t6.firebaseapp.com",
+    projectId: "high-service-431903-t6",
+    storageBucket: "high-service-431903-t6.appspot.com",
+    messagingSenderId: "797041135189",
+    appId: "1:797041135189:android:bfe45b46755c233195cedc"
+};
+
+// Firebase 초기화
+const app = initializeApp(firebaseConfig);
+const storage = getStorage(app);
+
+// 이미지 업로드 함수
+const uploadImageAsync = async (uri) => {
+    try {
+        // Fetch를 사용하여 이미지를 가져오고 Blob으로 변환
+        const response = await fetch(uri);
+        const blob = await response.blob();
+
+        // Firebase Storage에 고유한 파일 이름으로 저장
+        const filename = uri.split('/').pop();
+        const storageRef = ref(storage, `profile/${filename}`);
+
+        // Firebase Storage에 파일 업로드
+        await uploadBytes(storageRef, blob);
+
+        // 업로드된 파일의 다운로드 URL 가져오기
+        const downloadURL = await getDownloadURL(storageRef);
+
+        console.log('File available at:', downloadURL);
+        return downloadURL;
+
+    } catch (error) {
+        console.error('Error uploading image: ', error);
+        throw error;
+    }
+};
+
+
+
+const Userprofile = ({route}) => {
+    const navigation = useNavigation();
+
+    // 로그인 정보
+    const [userInfo, setUserInfo] = useState(route.params.userInfo);
+    const [profile_img, setProfile_img] = useState(userInfo.profile_img);
+    const [user_nick, setUser_nick] = useState(userInfo.user_nick);
+    const [user_pw, setUser_pw] = useState(null);
+    const [user_phone, setUser_phone] = useState(userInfo.user_phone);
+
+
+    const localhost = '192.168.55.35';
+
+    const pickImage = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            const selectedImageUri = result.assets[0].uri;
+
+            try {
+                const downloadURL = await uploadImageAsync(selectedImageUri);
+                setProfile_img(downloadURL); // 프로필 이미지 URL 업데이트
+            } catch (error) {
+                console.error('Error uploading image:', error);
+            }
+        }
+    };
+
+
+
+    // 상단 바 컴포넌트
+    const topHeader = () => {
+        return (
+            <View style={styles.headerContainer}>
+                <View style={styles.flexRow}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.headerIcon} onPress={handleNoticeIconPress}>
-                        <MaterialCommunityIcons name="bell-plus" size={24} color="black"/>
-                    </TouchableOpacity>
+                    <Text style={styles.headerText}>NUVIDA</Text>
                 </View>
             </View>
-        </View>
-    );
-};
+        );
+    };
+    
+    const handleChangeProfile = () =>{
+        console.log("변경")
+    }
 
+    const handlePasswordChange = (text) => {
+        // 영어와 숫자만 허용하는 정규식
+        const filteredText = text.replace(/[^a-zA-Z0-9]/g, '');
+        setUser_pw(filteredText);
+    };
 
-const handleNoticeIconPress = () => {
-    console.log("Notice icon pressed");
-};
+    const changeUserInfo = async ()=>{
+        console.log("이미지", profile_img);
+        console.log("닉네임", user_nick);
+        console.log("비번", user_pw);
+        console.log("폰", user_phone);
 
-const Userprofile = ({navigation}) => {
+        if (user_pw && user_pw.length < 8) {
+            Alert.alert("비밀번호 오류", "비밀번호는 8자리 이상이어야 합니다.",
+                [
+                    { text: "OK" }
+                ]
+            );
+            return ; // 함수를 여기서 종료하여 회원가입 절차를 중단합니다.
+        }
+
+        if (!user_nick) {
+            Alert.alert("닉네임 오류", "닉네임을 입력해주세요.",
+                [
+                    { text: "OK" }
+                ]
+            );
+            return ; // 함수를 여기서 종료하여 회원가입 절차를 중단합니다.
+        }
+        
+        try{
+
+            const response = await axios.post(`http://${localhost}:8090/nuvida/updateUserInfo`,{
+                user_id: userInfo.user_id,
+                profile_img: profile_img,
+                user_nick: user_nick,
+                user_pw:user_pw,
+                user_phone:user_phone
+            });
+
+            const userInfoString = JSON.stringify(response.data);
+            await AsyncStorage.setItem('userInfo', userInfoString);
+            navigation.navigate('Mypage', {userInfo:response.data});
+
+        }catch (e) {
+            console.error(e);
+        }
+    }
+    
     return (
         <View style={styles.container}>
-            {topHeader({navigation, handleNoticeIconPress})}
-            <View style={styles.logoBackgroundWrapper}>
-                <View style={styles.logoBackground}/>
-            </View>
+            {topHeader()}
+            {/*<View style={styles.logoBackgroundWrapper}>*/}
+            {/*    <View style={styles.logoBackground}/>*/}
+            {/*</View>*/}
             <View style={styles.profileContainer}>
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>별명</Text>
-                    <TextInput style={styles.inputBackground} placeholder="별명을 입력하세요" placeholderTextColor="gray"/>
+
+                <Text style={styles.label}>프로필</Text>
+                <View style={styles.profileImgContainer}>
+                    {userInfo && userInfo.profile_img ? (
+                        <Image
+                            style={styles.profileIcon}
+                            resizeMode="cover"
+                            source={{ uri: profile_img }}
+                        />
+                    ) : (
+                        <Image
+                            style={styles.profileIcon}
+                            resizeMode="cover"
+                            source={require("../assets/profile.png")}
+                        />
+                    )}
+                    <TouchableOpacity style={styles.changeButton} onPress={pickImage}>
+                        <Text style={styles.changeButtonText}>변경</Text>
+                    </TouchableOpacity>
                 </View>
+
                 <View style={styles.inputGroup}>
-                    <Text style={styles.label}>프로필사진</Text>
-                    <TextInput style={styles.inputBackground} placeholder="프로필사진" placeholderTextColor="gray"/>
+                    <Text style={styles.label}>닉네임</Text>
+                    <TextInput
+                        style={styles.inputBackground}
+                        value={user_nick}
+                        onChangeText={setUser_nick}
+                        placeholder="닉네임을 입력하세요"
+                        placeholderTextColor="gray"
+                    />
                 </View>
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>비밀번호</Text>
-                    <TextInput style={styles.inputBackground} placeholder="asdf123456" placeholderTextColor="gray"
-                               secureTextEntry={true}/>
+                    <TextInput
+                        style={styles.inputBackground}
+                        value={user_pw}
+                        onChangeText={handlePasswordChange} // 영어와 숫자만 입력되도록 처리
+                        placeholder="비밀번호 입력"
+                        placeholderTextColor="gray"
+                        secureTextEntry={true} // 비밀번호를 암호화된 형태로 보여줌
+                    />
                 </View>
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>휴대폰 번호</Text>
-                    <TextInput style={styles.inputBackground} placeholder="010-0000-0000" placeholderTextColor="gray"
-                               keyboardType="phone-pad"/>
+                    <TextInput
+                        style={styles.inputBackground}
+                        value={user_phone}
+                        onChangeText={setUser_phone}
+                        placeholder="010-0000-0000"
+                        placeholderTextColor="gray"
+                        keyboardType="phone-pad"
+                    />
                 </View>
             </View>
             <View style={styles.buttonContainer}>
-                <View style={styles.button}>
+                <TouchableOpacity style={styles.button} onPress={()=>navigation.navigate("Mypage",{userInfo:userInfo})}>
                     <Text style={styles.buttonText}>취소</Text>
-                </View>
-                <View style={styles.button}>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.button} onPress={()=>changeUserInfo()}>
                     <Text style={styles.buttonText}>수정</Text>
-                </View>
+                </TouchableOpacity>
             </View>
         </View>
     );
@@ -147,9 +306,26 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginTop: 16,
     },
+    profileImgContainer: {
+        flexDirection: 'row', // 이미지와 버튼을 가로로 배치
+        alignItems: 'center', // 세로 축에서 가운데 정렬
+    },
     profileIcon: {
-        width: 48,
-        height: 46,
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        marginRight: 10, // 이미지와 버튼 사이의 간격
+    },
+    changeButton: {
+        backgroundColor: '#007BFF', // 버튼 배경색
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 5,
+    },
+    changeButtonText: {
+        color: '#FFFFFF', // 텍스트 색상
+        fontSize: 14,
+        fontWeight: 'bold',
     },
     /* 상단바 */
     headerContainer: {

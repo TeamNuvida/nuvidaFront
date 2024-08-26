@@ -1,16 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useCallback  } from 'react';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import {Image, StyleSheet, Text, View, ScrollView, TouchableOpacity} from "react-native";
 import {createStackNavigator} from '@react-navigation/stack';
-import {NavigationContainer} from '@react-navigation/native';
 import {FontAwesome, Entypo, Ionicons, Feather, AntDesign, MaterialCommunityIcons} from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from "axios";
 
 const Mypage = ({route}) => {
     const navigation = useNavigation();
 
     // 로그인 정보
     const [userInfo, setUserInfo] = useState(route.params.userInfo);
+
+    useFocusEffect(
+        useCallback(() => {
+            if (route.params?.userInfo) {
+                setUserInfo(route.params.userInfo);
+            }
+
+            return () => {
+                // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
+            };
+        }, [route.params?.userInfo]) // 의존성으로 route.params.userInfo를 추가하여, 값이 변경될 때마다 렌더링
+    );
+
+
 
     // 상단 바 컴포넌트
     const topHeader = () => {
@@ -74,7 +88,7 @@ const Mypage = ({route}) => {
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 {topHeader()}
                 {userInfo?(
-                    <TouchableOpacity style={styles.profileContainer} onPress={()=>navigation.navigate("Userprofile")}>
+                    <TouchableOpacity style={styles.profileContainer} onPress={()=>navigation.navigate("Userprofile", {userInfo:userInfo})}>
                         {userInfo.profile_img?(
                                 <Image
                                     style={styles.profileIcon}
@@ -111,7 +125,7 @@ const Mypage = ({route}) => {
                         />
                         <Text style={styles.menuText}>내가 쓴글</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.menuItem} onPress={()=>navigation.navigate("FavoriteList")}>
+                    <TouchableOpacity style={styles.menuItem} onPress={()=>navigation.navigate("FavoriteList", {userInfo:userInfo})}>
                         <Image
                             style={styles.menuIcon}
                             resizeMode="cover"
@@ -119,7 +133,7 @@ const Mypage = ({route}) => {
                         />
                         <Text style={styles.menuText}>관심 페이지</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.menuItem} onPress={()=>navigation.navigate("TravelLog")}>
+                    <TouchableOpacity style={styles.menuItem} onPress={()=>navigation.navigate("TravelLog", {userInfo:userInfo})}>
                         <Image
                             style={styles.menuIcon}
                             resizeMode="cover"
@@ -127,7 +141,7 @@ const Mypage = ({route}) => {
                         />
                         <Text style={styles.menuText}>여행 기록</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.menuItem} onPress={()=>navigation.navigate("FriendList")}>
+                    <TouchableOpacity style={styles.menuItem} onPress={()=>navigation.navigate("FriendList", {userInfo:userInfo})}>
                         <Image
                             style={styles.menuIcon}
                             resizeMode="cover"
