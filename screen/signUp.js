@@ -17,7 +17,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { KeyboardAvoidingView } from 'react-native';
 
-const signUp = () => {
+const SignUp = () => {
     const navigation = useNavigation();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -386,4 +386,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default signUp;
+export default SignUp;

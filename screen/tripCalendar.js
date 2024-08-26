@@ -39,7 +39,7 @@ const generateCalendar = (year, month) => {
     return calendar;
 };
 
-const TravelCalendar = ({ navigation }) => {
+const TripCalendar = ({ navigation }) => {
     const [currentDate, setCurrentDate] = useState(moment());
     const [markedDates, setMarkedDates] = useState({});
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
@@ -216,7 +216,7 @@ const TravelCalendar = ({ navigation }) => {
             {renderCalendarHeader()}
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 {renderCalendar()}
-                <TouchableOpacity style={styles.addButton} onPress={() => setDatePickerVisibility(true)}>
+                <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate("ScheduleCreation1", {userInfo:userInfo})}>
                     <Text style={styles.addButtonText}>일정 추가</Text>
                 </TouchableOpacity>
             </ScrollView>
@@ -453,4 +453,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default TravelCalendar;
+export default TripCalendar;

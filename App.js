@@ -5,13 +5,13 @@ import { Image } from 'expo-image';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import signin from './screen/signin';
-import signUp from './screen/signUp';
-import calculate from './screen/calculate';
-import reservationInfo from './screen/reservationInfo';
-import memberList from './screen/memberList';
-import tripSchedule from "./screen/tripSchedule";
-import tripCalendar from "./screen/tripCalendar";
+import Signin from './screen/signin';
+import SignUp from './screen/signUp';
+import Calculate from './screen/calculate';
+import ReservationInfo from './screen/reservationInfo';
+import MemberList from './screen/memberList';
+import TripSchedule from "./screen/tripSchedule";
+import TripCalendar from "./screen/tripCalendar";
 import FavoriteList from "./screen/favoritePage"
 import FriendList from "./screen/friend_management"
 import Mypage from "./screen/mypage"
@@ -168,14 +168,14 @@ export default function App() {
 
   return (
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="Main">
-          <Stack.Screen name="signin" component={signin} options={{ headerShown: false }}/>
-          <Stack.Screen name="signUp" component={signUp} options={{ headerShown: false }}/>
-            <Stack.Screen name="calculate" component={calculate} options={{ headerShown: false }}/>
-            <Stack.Screen name="reservationInfo" component={reservationInfo} options={{ headerShown: false }}/>
-            <Stack.Screen name="memberList" component={memberList} options={{headerShown: false}}/>
-            <Stack.Screen name="tripSchedule" component={tripSchedule} options={{headerShown: false}}/>
-            <Stack.Screen name="tripCalendar" component={tripCalendar} options={{headerShown: false}}/>
+        <Stack.Navigator initialRouteName="TripCalendar">
+          <Stack.Screen name="Signin" component={Signin} options={{ headerShown: false }}/>
+          <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }}/>
+            <Stack.Screen name="Calculate" component={Calculate} options={{ headerShown: false }}/>
+            <Stack.Screen name="ReservationInfo" component={ReservationInfo} options={{ headerShown: false }}/>
+            <Stack.Screen name="MemberList" component={MemberList} options={{headerShown: false}}/>
+            <Stack.Screen name="TripSchedule" component={TripSchedule} options={{headerShown: false}}/>
+            <Stack.Screen name="TripCalendar" component={TripCalendar} options={{headerShown: false}}/>
             <Stack.Screen name="FavoriteList" component={FavoriteList} options={{headerShown: false}}/>
             <Stack.Screen name="FriendList" component={FriendList} options={{headerShown: false}}/>
             <Stack.Screen name="Mypage" component={Mypage} options={{headerShown: false}}/>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Button, TouchableOpacity, ScrollView, Modal, TextInput } from 'react-native';
 import { AntDesign, MaterialCommunityIcons, Entypo, FontAwesome, Ionicons, Feather } from '@expo/vector-icons';
 
-const calculate = ({ navigation }) => {
+const Calculate = ({ navigation }) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [newItemTitle, setNewItemTitle] = useState('');
     const [newItemPrice, setNewItemPrice] = useState('');
@@ -348,4 +348,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default calculate;
+export default Calculate;
