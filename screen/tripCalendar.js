@@ -114,34 +114,40 @@ const TravelCalendar = ({ navigation }) => {
                 </View>
                 {calendar.map((week, index) => (
                     <View key={index} style={styles.week}>
-                        {week.map((day, idx) => (
-                            <View key={idx} style={styles.dayContainer}>
-                                {day ? (
-                                    <TouchableOpacity
-                                        style={[
-                                            styles.day,
-                                            markedDates[moment(`${year}-${month}-${day}`).format('YYYY-MM-DD')]?.selected && {
-                                                backgroundColor: markedDates[moment(`${year}-${month}-${day}`).format('YYYY-MM-DD')].color
-                                            }
-                                        ]}
-                                        onPress={() => setSelectedDate(moment(`${year}-${month}-${day}`).format('YYYY-MM-DD'))}
-                                    >
-                                        <Text
+                        {week.map((day, idx) => {
+                            const dateString = moment(`${year}-${month}-${day}`).format('YYYY-MM-DD');
+                            const isMarked = markedDates[dateString]?.selected;
+
+                            return (
+                                <View key={idx} style={styles.dayContainer}>
+                                    {day ? (
+                                        <TouchableOpacity
                                             style={[
-                                                styles.dayText,
-                                                markedDates[moment(`${year}-${month}-${day}`).format('YYYY-MM-DD')]?.selected && {
-                                                    color: 'white'
+                                                styles.day,
+                                                isMarked && {
+                                                    backgroundColor: markedDates[dateString].color
                                                 }
                                             ]}
+                                            onPress={() => setSelectedDate(dateString)}
                                         >
-                                            {day}
-                                        </Text>
-                                    </TouchableOpacity>
-                                ) : (
-                                    <View style={styles.emptyDay} />
-                                )}
-                            </View>
-                        ))}
+                                            <Text
+                                                style={[
+                                                    styles.dayText,
+                                                    isMarked && { color: 'white' }
+                                                ]}
+                                            >
+                                                {day}
+                                            </Text>
+                                            {isMarked && (
+                                                <View style={styles.markBar}></View>
+                                            )}
+                                        </TouchableOpacity>
+                                    ) : (
+                                        <View style={styles.emptyDay} />
+                                    )}
+                                </View>
+                            );
+                        })}
                     </View>
                 ))}
             </View>
@@ -330,6 +336,13 @@ const styles = StyleSheet.create({
     emptyDay: {
         width: 40,
         height: 40,
+    },
+    markBar: {
+        marginTop: 2,
+        width: '60%',
+        height: 4,
+        backgroundColor: 'blue',
+        borderRadius: 2,
     },
     addButton: {
         backgroundColor: 'white',

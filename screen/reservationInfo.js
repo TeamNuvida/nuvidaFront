@@ -4,17 +4,24 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { AntDesign, MaterialCommunityIcons, Entypo, FontAwesome, Ionicons, Feather } from '@expo/vector-icons';
 
 const ReservationInfo = ({ navigation }) => {
-    const [modalVisible, setModalVisible] = useState(false);
+    const [ticketModalVisible, setTicketModalVisible] = useState(false);
+    const [scheduleModalVisible, setScheduleModalVisible] = useState(false);
+    const [newTicketTitle, setNewTicketTitle] = useState('');
+    const [newTicketDate, setNewTicketDate] = useState(new Date());
+    const [newTicketTime, setNewTicketTime] = useState(new Date());
     const [newItemTitle, setNewItemTitle] = useState('');
     const [newItemDate, setNewItemDate] = useState(new Date());
     const [newItemStartTime, setNewItemStartTime] = useState(new Date());
     const [newItemEndTime, setNewItemEndTime] = useState(new Date());
+    const [showTicketDatePicker, setShowTicketDatePicker] = useState(false);
+    const [showTicketTimePicker, setShowTicketTimePicker] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showStartTimePicker, setShowStartTimePicker] = useState(false);
     const [showEndTimePicker, setShowEndTimePicker] = useState(false);
     const [items, setItems] = useState([
         { title: '국립광주박물관', date: '2024.05.21', time: '10:00 - 12:00 p.m.' }
     ]);
+    const [tickets, setTickets] = useState([]);
     const [showDeleteIcons, setShowDeleteIcons] = useState(false);
 
     const handleAddItem = () => {
@@ -24,14 +31,38 @@ const ReservationInfo = ({ navigation }) => {
                 date: newItemDate.toLocaleDateString(),
                 time: `${newItemStartTime.toLocaleTimeString()} - ${newItemEndTime.toLocaleTimeString()}`
             }]);
-            setNewItemTitle('');
-            setNewItemDate(new Date());
-            setNewItemStartTime(new Date());
-            setNewItemEndTime(new Date());
-            setModalVisible(false);
+            resetScheduleModal();
         } else {
             alert("위치, 날짜, 시작 시간, 끝 시간을 입력하세요.");
         }
+    };
+
+    const handleAddTicket = () => {
+        if (newTicketTitle && newTicketDate && newTicketTime) {
+            setTickets([...tickets, {
+                title: newTicketTitle,
+                date: newTicketDate.toLocaleDateString(),
+                time: newTicketTime.toLocaleTimeString()
+            }]);
+            resetTicketModal();
+        } else {
+            alert("티켓 정보(위치, 날짜, 시간)를 입력하세요.");
+        }
+    };
+
+    const resetScheduleModal = () => {
+        setNewItemTitle('');
+        setNewItemDate(new Date());
+        setNewItemStartTime(new Date());
+        setNewItemEndTime(new Date());
+        setScheduleModalVisible(false);
+    };
+
+    const resetTicketModal = () => {
+        setNewTicketTitle('');
+        setNewTicketDate(new Date());
+        setNewTicketTime(new Date());
+        setTicketModalVisible(false);
     };
 
     const handleDeleteItem = (index) => {
@@ -66,6 +97,18 @@ const ReservationInfo = ({ navigation }) => {
         setNewItemEndTime(currentTime);
     };
 
+    const handleTicketDateChange = (event, selectedDate) => {
+        const currentDate = selectedDate || newTicketDate;
+        setShowTicketDatePicker(Platform.OS === 'ios');
+        setNewTicketDate(currentDate);
+    };
+
+    const handleTicketTimeChange = (event, selectedTime) => {
+        const currentTime = selectedTime || newTicketTime;
+        setShowTicketTimePicker(Platform.OS === 'ios');
+        setNewTicketTime(currentTime);
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.topBar}>
@@ -95,25 +138,33 @@ const ReservationInfo = ({ navigation }) => {
                         <Text style={styles.tabText}>정산하기</Text>
                     </TouchableOpacity>
                 </View>
-                <View style={styles.reservationInfoContainer}>
-                    <View style={styles.reservationInfo}>
-                        <MaterialCommunityIcons name="airplane" size={40} color="grey" style={styles.icon} />
-                        <View style={styles.reservationDetails}>
-                            <Text style={styles.detailTitle}>출발일시</Text>
-                            <Text style={styles.detailText}>2024. 05. 21 (토) 8:30</Text>
-                            <View style={styles.reservationSeats}>
-                                <View style={styles.seatInfo}>
-                                    <Text style={styles.seatText}>승차점</Text>
-                                    <Text style={styles.seatNumber}>11</Text>
-                                </View>
-                                <View style={styles.seatInfo}>
-                                    <Text style={styles.seatText}>좌석번호</Text>
-                                    <Text style={styles.seatNumber}>06</Text>
+                {tickets.length === 0 ? (
+                    <TouchableOpacity style={styles.addTicketButton} onPress={() => setTicketModalVisible(true)}>
+                        <Text style={styles.addTicketText}>티켓 정보 추가</Text>
+                    </TouchableOpacity>
+                ) : (
+                    <View style={styles.reservationInfoContainer}>
+                        {tickets.map((ticket, index) => (
+                            <View key={index} style={styles.reservationInfo}>
+                                <MaterialCommunityIcons name="airplane" size={40} color="grey" style={styles.icon} />
+                                <View style={styles.reservationDetails}>
+                                    <Text style={styles.detailTitle}>{ticket.title}</Text>
+                                    <Text style={styles.detailText}>{ticket.date} {ticket.time}</Text>
+                                    <View style={styles.reservationSeats}>
+                                        <View style={styles.seatInfo}>
+                                            <Text style={styles.seatText}>승차점</Text>
+                                            <Text style={styles.seatNumber}>11</Text>
+                                        </View>
+                                        <View style={styles.seatInfo}>
+                                            <Text style={styles.seatText}>좌석번호</Text>
+                                            <Text style={styles.seatNumber}>06</Text>
+                                        </View>
+                                    </View>
                                 </View>
                             </View>
-                        </View>
+                        ))}
                     </View>
-                </View>
+                )}
                 <View style={styles.line} />
                 <View style={styles.boxContainer}>
                     <Text style={styles.subHeader}>예약 목록</Text>
@@ -135,7 +186,7 @@ const ReservationInfo = ({ navigation }) => {
                                 </View>
                             ))}
                         </View>
-                        <TouchableOpacity style={styles.addItemButton} onPress={() => setModalVisible(true)}>
+                        <TouchableOpacity style={styles.addItemButton} onPress={() => setScheduleModalVisible(true)}>
                             <Text style={styles.addItemText}>+</Text>
                         </TouchableOpacity>
                     </View>
@@ -158,17 +209,77 @@ const ReservationInfo = ({ navigation }) => {
                     <Feather name="user" size={24} color="black" />
                 </TouchableOpacity>
             </View>
+
+            {/* 티켓 추가 모달 */}
             <Modal
                 animationType="slide"
                 transparent={true}
-                visible={modalVisible}
+                visible={ticketModalVisible}
                 onRequestClose={() => {
-                    setModalVisible(!modalVisible);
+                    setTicketModalVisible(!ticketModalVisible);
                 }}
             >
                 <View style={styles.modalContainer}>
                     <View style={styles.modalView}>
-                        <Text style={styles.modalText}>목록 추가</Text>
+                        <Text style={styles.modalText}>티켓 추가</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="티켓 위치를 입력하세요"
+                            value={newTicketTitle}
+                            onChangeText={setNewTicketTitle}
+                        />
+                        <TouchableOpacity onPress={() => setShowTicketDatePicker(true)} style={styles.input}>
+                            <Text>{newTicketDate.toLocaleDateString()}</Text>
+                        </TouchableOpacity>
+                        {showTicketDatePicker && (
+                            <DateTimePicker
+                                value={newTicketDate}
+                                mode="date"
+                                display="default"
+                                onChange={handleTicketDateChange}
+                            />
+                        )}
+                        <TouchableOpacity onPress={() => setShowTicketTimePicker(true)} style={styles.input}>
+                            <Text>{newTicketTime.toLocaleTimeString()}</Text>
+                        </TouchableOpacity>
+                        {showTicketTimePicker && (
+                            <DateTimePicker
+                                value={newTicketTime}
+                                mode="time"
+                                display="default"
+                                onChange={handleTicketTimeChange}
+                            />
+                        )}
+                        <View style={styles.modalButtonContainer}>
+                            <TouchableOpacity
+                                style={[styles.button, styles.buttonClose]}
+                                onPress={() => setTicketModalVisible(!ticketModalVisible)}
+                            >
+                                <Text style={styles.textStyle}>취소</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.button, styles.buttonAdd]}
+                                onPress={handleAddTicket}
+                            >
+                                <Text style={styles.textStyle}>추가</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* 일정 추가 모달 */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={scheduleModalVisible}
+                onRequestClose={() => {
+                    setScheduleModalVisible(!scheduleModalVisible);
+                }}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalView}>
+                        <Text style={styles.modalText}>일정 추가</Text>
                         <TextInput
                             style={styles.input}
                             placeholder="위치를 입력하세요"
@@ -211,7 +322,7 @@ const ReservationInfo = ({ navigation }) => {
                         <View style={styles.modalButtonContainer}>
                             <TouchableOpacity
                                 style={[styles.button, styles.buttonClose]}
-                                onPress={() => setModalVisible(!modalVisible)}
+                                onPress={() => setScheduleModalVisible(!scheduleModalVisible)}
                             >
                                 <Text style={styles.textStyle}>취소</Text>
                             </TouchableOpacity>
@@ -304,7 +415,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f0f0f0',
         borderRadius: 10,
         marginBottom: 10,
-        flexDirection: 'row'
+        flexDirection: 'row',
     },
     icon: {
         marginBottom: 20,
@@ -339,7 +450,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     boxContainer: {
-        backgroundColor: 'white', // 밝은 회색 배경색
+        backgroundColor: 'white',
         padding: 15,
         margin: 20,
         borderRadius: 10,
@@ -401,6 +512,20 @@ const styles = StyleSheet.create({
         fontSize: 24,
         color: '#000',
     },
+    addTicketButton: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 20,
+        borderWidth: 1,
+        borderColor: '#838383',
+        borderRadius: 5,
+        backgroundColor: '#fff',
+        margin: 20,
+    },
+    addTicketText: {
+        fontSize: 18,
+        color: '#000',
+    },
     tabBar: {
         flexDirection: 'row',
         justifyContent: 'space-around',
@@ -411,7 +536,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 0,
         width: '100%',
-        marginBottom:20
+        marginBottom: 20,
     },
     tabItem: {
         alignItems: 'center',
@@ -476,7 +601,7 @@ const styles = StyleSheet.create({
         borderBottomColor: '#ccc',
         borderBottomWidth: 0.7,
         marginVertical: 10,
-        marginHorizontal:20
+        marginHorizontal: 20,
     },
 });
 

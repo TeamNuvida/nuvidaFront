@@ -15,7 +15,7 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="tripSchedule">
+        <Stack.Navigator initialRouteName="signUp">
           <Stack.Screen name="signin" component={signin} options={{ headerShown: false }}/>
           <Stack.Screen name="signUp" component={signUp} options={{ headerShown: false }}/>
             <Stack.Screen name="calculate" component={calculate} options={{ headerShown: false }}/>
