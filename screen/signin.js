@@ -26,6 +26,9 @@ const Signin = () => {
     });
     const [loading, setLoading] = useState(false);
 
+    const localhost = "192.168.55.35";
+
+
     const handleLoginChange = (name, value) => {
         let cleanedValue = value;
         cleanedValue = cleanedValue.replace(/[^\w\s!@]/gi, '');
@@ -35,7 +38,7 @@ const Signin = () => {
     const handleLogin = async () => {
         setLoading(true);
         try {
-            const response = await axios.post({
+            const response = await axios.post(`http://${localhost}:8090/nuvida/signin`,{
                 id: loginInfo.id,
                 password: loginInfo.password,
             });

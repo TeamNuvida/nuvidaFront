@@ -7,8 +7,8 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
+      "image": "./assets/loading_test.gif",
+      "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
     "ios": {
@@ -18,10 +18,12 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.nuvida.nuvida"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     }
   }
 }
+

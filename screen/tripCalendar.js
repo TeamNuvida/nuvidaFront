@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Alert
 import { Picker } from '@react-native-picker/picker';
 import { AntDesign, MaterialCommunityIcons, Entypo, FontAwesome, Ionicons, Feather } from '@expo/vector-icons';
 import moment from 'moment';
+import axios from 'axios';
 
 const { width } = Dimensions.get('window');
 
@@ -43,6 +44,27 @@ const TravelCalendar = ({ navigation }) => {
     const [markedDates, setMarkedDates] = useState({});
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
+    const [planList, setPlanList] = useState(null);
+
+    const localhost = "192.168.55.35";
+
+    const userInfo = {user_id:'test'};
+
+
+    useEffect(() => {
+        const getPlanList = async () => {
+            try {
+                const response = await axios.post(`http://${localhost}:8090/nuvida/getPlanList`, {user_id:userInfo.user_id});
+                setPlanList(response.data);
+                console.log(response.data)
+            } catch (error) {
+                console.error('Error fetching plan data:', error);
+            }
+        };
+
+        getPlanList();
+    }, []);
+
 
     useEffect(() => {
         const today = moment().format('YYYY-MM-DD');

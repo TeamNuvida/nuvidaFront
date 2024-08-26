@@ -28,13 +28,15 @@ const signUp = () => {
     const [passwordMatch, setPasswordMatch] = useState(true);
     const [hasCheckedDuplicate, setHasCheckedDuplicate] = useState(false);
 
+    const localhost = "192.168.55.35";
+
 
     const checkDuplicate = async () => {
         try {
             if(username !=""){
 
 
-                const response = await axios.post( {
+                const response = await axios.post( `http://${localhost}:8090/nuvida/idCheck`,{
                     id: username
                 });
 
@@ -81,12 +83,7 @@ const signUp = () => {
         console.log(hasCheckedDuplicate, passwordMatch);
         if (verifyInputs()) {
             try {
-                const response = await axios.post( {
-                    id: username,
-                    pw: password,
-                    name: name,
-                    phone: phoneNumber,
-                });
+
                 if (password.length < 8) {
                     Alert.alert("비밀번호 오류", "비밀번호는 8자리 이상이어야 합니다.",
                         [
@@ -96,14 +93,20 @@ const signUp = () => {
                     return ; // 함수를 여기서 종료하여 회원가입 절차를 중단합니다.
                 }
 
+                const response = await axios.post( `http://${localhost}:8090/nuvida/signUp`,{
+                    id: username,
+                    pw: password,
+                    name: name,
+                    phone: phoneNumber,
+                });
 
                 console.log('회원가입:', username);
                 Alert.alert(
                     "회원가입 성공",
-                    "회원가입 성공"
+                    "회원가입 성공",
                         [{
                         text: "확인",
-                        onPress: () => console.log("성공"),
+                        onPress: () => navigation.navigate("signin"),
                         style:"cancel"
 
                     }],
@@ -169,7 +172,7 @@ const signUp = () => {
             >
                 <ScrollView style={styles.container}>
                     <View style={styles.logoContainer}>
-                        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                        <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("signin")}>
                             <Ionicons name="arrow-back" size={24} color="black" />
 
                         </TouchableOpacity>
