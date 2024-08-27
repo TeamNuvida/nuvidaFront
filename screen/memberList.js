@@ -1,8 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback  } from 'react';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, TextInput, Alert } from 'react-native';
 import { AntDesign, Entypo, FontAwesome, Ionicons, Feather } from '@expo/vector-icons';
+import axios from "axios";
 
-const MemberList = ({ navigation }) => {
+const MemberList = ({ route }) => {
+    const navigation = useNavigation();
+
+    // 로그인 정보
+    const [userInfo, setUserInfo] = useState(route.params.userInfo);
+
+    // 일정 식별자
+    const plan_seq = route.params.plan_seq;
+
+    console.log(plan_seq)
+
     const [modalVisible, setModalVisible] = useState(false);
     const [showDeleteIcons, setShowDeleteIcons] = useState(false);
     const [members, setMembers] = useState([
@@ -53,16 +65,16 @@ const MemberList = ({ navigation }) => {
                     <Text style={styles.date}>2024. 05. 21 (토) - 2024. 05. 23 (월)</Text>
                 </View>
                 <View style={styles.tabContainer}>
-                    <TouchableOpacity style={styles.tabButton}>
-                        <Text style={styles.tabText}>여행일정</Text>
+                    <TouchableOpacity style={styles.tabButton} onPress={()=>navigation.navigate("TripSchedule", {userInfo:userInfo, plan_seq:plan_seq})}>
+                        <Text style={styles.tabTextActive}>여행일정</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.tabButton}>
+                    <TouchableOpacity style={styles.tabButton} onPress={()=>navigation.navigate("ReservationInfo", {userInfo:userInfo, plan_seq:plan_seq})}>
                         <Text style={styles.tabText}>예약정보</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.tabButtonActive}>
-                        <Text style={styles.tabTextActive}>멤버목록</Text>
+                    <TouchableOpacity style={styles.tabButtonActive} onPress={()=>navigation.navigate("MemberList", {userInfo:userInfo, plan_seq:plan_seq})}>
+                        <Text style={styles.tabText}>멤버목록</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.tabButton}>
+                    <TouchableOpacity style={styles.tabButton} onPress={()=>navigation.navigate("Calculate", {userInfo:userInfo, plan_seq:plan_seq})}>
                         <Text style={styles.tabText}>정산하기</Text>
                     </TouchableOpacity>
                 </View>

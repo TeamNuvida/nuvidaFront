@@ -1,139 +1,248 @@
-import * as React from "react";
-import {Image, StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView} from "react-native";
-import {createStackNavigator} from '@react-navigation/stack';
-import {NavigationContainer} from '@react-navigation/native';
+import React, { useState, useEffect, useCallback  } from 'react';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import {Image, StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, FlatList} from "react-native";
 import {FontAwesome, Entypo, Ionicons, Feather, AntDesign, MaterialCommunityIcons} from '@expo/vector-icons';
-import {useState} from 'react';
+import axios from "axios";
 
-// 상단 바 컴포넌트
-const topHeader = ({navigation, handleNoticeIconPress}) => {
-    return (
-        <View style={styles.headerContainer}>
-            <View style={styles.flexRow}>
-                <View style={{flex: 1}}></View>
-                <Text style={styles.headerText}>NUVIDA</Text>
-                <View style={styles.headerIconContainer}>
-                    <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('baseballSchedule')}>
-                        <AntDesign name="calendar" size={24} color="black"/>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.headerIcon} onPress={handleNoticeIconPress}>
-                        <MaterialCommunityIcons name="bell-plus" size={24} color="black"/>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </View>
-    );
-};
 
-// 하단 바 컴포넌트
-const bottomHeader = ({navigation, handleNoticeIconPress}) => {
-    return (
-        <View style={styles.tabBar}>
-            <TouchableOpacity style={styles.tabItem}>
-                <Entypo name="home" size={24} color="black"/>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-                <FontAwesome name="calendar-check-o" size={24} color="black"/>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-                <FontAwesome name="calendar-check-o" size={24} color="black"/>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-                <Ionicons name="chatbubbles-outline" size={24} color="black"/>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-                <Feather name="user" size={24} color="black"/>
-            </TouchableOpacity>
-        </View>
-    );
-};
 
-const handleNoticeIconPress = () => {
-    console.log("Notice icon pressed");
-};
 
-const CommunityCard = ({imageSource, title, subtitle, description, date}) => {
-    return (
-        <View style={{alignItems: "center"}}>
-            <View style={styles.cardContainer}>
-                <Image source={imageSource} style={styles.image}/>
-                <View style={styles.textContainer}>
-                    <Text style={styles.titleText}>{title}</Text>
-                    <Text style={styles.subtitleText}>{subtitle}</Text>
-                    <Text style={styles.descriptionText}>{description}</Text>
-                    <Text style={styles.dateText}>{date}</Text>
-                </View>
-            </View>
-        </View>
-    );
-};
-const CommentCard = ({imageSource, title, subtitle, description, date}) => {
-    return (
-        <View style={{alignItems: "center"}}>
-            <View style={styles.cardContainer}>
-                <Image source={imageSource} style={styles.image}/>
-                <View style={styles.textContainer}>
-                    <Text style={styles.titleText}>{title}</Text>
-                    <Text style={styles.subtitleText}>{subtitle}</Text>
-                    <Text style={styles.descriptionText}>{description}</Text>
-                    <Text style={styles.dateText}>{date}</Text>
-                </View>
-            </View>
-        </View>
-    );
-};
-
-const MypostList = ({navigation}) => {
+const MypostList = ({route}) => {
     const [activeTab, setActiveTab] = useState('community'); // 'community' or 'comment'
 
-    const renderCommunityList = () => (
-        <>
-            <CommunityCard
-                imageSource={require('../assets/profile.png')}
-                title="축제"
-                subtitle="함평 나비 축제"
-                description="전라남도 함평 축제"
-                date="2024.05.28~2024.05.30"
-            />
-        </>
+    const navigation = useNavigation();
+
+    // 로그인 정보
+    const [userInfo, setUserInfo] = useState(route.params.userInfo);
+    const [postList, setPostList] = useState(null);
+
+
+    const localhost = '192.168.55.35';
+
+
+
+    // 작성한 글 데이터 가져오기
+    const getCommunityList = async () => {
+        try{
+            setPostList([]);
+            const response = await axios.post(`http://${localhost}:8090/nuvida/getCommunityList`,{
+                user_id: userInfo.user_id
+            });
+            setPostList(response.data);
+        }catch (e) {
+            console.error(e);
+        }
+
+    }
+
+    // 작성한 댓글 데이터 가져오기
+    const getCommentList = async () => {
+        try{
+            setPostList([]);
+            const response = await axios.post(`http://${localhost}:8090/nuvida/getCommentList`,{
+                user_id: userInfo.user_id
+            });
+            setPostList(response.data);
+        }catch (e) {
+            console.error(e);
+        }
+
+    }
+
+    useFocusEffect(
+        useCallback(() => {
+            if(activeTab === 'community'){
+                getCommunityList();
+            }else{
+                getCommentList();
+            }
+
+
+            return () => {
+                // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
+            };
+        }, []) // 의존성으로 route.params.userInfo를 추가하여, 값이 변경될 때마다 렌더링
     );
 
-    const renderCommentList = () => (
-        <>
-            <CommentCard
-                imageSource={require('../assets/profile.png')}
-                title="커뮤니티"
-                subtitle="ㅁㄴㅇㄹ"
-                description="ㅁㅇㄹ"
-                date="2024.05.28~2024.05.30"
-            />
-        </>
-    );
+    const deletePost = async (postSeq) => {
+        try {
+            if (activeTab === 'community') {
+                await axios.post(`http://${localhost}:8090/nuvida/deletePost`, {
+                    post_seq: postSeq,
+                    user_id: userInfo.user_id
+                });
+                getCommunityList();
+            } else {
+                await axios.post(`http://${localhost}:8090/nuvida/deleteComment`, {
+                    post_seq: postSeq,
+                    user_id: userInfo.user_id
+                });
+                getCommentList();
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const communityInfo = async (post_seq) =>{
+        console.log(post_seq)
+        try {
+            const response = await axios.post(`http://${localhost}:8090/nuvida/getCmtInfo`, {post_seq:post_seq});
+            console.log(response.data);
+            const intResponse = await axios.post(`http://${localhost}:8090/nuvida/getInt`, {post_seq:post_seq, user_id:userInfo.user_id});
+            navigation.navigate('CommunityInfo', {cmtInfo:response.data, intTF:intResponse.data})
+        } catch (error) {
+            console.error('Error fetching plan data:', error);
+        }
+
+    }
+
+    const PostItem = ({ item }) => {
+        return (
+            <SafeAreaView style={{ flex: 1 }}>
+                <View style={{ alignItems: "center" }}>
+                    <TouchableOpacity style={styles.cardContainer} onPress={() => communityInfo(item.post_seq)}>
+                        {item.image ? (
+                            <Image source={{ uri: item.image }} style={styles.image} />
+                        ) : (
+                            <Image
+                                source={{
+                                    uri: 'https://firebasestorage.googleapis.com/v0/b/high-service-431903-t6.appspot.com/o/imgtest%2Fprofile.png?alt=media&token=668cdcff-3447-406d-a46c-de24b34235e0'
+                                }}
+                                style={styles.image}
+                            />
+                        )}
+                        <View style={styles.textContainer}>
+                            <View style={styles.titleRow}>
+                                <Text style={styles.titleText}>{item.post_title}</Text>
+                                <TouchableOpacity onPress={() => deletePost(item.post_seq)}>
+                                    <Feather name="trash-2" size={24} color="red" />
+                                </TouchableOpacity>
+                            </View>
+                            <Text style={styles.descriptionText}>{item.details}</Text>
+                            <Text style={styles.dateText}>{item.regi_at}</Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            </SafeAreaView>
+        );
+    };
+
+    const CommentItem = ({ item }) => {
+        return (
+            <SafeAreaView style={{ flex: 1 }}>
+                <View style={{ alignItems: "center" }}>
+                    <TouchableOpacity style={styles.cardContainer} onPress={() => communityInfo(item.post_seq)}>
+                        <View style={styles.textContainer}>
+                            <View style={styles.titleRow}>
+                                <Text style={styles.titleText}>{item.post_title}</Text>
+                                <TouchableOpacity onPress={() => deletePost(item.cmt_seq)}>
+                                    <Feather name="trash-2" size={24} color="red" />
+                                </TouchableOpacity>
+                            </View>
+                            <Text style={styles.descriptionText}>{item.cmt_detail}</Text>
+                            <Text style={styles.dateText}>{item.regi_at}</Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            </SafeAreaView>
+        );
+    };
+
+
+    // 상단 바 컴포넌트
+    const topHeader = () => {
+        return (
+            <View style={styles.headerContainer}>
+                <View style={styles.flexRow}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
+                    </TouchableOpacity>
+                    <Text style={styles.headerText}>NUVIDA</Text>
+                </View>
+            </View>
+        );
+    };
+
+    // 하단 바 컴포넌트
+    const bottomHeader = () => {
+        return (
+            <View style={styles.tabBar}>
+                <TouchableOpacity style={styles.tabItem}>
+                    <Entypo name="home" size={24} color="black"/>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem}>
+                    <FontAwesome name="calendar-check-o" size={24} color="black"/>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem}>
+                    <FontAwesome name="calendar-check-o" size={24} color="black"/>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem}>
+                    <Ionicons name="chatbubbles-outline" size={24} color="black"/>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem}>
+                    <Feather name="user" size={24} color="black"/>
+                </TouchableOpacity>
+            </View>
+        );
+    };
+
+    const handleSetActiveTab = (active) => {
+        setActiveTab(active);
+
+        if(active === 'community'){
+            getCommunityList();
+        } else {
+            getCommentList();
+        }
+        console.log(active)
+    }
+
 
     return (
         <View style={styles.container}>
-            {topHeader({navigation, handleNoticeIconPress})}
-            <ScrollView>
+            {topHeader()}
+
                 <View style={styles.menuContainer}>
                     <View style={styles.menuBackground}>
                         <TouchableOpacity
                             style={[styles.menu, activeTab === 'community' && styles.activeMenu]}
-                            onPress={() => setActiveTab('community')}
+                            onPress={() => handleSetActiveTab('community')}
                         >
 
                             <Text style={styles.menuText}>커뮤니티글</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.menu, activeTab === 'comment' && styles.activeMenu]}
-                            onPress={() => setActiveTab('comment')}
+                            onPress={() => handleSetActiveTab('comment')}
                         >
                             <Text style={styles.menuText}>작성한 댓글</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
-                {activeTab === 'community' ? renderCommunityList() : renderCommentList()}
-            </ScrollView>
-            {bottomHeader({navigation, handleNoticeIconPress})}
+                {postList?(
+                    <FlatList
+                        data={postList}
+                        renderItem={({ item }) =>
+                            activeTab === 'community' ? (
+                                <PostItem item={item} />
+                            ) : (
+                                <CommentItem item={item} />
+                            )
+                        }
+                        keyExtractor={item =>
+                            activeTab === 'community'
+                                ? item.post_seq
+                                : item.cmt_seq
+                        }
+                    />
+                ):(
+                    <View style={styles.nullItem}>
+                        <Text >작성한 글이 없습니다.</Text>
+                    </View>
+                )}
+
+            {bottomHeader()}
         </View>
     );
 };
@@ -263,6 +372,14 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#999',
     },
+    titleRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    nullItem:{
+    alignItems: 'center',
+},
 
 });
 

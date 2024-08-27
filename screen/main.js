@@ -160,51 +160,6 @@ export default function Main({ weather, particulateMatter, store, location }) {
     }, [userInfo]);
 
 
-
-    // // 단기예보 데이터 가져오기
-    // useEffect(() => {
-    //     const fetchWeather = async () => {
-    //         const date = new Date();
-    //         const base_date = formatWeatherDate(date);
-    //         const base_time = formatWeatherTime(date);
-    //
-    //         try {
-    //             const response = await axios.get(`http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst?serviceKey=${API_KEY}&numOfRows=60&pageNo=1&base_date=${base_date}&base_time=${base_time}&nx=59&ny=74&dataType=JSON`);
-    //             const items = response.data.response.body.items.item;
-    //             const fcstTime = formatFcstTime(base_time);
-    //
-    //             const filteredItems = items.filter(item => item.fcstTime === fcstTime)
-    //                 .reduce((acc, item) => {
-    //                     acc[item.category] = item.fcstValue;
-    //                     return acc;
-    //                 }, {});
-    //             setWeatherData(filteredItems);
-    //         } catch (error){
-    //             console.log('weather API error');
-    //         }
-    //     }
-    //     fetchWeather();
-    // }, [navigation]);
-    //
-    // // 미세먼지 데이터 가져오기
-    // useEffect(() => {
-    //     const fetchParticulateMatter = async () => {
-    //         try {
-    //             const response = await axios.get(`http://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getCtprvnRltmMesureDnsty?sidoName=광주&pageNo=1&numOfRows=100&returnType=json&serviceKey=${API_KEY}&ver=1.3`);
-    //             const items = response.data.response.body.items;
-    //             const filteredItems = items.filter(item => item.stationName === "농성동") // 농성동이 제일 가까운 관측소여서 여기로 설정함
-    //                 .map(item => (
-    //                     { pm10Grade1h: item.pm10Grade1h, pm25Grade1h: item.pm25Grade1h }
-    //                 ));
-    //             setParticulateMatterData(filteredItems);
-    //         }catch (error) {
-    //             console.log('particulate matter API error');
-    //         }
-    //     }
-    //     fetchParticulateMatter();
-    // }, []);
-
-
     // 이번주 경기 일정
     useEffect(() => {
         const fetchWeeklyMatchData = async () => {
@@ -234,7 +189,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
         if (isLoggedIn) {
             navigation.navigate("NoticeList");
         } else {
-            navigation.navigate("loginPage");
+            navigation.navigate("Signin");
         }
     }
 
@@ -243,18 +198,18 @@ export default function Main({ weather, particulateMatter, store, location }) {
         if (isLoggedIn) {
             navigation.navigate("planCalendarPage");
         } else {
-            navigation.navigate("loginPage");
+            navigation.navigate("Signin");
         }
     };
 
     // 여행 일정
     const handlePlanContainerPress = () => {
-        if (isLoggedIn && titlePlan == null) {
-            navigation.navigate("createPlanPage");
-        } else if (isLoggedIn && titlePlan != null) {
-            navigation.navigate("planInformationPage");
+        if (isLoggedIn && titlePlan.plan_seq == null) {
+            navigation.navigate("ScheduleCreation1", {userInfo:userInfo});
+        } else if (isLoggedIn && titlePlan.plan_seq != null) {
+            navigation.navigate("TripSchedule",{userInfo:userInfo, plan_seq:titlePlan.plan_seq});
         } else {
-            navigation.navigate("loginPage");
+            navigation.navigate("Signin");
         }
     }
 
@@ -1037,7 +992,6 @@ export default function Main({ weather, particulateMatter, store, location }) {
         if(userInfo){
             navigation.navigate('Mypage', {userInfo:userInfo})
         }else{
-            Alert.alert('','로그인 해주세요.');
             navigation.navigate('signin')
         }
     }

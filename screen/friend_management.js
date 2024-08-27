@@ -1,59 +1,175 @@
-import * as React from "react";
-import {Image, StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView} from "react-native";
-import {createStackNavigator} from '@react-navigation/stack';
-import {NavigationContainer} from '@react-navigation/native';
+import React, { useState, useEffect, useCallback  } from 'react';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import {Image, StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, FlatList, Alert} from "react-native";
 import {FontAwesome, Entypo, Ionicons, Feather, AntDesign, MaterialCommunityIcons} from '@expo/vector-icons';
-import {useState} from 'react';
+import axios from "axios";
 
-// 상단 바 컴포넌트
-const topHeader = ({navigation, handleNoticeIconPress}) => {
-    return (
-        <View style={styles.headerContainer}>
-            <View style={styles.flexRow}>
-                <View style={{flex: 1}}></View>
-                <Text style={styles.headerText}>NUVIDA</Text>
-                <View style={styles.headerIconContainer}>
-                    <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('baseballSchedule')}>
-                        <AntDesign name="calendar" size={24} color="black"/>
+
+const FriendList = ({route}) => {
+    const [activeTab, setActiveTab] = useState('friends'); // 'friends' or 'requests'
+    const [searchQuery, setSearchQuery] = useState(''); // 검색어 상태
+    const [requestFriend, setRequestFriend] = useState(''); //친구 요청
+
+    const navigation = useNavigation();
+
+    // 로그인 정보
+    const [userInfo, setUserInfo] = useState(route.params.userInfo);
+    const [friendList, setFriendList] = useState(null);
+    const [filteredFriendList, setFilteredFriendList] = useState(null); // 필터링된 친구 목록 상태
+
+    const localhost = '192.168.55.35';
+
+    // 친구 목록 가져오기
+    const getFriendList = async () => {
+        try {
+            setSearchQuery('');
+            setFriendList([]);
+            const response = await axios.post(`http://${localhost}:8090/nuvida/getFriend`, {
+                user_id: userInfo.user_id
+            });
+            setFriendList(response.data);
+            setFilteredFriendList(response.data); // 초기 필터링된 목록은 전체 목록으로 설정
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    // 요청 목록 가져오기
+    const getRequestList = async () => {
+        try{
+            setFriendList([]);
+            const response = await axios.post(`http://${localhost}:8090/nuvida/getRequestList`,{
+                user_id: userInfo.user_id
+            });
+            setFriendList(response.data);
+        }catch (e) {
+            console.error(e);
+        }
+
+    }
+
+    useFocusEffect(
+        useCallback(() => {
+            if(activeTab === 'friends'){
+                getFriendList();
+            } else {
+                getRequestList();
+            }
+
+
+            return () => {
+                // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
+            };
+        }, []) // 의존성으로 route.params.userInfo를 추가하여, 값이 변경될 때마다 렌더링
+    );
+
+    // 검색어에 따라 친구 목록을 필터링하는 함수
+    const handleSearch = (query) => {
+        setSearchQuery(query);
+
+        if (query === '') {
+            setFilteredFriendList(friendList); // 검색어가 없으면 전체 목록 표시
+        } else {
+            const filteredList = friendList.filter(item =>
+                item.user_id.toLowerCase().includes(query.toLowerCase()) ||
+                item.user_nick.toLowerCase().includes(query.toLowerCase())
+            );
+            setFilteredFriendList(filteredList);
+        }
+    };
+
+
+    // 검색어에 따라 친구 요청 처리
+    const handleRequest = (query) => {
+        setRequestFriend(query);
+    };
+
+
+    // 상단 바 컴포넌트
+    const topHeader = () => {
+        return (
+            <View style={styles.headerContainer}>
+                <View style={styles.flexRow}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.headerIcon} onPress={handleNoticeIconPress}>
-                        <MaterialCommunityIcons name="bell-plus" size={24} color="black"/>
-                    </TouchableOpacity>
+                    <Text style={styles.headerText}>NUVIDA</Text>
                 </View>
             </View>
-        </View>
-    );
-};
+        );
+    };
 
-// 하단 바 컴포넌트
-const bottomHeader = ({navigation, handleNoticeIconPress}) => {
-    return (
-        <View style={styles.tabBar}>
-            <TouchableOpacity style={styles.tabItem}>
-                <Entypo name="home" size={24} color="black"/>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-                <FontAwesome name="calendar-check-o" size={24} color="black"/>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-                <FontAwesome name="calendar-check-o" size={24} color="black"/>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-                <Ionicons name="chatbubbles-outline" size={24} color="black"/>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-                <Feather name="user" size={24} color="black"/>
-            </TouchableOpacity>
-        </View>
-    );
-};
+    // 하단 바 컴포넌트
+    const bottomHeader = () => {
+        return (
+            <View style={styles.tabBar}>
+                <TouchableOpacity style={styles.tabItem}>
+                    <Entypo name="home" size={24} color="black"/>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem}>
+                    <FontAwesome name="calendar-check-o" size={24} color="black"/>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem}>
+                    <FontAwesome name="calendar-check-o" size={24} color="black"/>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem}>
+                    <Ionicons name="chatbubbles-outline" size={24} color="black"/>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem}>
+                    <Feather name="user" size={24} color="black"/>
+                </TouchableOpacity>
+            </View>
+        );
+    };
 
-const handleNoticeIconPress = () => {
-    console.log("Notice icon pressed");
-};
+    const handleSetActiveTab = (active) => {
+        setActiveTab(active);
 
-const FriendList = ({navigation}) => {
-    const [activeTab, setActiveTab] = useState('friends'); // 'friends' or 'requests'
+        if(active === 'friends'){
+            getFriendList();
+        } else {
+            getRequestList();
+        }
+    }
+
+    const delFriend = async (user_id) =>{
+        try{
+            const response = await axios.post(`http://${localhost}:8090/nuvida/delFriend`, {
+                fr_user: user_id,
+                user_id: userInfo.user_id
+            });
+            Alert.alert('','삭제되었습니다.');
+            getFriendList();
+        }catch (e) {
+            console.error(e)
+        }
+    }
+
+
+    const FriendItem = ({ item }) => {
+        return (
+            <SafeAreaView style={{ flex: 1 }}>
+                <View style={styles.friendItem}>
+                    {item.image ? (
+                        <Image source={{ uri: item.image }} style={styles.profileIcon} />
+                    ) : (
+                        <Image
+                            source={require("../assets/profile.png")}
+                            style={styles.profileIcon}
+                        />
+                    )}
+                    <View style={styles.friendInfo}>
+                        <Text style={styles.username}>{item.user_id}</Text>
+                        <Text style={styles.name}>{item.user_nick}</Text>
+                    </View>
+                    <TouchableOpacity style={styles.deleteFriendButton} onPress={() => delFriend(item.user_id)}>
+                        <Text style={styles.deleteFriendText}>친구 삭제</Text>
+                    </TouchableOpacity>
+                </View>
+            </SafeAreaView>
+        );
+    };
+
 
     const renderFriendsList = () => (
         <>
@@ -61,85 +177,148 @@ const FriendList = ({navigation}) => {
                 style={styles.searchBar}
                 placeholder="친구 검색"
                 placeholderTextColor="#B7B7B7"
+                value={searchQuery}
+                onChangeText={handleSearch} // 검색어 변경 시 필터링
             />
-            <ScrollView style={styles.scrollView}>
-                {Array.from({length: 5}).map((_, index) => (
-                    <View key={index} style={styles.friendItem}>
-                        <Image
-                            style={styles.profileIcon}
-                            source={require("../assets/profile.png")}
-                        />
-                        <View style={styles.friendInfo}>
-                            <Text style={styles.username}>jinyu990055</Text>
-                            <Text style={styles.name}>박지뉴</Text>
-                        </View>
-                        <TouchableOpacity style={styles.deleteFriendButton}>
-                            <Text style={styles.deleteFriendText}>친구 삭제</Text>
-                        </TouchableOpacity>
-                    </View>
-                ))}
-            </ScrollView>
+            {filteredFriendList ? (
+                <FlatList
+                    data={filteredFriendList}
+                    renderItem={({ item }) => <FriendItem item={item} />}
+                    keyExtractor={item => item.user_id}
+                />
+            ) : (
+                <View style={styles.nullItem}>
+                    <Text>친구 목록이 없습니다.</Text>
+                </View>
+            )}
         </>
     );
+
+
+    const requestFr = async () => {
+        console.log(requestFriend);
+        try {
+            const response = await axios.post(`http://${localhost}:8090/nuvida/requestFriend`, {
+                request_id: requestFriend,
+                user_id: userInfo.user_id
+            });
+            if (response.data > 1) {
+                Alert.alert('친구 요청 성공', `${requestFriend}님에게 친구 요청을 보냈습니다.`);
+            }else if (response.data > 0){
+                Alert.alert('친구 요청 실패', '이미 존재하는 친구 입니다.');
+            }else{
+                Alert.alert('친구 요청 실패','존재하지 않는 회원입니다.')
+            }
+            setRequestFriend('');
+        }catch (e) {
+            console.error(e)
+        }
+    }
+
+    const acceptFriend = async (user_id) => {
+        try{
+            const response = await axios.post(`http://${localhost}:8090/nuvida/acceptFriend`, {
+                fr_user: user_id,
+                user_id: userInfo.user_id
+            });
+            getRequestList();
+        }catch (e) {
+            console.error(e)
+        }
+    }
+
+    const refusalFriend = async (user_id) => {
+        try{
+            const response = await axios.post(`http://${localhost}:8090/nuvida/refusalFriend`, {
+                fr_user: user_id,
+                user_id: userInfo.user_id
+            });
+            getRequestList();
+        }catch (e) {
+            console.error(e)
+        }
+    }
+
+
+    const RequestItem = ({ item }) => {
+        return (
+            <SafeAreaView style={{ flex: 1 }}>
+                <View style={styles.friendItem}>
+                    {item.image ? (
+                        <Image source={{ uri: item.image }} style={styles.profileIcon} />
+                    ) : (
+                        <Image
+                            source={require("../assets/profile.png")}
+                            style={styles.profileIcon}
+                        />
+                    )}
+                    <View style={styles.friendInfo}>
+                        <Text style={styles.username}>{item.user_id}</Text>
+                        <Text style={styles.name}>{item.user_nick}</Text>
+                    </View>
+                    <View style={styles.acceptButtons}>
+                        <TouchableOpacity style={styles.acceptButton} onPress={()=>acceptFriend(item.user_id)}>
+                            <Text style={styles.acceptButtonText}>확인</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.acceptButton} onPress={()=> refusalFriend(item.user_id)}>
+                            <Text style={styles.acceptButtonText}>취소</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </SafeAreaView>
+        );
+    };
+
 
     const renderFriendRequests = () => (
         <>
             <TextInput
                 style={styles.searchBar}
-                placeholder="친구 요청"
+                placeholder="친구 요청을 보낼 아이디"
                 placeholderTextColor="#B7B7B7"
+                value={requestFriend}
+                onChangeText={handleRequest} // 검색어 변경 시 필터링
             />
             <View style={{alignItems: "center"}}>
-                <TouchableOpacity style={styles.requestButton}>
+                <TouchableOpacity style={styles.requestButton} onPress={() => requestFr()}>
                     <Text style={styles.requestButtonText}>요청</Text>
                 </TouchableOpacity>
             </View>
-            <ScrollView style={styles.scrollView}>
-                {Array.from({length: 5}).map((_, index) => (
-                    <View key={index} style={styles.friendItem}>
-                        <Image
-                            style={styles.profileIcon}
-                            source={require("../assets/profile.png")}
-                        />
-                        <View style={styles.friendInfo}>
-                            <Text style={styles.username}>jinyu990055</Text>
-                            <Text style={styles.name}>박지뉴</Text>
-                        </View>
-                        <View style={styles.acceptButtons}>
-                            <TouchableOpacity style={styles.acceptButton}>
-                                <Text style={styles.acceptButtonText}>확인</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.acceptButton}>
-                                <Text style={styles.acceptButtonText}>취소</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                ))}
-            </ScrollView>
+            {friendList?(
+                <FlatList
+                    data={friendList}
+                    renderItem={({ item }) => <RequestItem item={item} />}
+                    keyExtractor={item => item.user_id}
+                />
+            ):(
+                <View style={styles.nullItem}>
+                    <Text >요청 목록이 없습니다.</Text>
+                </View>
+            )}
         </>
     );
 
     return (
         <View style={styles.container}>
-            {topHeader({navigation, handleNoticeIconPress})}
+            {topHeader()}
             <View style={styles.menuContainer}>
                 <View style={styles.menuBackground}>
                     <TouchableOpacity
                         style={[styles.menu, activeTab === 'friends' && styles.activeMenu]}
-                        onPress={() => setActiveTab('friends')}
+                        onPress={() => handleSetActiveTab('friends')}
                     >
                         <Text style={styles.menuText}>친구 목록</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={[styles.menu, activeTab === 'requests' && styles.activeMenu]}
-                        onPress={() => setActiveTab('requests')}
+                        onPress={() => handleSetActiveTab('requests')}
                     >
                         <Text style={styles.menuText}>친구 요청</Text>
                     </TouchableOpacity>
                 </View>
             </View>
             {activeTab === 'friends' ? renderFriendsList() : renderFriendRequests()}
-            {bottomHeader({navigation, handleNoticeIconPress})}
+            {bottomHeader()}
         </View>
     );
 };
@@ -309,7 +488,10 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         textAlign: "center",
         marginTop: 5,
-    }
+    },
+    nullItem:{
+        alignItems: 'center',
+    },
 });
 
 export default FriendList;

@@ -1,94 +1,118 @@
-import * as React from "react";
-import {Image, StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView} from "react-native";
-import {createStackNavigator} from '@react-navigation/stack';
-import {NavigationContainer} from '@react-navigation/native';
+import React, { useState, useEffect, useCallback  } from 'react';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import {Image, StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, FlatList} from "react-native";
 import {FontAwesome, Entypo, Ionicons, Feather, AntDesign, MaterialCommunityIcons} from '@expo/vector-icons';
-import {useState} from 'react';
+import axios from "axios";
 
-// 상단 바 컴포넌트
-const topHeader = ({navigation, handleNoticeIconPress}) => {
-    return (
-        <View style={styles.headerContainer}>
-            <View style={styles.flexRow}>
-                <View style={{flex: 1}}></View>
-                <Text style={styles.headerText}>NUVIDA</Text>
-                <View style={styles.headerIconContainer}>
-                    <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('baseballSchedule')}>
-                        <AntDesign name="calendar" size={24} color="black"/>
+const TravelLog = ({route}) => {
+    const navigation = useNavigation();
+
+    // 로그인 정보
+    const [userInfo, setUserInfo] = useState(route.params.userInfo);
+    const [planList, setPlanList] = useState(null);
+
+
+    const localhost = '192.168.55.35';
+
+    // 관심 데이터 가져오기
+    const getPlanList = async () => {
+        try{
+            const response = await axios.post(`http://${localhost}:8090/nuvida/getPlanList`,{
+                user_id: userInfo.user_id
+            });
+            setPlanList(response.data)
+        }catch (e) {
+            console.error(e);
+        }
+
+    }
+
+    useFocusEffect(
+        useCallback(() => {
+            getPlanList();
+
+            return () => {
+                // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
+            };
+        }, []) // 의존성으로 route.params.userInfo를 추가하여, 값이 변경될 때마다 렌더링
+    );
+
+
+    // 상단 바 컴포넌트
+    const topHeader = () => {
+        return (
+            <View style={styles.headerContainer}>
+                <View style={styles.flexRow}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.headerIcon} onPress={handleNoticeIconPress}>
-                        <MaterialCommunityIcons name="bell-plus" size={24} color="black"/>
-                    </TouchableOpacity>
+                    <Text style={styles.headerText}>NUVIDA</Text>
                 </View>
             </View>
-        </View>
-    );
-};
+        );
+    };
 
-// 하단 바 컴포넌트
-const bottomHeader = ({navigation, handleNoticeIconPress}) => {
-    return (
-        <View style={styles.tabBar}>
-            <TouchableOpacity style={styles.tabItem}>
-                <Entypo name="home" size={24} color="black"/>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-                <FontAwesome name="calendar-check-o" size={24} color="black"/>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-                <FontAwesome name="calendar-check-o" size={24} color="black"/>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-                <Ionicons name="chatbubbles-outline" size={24} color="black"/>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-                <Feather name="user" size={24} color="black"/>
-            </TouchableOpacity>
-        </View>
-    );
-};
-
-const handleNoticeIconPress = () => {
-    console.log("Notice icon pressed");
-};
-
-const TravelCard = ({imageSource, title, date}) => {
-    return (
-        <View style={{alignItems: "center"}}>
-            <View style={styles.cardContainer}>
-                <Image source={imageSource} style={styles.image}/>
-                <View style={styles.textContainer}>
-                    <Text style={styles.titleText}>{title}</Text>
-                    <Text style={styles.date}>{date}</Text>
-                </View>
+    // 하단 바 컴포넌트
+    const bottomHeader = () => {
+        return (
+            <View style={styles.tabBar}>
+                <TouchableOpacity style={styles.tabItem}>
+                    <Entypo name="home" size={24} color="black"/>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem}>
+                    <FontAwesome name="calendar-check-o" size={24} color="black"/>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem}>
+                    <FontAwesome name="calendar-check-o" size={24} color="black"/>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem}>
+                    <Ionicons name="chatbubbles-outline" size={24} color="black"/>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem}>
+                    <Feather name="user" size={24} color="black"/>
+                </TouchableOpacity>
             </View>
-        </View>
-    );
-};
+        );
+    };
 
-const TravelLog = ({navigation}) => {
+    // 대표 일정 날짜 표시 변경 -> 2024-05-28
+    const formatPlanDate = (date) => {
+        if (!date) {
+            // date가 null 또는 undefined인 경우 빈 문자열 반환
+            return '';
+        }
+        return date.split(' ')[0];
+    }
+
+    const TravelCard = ({item}) => {
+        return (
+            <View style={{alignItems: "center"}}>
+                <TouchableOpacity style={styles.cardContainer} onPress={()=>navigation.navigate("TripSchedule",{userInfo:userInfo, plan_seq:item.plan_seq})}>
+                    <View style={styles.textContainer}>
+                        <Text style={styles.titleText}>{item.plan_name}</Text>
+                        <Text style={styles.date}>{formatPlanDate(item.start_date)} ~ {formatPlanDate(item.end_date)}</Text>
+                    </View>
+                </TouchableOpacity>
+            </View>
+        );
+    };
+
 
     return (
         <View style={styles.container}>
-            {topHeader({navigation, handleNoticeIconPress})}
-            <ScrollView>
-                <TravelCard
-                    imageSource={require('../assets/profile.png')}
-                    title="여행 이름"
-                    date="2024.05.28~2024.05.30"
+            {topHeader()}
+            {planList && planList.length > 0?(
+                <FlatList
+                    data={planList}
+                    renderItem={({ item }) => <TravelCard item={item} />}
+                    keyExtractor={item => item.plan_seq}
                 />
-                <TravelCard
-                    imageSource={require('../assets/profile.png')}
-                    title="여행 이름"
-                    date="2024.05.28~2024.05.30"
-                />
-                <TravelCard
-                    imageSource={require('../assets/profile.png')}
-                    title="여행 이름"
-                    date="2024.05.28~2024.05.30"
-                />
-            </ScrollView>
-            {bottomHeader({navigation, handleNoticeIconPress})}
+            ):(
+                <View style={styles.nullItem}>
+                    <Text >여행기록이 없습니다.</Text>
+                </View>
+            )}
+            {bottomHeader()}
         </View>
 
     );
@@ -215,6 +239,9 @@ const styles = StyleSheet.create({
     },
     iconStyle: {
         marginLeft: 10, // 텍스트와 아이콘 사이의 간격 조정 (선택 사항)
+    },
+    nullItem:{
+        alignItems: 'center',
     },
 
 });

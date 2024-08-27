@@ -117,6 +117,14 @@ const Mypage = ({route}) => {
                 
                 
                 <View style={styles.menuContainer}>
+                    <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("Betting", {userInfo:userInfo})}>
+                        <Image
+                            style={styles.menuIcon}
+                            resizeMode="cover"
+                            source={require("../assets/ellipse-7.png")}
+                        />
+                        <Text style={styles.menuText}>배팅 목록</Text>
+                    </TouchableOpacity>
                     <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("MypostList", {userInfo:userInfo})}>
                         <Image
                             style={styles.menuIcon}
