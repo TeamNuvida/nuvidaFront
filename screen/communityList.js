@@ -10,6 +10,8 @@ export default function CommunityList({route}) {
     const [cmtList, setCmtList] = useState(null);
     const [userInfo, setUserInfo] = useState(route.params.userInfo)
 
+    const [notiState, setNotiState] = useState(false);
+
     const localhost = '192.168.55.35';
     
 
@@ -28,6 +30,51 @@ export default function CommunityList({route}) {
             getCmtList();
         }, [])
     );
+
+    const getNotiState = async () => {
+        try{
+            const response = await axios.post(`http://${localhost}:8090/nuvida/checkNoti`,{
+                user_id: userInfo.user_id
+            });
+            if(response.data > 0){
+                setNotiState(true);
+            }else {
+                setNotiState(false);
+            }
+        }catch (e) {
+            console.error(e);
+        }
+
+    }
+
+    useFocusEffect(
+        useCallback(() => {
+            if(userInfo){
+                getNotiState();
+            }else {
+                setNotiState(false);
+            }
+
+
+            return () => {
+                // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
+            };
+        }, [userInfo])
+    );
+
+    const handleNoticeIconPress = async () => {
+        if (userInfo) {
+            try{
+                const response = await axios.post(`http://${localhost}:8090/nuvida/setNoti`,{user_id:userInfo.user_id});
+                navigation.navigate("NoticeList", {noticeList:response.data});
+            }catch (e) {
+                console.error(e)
+            }
+
+        } else {
+            navigation.navigate("Signin");
+        }
+    }
 
 
     const communityInfo = async (post_seq) =>{
@@ -74,8 +121,12 @@ export default function CommunityList({route}) {
                     <Text style={styles.headerText}>NUVIDA</Text>
                 </View>
                 <View style={[styles.headerIconContainer, {width: '30%', height: '100%'}]}>
-                    <TouchableOpacity style={styles.headerIcon} onPress={() => console.log("알림페이지")}>
-                        <MaterialCommunityIcons name="bell-plus" size={24} color="black" />
+                    <TouchableOpacity style={styles.headerIcon} onPress={handleNoticeIconPress}>
+                        {notiState?(
+                            <MaterialCommunityIcons name="bell-plus" size={24} color="red" />
+                        ):(
+                            <MaterialCommunityIcons name="bell-plus" size={24} color="black" />
+                        )}
                     </TouchableOpacity>
                 </View>
             </View>

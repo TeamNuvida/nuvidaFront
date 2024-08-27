@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
     View,
     Text,
@@ -14,7 +14,7 @@ import { Picker } from '@react-native-picker/picker';
 import { AntDesign, MaterialCommunityIcons, Entypo, FontAwesome, Ionicons, Feather, Fontisto } from '@expo/vector-icons';
 import moment from 'moment';
 import axios from 'axios';
-import {useNavigation} from "@react-navigation/native";
+import {useFocusEffect, useNavigation} from "@react-navigation/native";
 
 const { width } = Dimensions.get('window');
 
@@ -62,13 +62,44 @@ const TripCalendar = ({ route }) => {
     const [midWeatherData, setMidWeatherData] = useState({})
     const [loading, setLoading] = useState(true); // 로딩 상태 추가
 
+    const [notiState, setNotiState] = useState(false);
+
     const localhost = "192.168.55.35";
 
     const [userInfo, setUserInfo] = useState(route.params.userInfo);
     // API KEY
     const API_KEY = "q9%2BtR1kSmDAYUNoOjKOB3vkl1rLYVTSEVfg4sMDG2UYDAL4KiJo5GaFq9nfn%2FdUnUFjK%2FrOY3UfgJvHtOBAEmQ%3D%3D";
 
+    const getNotiState = async () => {
+        try{
+            const response = await axios.post(`http://${localhost}:8090/nuvida/checkNoti`,{
+                user_id: userInfo.user_id
+            });
+            if(response.data > 0){
+                setNotiState(true);
+            }else {
+                setNotiState(false);
+            }
+        }catch (e) {
+            console.error(e);
+        }
 
+    }
+
+    useFocusEffect(
+        useCallback(() => {
+            if(userInfo){
+                getNotiState();
+            }else {
+                setNotiState(false);
+            }
+
+
+            return () => {
+                // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
+            };
+        }, [userInfo]) // 의존성으로 route.params.userInfo를 추가하여, 값이 변경될 때마다 렌더링
+    );
 
 
     useEffect(() => {
@@ -326,6 +357,20 @@ const TripCalendar = ({ route }) => {
         });
     }, []);
 
+    const handleNoticeIconPress = async () => {
+        if (userInfo) {
+            try{
+                const response = await axios.post(`http://${localhost}:8090/nuvida/setNoti`,{user_id:userInfo.user_id});
+                navigation.navigate("NoticeList", {noticeList:response.data});
+            }catch (e) {
+                console.error(e)
+            }
+
+        } else {
+            navigation.navigate("Signin");
+        }
+    }
+
     const renderHeader = () => {
         return (
             <View style={styles.headerContainer}>
@@ -337,8 +382,12 @@ const TripCalendar = ({ route }) => {
                     <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('BaseballSchedule')}>
                         <AntDesign name="calendar" size={24} color="black" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.headerIcon} onPress={() => alert('알림')}>
-                        <MaterialCommunityIcons name="bell-plus" size={24} color="black" />
+                    <TouchableOpacity style={styles.headerIcon} onPress={handleNoticeIconPress}>
+                        {notiState?(
+                            <MaterialCommunityIcons name="bell-plus" size={24} color="red" />
+                        ):(
+                            <MaterialCommunityIcons name="bell-plus" size={24} color="black" />
+                        )}
                     </TouchableOpacity>
                 </View>
             </View>

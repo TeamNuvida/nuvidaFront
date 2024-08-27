@@ -85,6 +85,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
     );
 
     const getNotiState = async () => {
+        if (!userInfo) return;
         try{
             const response = await axios.post(`http://${localhost}:8090/nuvida/checkNoti`,{
                 user_id: userInfo.user_id
