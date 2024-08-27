@@ -5,10 +5,10 @@ import { MaterialCommunityIcons, AntDesign, FontAwesome, Entypo, Ionicons, Feath
 import axios from 'axios';
 
 
-export default function CommunityList() {
+export default function CommunityList({route}) {
     const navigation = useNavigation();
     const [cmtList, setCmtList] = useState(null);
-    const userInfo = {user_id:'test', user_nick:'test'}
+    const [userInfo, setUserInfo] = useState(route.params.userInfo)
 
     const localhost = '192.168.55.35';
     
@@ -82,6 +82,14 @@ export default function CommunityList() {
         );
     };
 
+    const goMypage = () =>{
+        if(userInfo){
+            navigation.navigate('Mypage', {userInfo:userInfo})
+        }else{
+            navigation.navigate('Signin')
+        }
+    }
+
     // 하단 바
     const renderTabBar = () => {
         return (
@@ -89,27 +97,43 @@ export default function CommunityList() {
                 <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Main')}>
                     <Entypo name="home" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={() => console.log("핀볼빵")}>
+                <TouchableOpacity style={styles.tabItem} onPress={handlePlanCalendarIconPress}>
                     <FontAwesome name="calendar-check-o" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('game')}>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('PinBall')}>
                     <FontAwesome name="calendar-check-o" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('community')}>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('CommunityList', {userInfo:userInfo})}>
                     <Ionicons name="chatbubbles-outline" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('mypage')}>
+                <TouchableOpacity style={styles.tabItem} onPress={() => goMypage()}>
                     <Feather name="user" size={24} color="black" />
                 </TouchableOpacity>
             </View>
         );
     };
 
+    // 하단바 일정관리 아이콘
+    const handlePlanCalendarIconPress = () => {
+        if (userInfo) {
+            navigation.navigate("TripCalendar",{userInfo:userInfo});
+        } else {
+            navigation.navigate("Signin");
+        }
+    };
+
+    const handleWriteIngPost = () => {
+        if(userInfo){
+            navigation.navigate('WritingPost', {user_id:userInfo.user_id});
+        }else{
+            navigation.navigate('Signin');
+        }
+    }
 
     return (
         <SafeAreaView style={styles.container}>
             {renderHeader()}
-            <TouchableOpacity onPress={()=>navigation.navigate('WritingPost', {user_id:userInfo.user_id})}>
+            <TouchableOpacity onPress={handleWriteIngPost}>
                 <View style={styles.newPost}>
                     <Text style={styles.newPostText}>글작성</Text>
                 </View>

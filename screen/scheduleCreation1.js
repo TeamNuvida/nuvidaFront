@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, Activity
 import { MaterialCommunityIcons, AntDesign, FontAwesome, Entypo, Ionicons, Feather} from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
-export default function ScheduleCreation1() {
+export default function ScheduleCreation1({route}) {
     const navigation = useNavigation();
 
     const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태
@@ -17,11 +17,7 @@ export default function ScheduleCreation1() {
     useEffect(() => {
         const user = async () => {
             try {
-                const data = {
-                    user_id: "1",
-                    user_nick: "먹고대학생"
-                };
-                setUserInfo(data);
+                setUserInfo(route.params.userInfo);
                 setIsLoggedIn(true);
             } catch (error) {
                 console.error('Error fetching user data:', error);
@@ -50,21 +46,12 @@ export default function ScheduleCreation1() {
     }
 
 
-    // 상단바 알림 아이콘
-    const handleNoticeIconPress = () => {
-        if (isLoggedIn) {
-            navigation.navigate("NoticeList");
-        } else {
-            navigation.navigate("loginPage");
-        }
-    }
-
     // 하단바 일정 아이콘
     const handlePlanCalendarIconPress = () => {
         if (isLoggedIn) {
-            navigation.navigate("planCalendarPage");
+            navigation.navigate("TripCalendar",{userInfo:userInfo});
         } else {
-            navigation.navigate("loginPage");
+            navigation.navigate("Signin");
         }
     };
 
@@ -72,18 +59,9 @@ export default function ScheduleCreation1() {
     const renderHeader = () => {
         return (
             <View style={[styles.center_row, styles.headerContainer]}>
-                <View style={[{width: '30%', height: '100%'}]}>
-                </View>
+
                 <View style={[styles.center, {width: '40%', height: '100%'}]}>
                     <Text style={styles.headerText}>NUVIDA</Text>
-                </View>
-                <View style={[styles.headerIconContainer, {width: '30%', height: '100%'}]}>
-                    <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('BaseballSchedule')}>
-                        <AntDesign name="calendar" size={24} color="black" />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.headerIcon} onPress={handleNoticeIconPress}>
-                        <MaterialCommunityIcons name="bell-plus" size={24} color="black" />
-                    </TouchableOpacity>
                 </View>
             </View>
         );
@@ -152,13 +130,13 @@ export default function ScheduleCreation1() {
             <TouchableOpacity style={styles.tabItem} onPress={handlePlanCalendarIconPress}>
                 <FontAwesome name="calendar-check-o" size={24} color="black" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('game')}>
+            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('PinBall')}>
                 <FontAwesome name="calendar-check-o" size={24} color="black" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('community')}>
+            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('CommunityList', {userInfo:userInfo})}>
                 <Ionicons name="chatbubbles-outline" size={24} color="black" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('mypage')}>
+            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Mypage',{userInfo:userInfo})}>
                 <Feather name="user" size={24} color="black" />
             </TouchableOpacity>
         </View>

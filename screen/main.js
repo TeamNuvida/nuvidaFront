@@ -35,6 +35,8 @@ export default function Main({ weather, particulateMatter, store, location }) {
     const [loading, setLoading] = useState(true); // 로딩 상태 추가
     const [loadingUser, setLoadingUser] = useState(true); // 로딩 상태 추가
 
+    const [notiState, setNotiState] = useState(false);
+
     // localhost 주소값
     const localhost = '192.168.55.35';
 
@@ -80,6 +82,37 @@ export default function Main({ weather, particulateMatter, store, location }) {
                 // 필요에 따라 추가적인 정리 작업을 여기서 할 수 있습니다.
             };
         }, []) // 빈 배열을 의존성으로 두면, 화면이 포커스를 받을 때마다 실행됩니다.
+    );
+
+    const getNotiState = async () => {
+        try{
+            const response = await axios.post(`http://${localhost}:8090/nuvida/checkNoti`,{
+                user_id: userInfo.user_id
+            });
+            if(response.data > 0){
+                setNotiState(true);
+            }else {
+                setNotiState(false);
+            }
+        }catch (e) {
+            console.error(e);
+        }
+
+    }
+
+    useFocusEffect(
+        useCallback(() => {
+            if(isLoggedIn){
+                getNotiState();
+            }else {
+                setNotiState(false);
+            }
+
+
+            return () => {
+                // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
+            };
+        }, [userInfo]) // 의존성으로 route.params.userInfo를 추가하여, 값이 변경될 때마다 렌더링
     );
 
     // 여행 일정
@@ -177,17 +210,26 @@ export default function Main({ weather, particulateMatter, store, location }) {
     // 인기 글
     useEffect(() => {
         const fetchBoardData = async () => {
-            const response = await axios.post(`http://${localhost}:8090/nuvida/hotPost`);
-
-            setBoardData(response.data);
+            try{
+                const response = await axios.post(`http://${localhost}:8090/nuvida/hotPost`);
+                setBoardData(response.data);
+            }catch (e) {
+                console.error(e)
+            }
         };
         fetchBoardData();
     }, []);
 
     // 상단바 알림 아이콘
-    const handleNoticeIconPress = () => {
+    const handleNoticeIconPress = async () => {
         if (isLoggedIn) {
-            navigation.navigate("NoticeList");
+            try{
+                const response = await axios.post(`http://${localhost}:8090/nuvida/setNoti`,{user_id:userInfo.user_id});
+                navigation.navigate("NoticeList", {noticeList:response.data});
+            }catch (e) {
+                console.error(e)
+            }
+
         } else {
             navigation.navigate("Signin");
         }
@@ -196,7 +238,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
     // 하단바 일정관리 아이콘
     const handlePlanCalendarIconPress = () => {
         if (isLoggedIn) {
-            navigation.navigate("planCalendarPage");
+            navigation.navigate("TripCalendar",{userInfo:userInfo});
         } else {
             navigation.navigate("Signin");
         }
@@ -300,14 +342,27 @@ export default function Main({ weather, particulateMatter, store, location }) {
             console.log(id);
             navigation.navigate("betPage", { id });
         } else {
-            navigation.navigate("loginPage");
+            navigation.navigate("Signin");
         }
     };
 
+
+
     // 인기 글
-    const handlePostPress = (postSeq) => {
+    const handlePostPress = async (postSeq) => {
         console.log('postSeq:', postSeq);
-        navigation.navigate('PostDetail', { postSeq });
+        if(isLoggedIn){
+            try {
+                const response = await axios.post(`http://${localhost}:8090/nuvida/getCmtInfo`, {post_seq:postSeq});
+                console.log(response.data);
+                const intResponse = await axios.post(`http://${localhost}:8090/nuvida/getInt`, {post_seq:postSeq, user_id:userInfo.user_id});
+                navigation.navigate('CommunityInfo', {cmtInfo:response.data, intTF:intResponse.data})
+            } catch (error) {
+                console.error('Error fetching plan data:', error);
+            }
+        }else {
+            navigation.navigate("Signin");
+        }
     };
 
     // 날짜 표시 변경 -> 07/04 (목)
@@ -430,7 +485,11 @@ export default function Main({ weather, particulateMatter, store, location }) {
                         <AntDesign name="calendar" size={24} color="black" />
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.headerIcon} onPress={handleNoticeIconPress}>
-                        <MaterialCommunityIcons name="bell-plus" size={24} color="black" />
+                        {notiState?(
+                            <MaterialCommunityIcons name="bell-plus" size={24} color="red" />
+                        ):(
+                            <MaterialCommunityIcons name="bell-plus" size={24} color="black" />
+                        )}
                     </TouchableOpacity>
                 </View>
             </View>
@@ -975,10 +1034,10 @@ export default function Main({ weather, particulateMatter, store, location }) {
                 <TouchableOpacity style={styles.tabItem} onPress={handlePlanCalendarIconPress}>
                     <FontAwesome name="calendar-check-o" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('game')}>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('PinBall')}>
                     <FontAwesome name="calendar-check-o" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('community')}>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('CommunityList', {userInfo:userInfo})}>
                     <Ionicons name="chatbubbles-outline" size={24} color="black" />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.tabItem} onPress={() => goMypage()}>
@@ -989,10 +1048,10 @@ export default function Main({ weather, particulateMatter, store, location }) {
     };
 
     const goMypage = () =>{
-        if(userInfo){
+        if(isLoggedIn){
             navigation.navigate('Mypage', {userInfo:userInfo})
         }else{
-            navigation.navigate('signin')
+            navigation.navigate('Signin')
         }
     }
 

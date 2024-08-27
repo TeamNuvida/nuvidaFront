@@ -9,8 +9,12 @@ import axios from "axios";
 const Mypage = ({route}) => {
     const navigation = useNavigation();
 
+    const localhost = '192.168.55.35';
+
     // 로그인 정보
     const [userInfo, setUserInfo] = useState(route.params.userInfo);
+
+    const [notiState, setNotiState] = useState(false);
 
     useFocusEffect(
         useCallback(() => {
@@ -24,7 +28,50 @@ const Mypage = ({route}) => {
         }, [route.params?.userInfo]) // 의존성으로 route.params.userInfo를 추가하여, 값이 변경될 때마다 렌더링
     );
 
+    const getNotiState = async () => {
+        try{
+            const response = await axios.post(`http://${localhost}:8090/nuvida/checkNoti`,{
+                user_id: userInfo.user_id
+            });
+            if(response.data > 0){
+                setNotiState(true);
+            }else {
+                setNotiState(false);
+            }
+        }catch (e) {
+            console.error(e);
+        }
 
+    }
+
+    useFocusEffect(
+        useCallback(() => {
+            if(userInfo){
+                getNotiState();
+            }else {
+                setNotiState(false);
+            }
+
+
+            return () => {
+                // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
+            };
+        }, [userInfo]) // 의존성으로 route.params.userInfo를 추가하여, 값이 변경될 때마다 렌더링
+    );
+
+    const handleNoticeIconPress = async () => {
+        if (userInfo) {
+            try{
+                const response = await axios.post(`http://${localhost}:8090/nuvida/setNoti`,{user_id:userInfo.user_id});
+                navigation.navigate("NoticeList", {noticeList:response.data});
+            }catch (e) {
+                console.error(e)
+            }
+
+        } else {
+            navigation.navigate("Signin");
+        }
+    }
 
     // 상단 바 컴포넌트
     const topHeader = () => {
@@ -37,32 +84,46 @@ const Mypage = ({route}) => {
                         <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('BaseballSchedule')}>
                             <AntDesign name="calendar" size={24} color="black"/>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.headerIcon} onPress={()=> console.log("알림")}>
-                            <MaterialCommunityIcons name="bell-plus" size={24} color="black"/>
+                        <TouchableOpacity style={styles.headerIcon} onPress={handleNoticeIconPress}>
+                            {notiState?(
+                                <MaterialCommunityIcons name="bell-plus" size={24} color="red" />
+                            ):(
+                                <MaterialCommunityIcons name="bell-plus" size={24} color="black" />
+                            )}
                         </TouchableOpacity>
                     </View>
                 </View>
             </View>
         );
     };
+
+    // 하단바 일정 아이콘
+    const handlePlanCalendarIconPress = () => {
+        if (userInfo) {
+            navigation.navigate("TripCalendar",{userInfo:userInfo});
+        } else {
+            navigation.navigate("Signin");
+        }
+    };
+
 // 하단 바 컴포넌트
     const bottomHeader = () => {
         return (
             <View style={styles.tabBar}>
-                <TouchableOpacity style={styles.tabItem}>
-                    <Entypo name="home" size={24} color="black"/>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Main')}>
+                    <Entypo name="home" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem}>
-                    <FontAwesome name="calendar-check-o" size={24} color="black"/>
+                <TouchableOpacity style={styles.tabItem} onPress={handlePlanCalendarIconPress}>
+                    <FontAwesome name="calendar-check-o" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem}>
-                    <FontAwesome name="calendar-check-o" size={24} color="black"/>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('PinBall')}>
+                    <FontAwesome name="calendar-check-o" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem}>
-                    <Ionicons name="chatbubbles-outline" size={24} color="black"/>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('CommunityList', {userInfo:userInfo})}>
+                    <Ionicons name="chatbubbles-outline" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem}>
-                    <Feather name="user" size={24} color="black"/>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Mypage',{userInfo:userInfo})}>
+                    <Feather name="user" size={24} color="black" />
                 </TouchableOpacity>
             </View>
         );

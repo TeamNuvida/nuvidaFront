@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Alert, Modal } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    ScrollView,
+    Dimensions,
+    Alert,
+    Modal,
+    SafeAreaView, ActivityIndicator
+} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { AntDesign, MaterialCommunityIcons, Entypo, FontAwesome, Ionicons, Feather, Fontisto } from '@expo/vector-icons';
 import moment from 'moment';
@@ -50,10 +60,11 @@ const TripCalendar = ({ route }) => {
     const [planList, setPlanList] = useState(null);
     const [weatherData, setWeatherData] = useState({});
     const [midWeatherData, setMidWeatherData] = useState({})
+    const [loading, setLoading] = useState(true); // 로딩 상태 추가
 
     const localhost = "192.168.55.35";
 
-    const userInfo = {user_id:'test'};
+    const [userInfo, setUserInfo] = useState(route.params.userInfo);
     // API KEY
     const API_KEY = "q9%2BtR1kSmDAYUNoOjKOB3vkl1rLYVTSEVfg4sMDG2UYDAL4KiJo5GaFq9nfn%2FdUnUFjK%2FrOY3UfgJvHtOBAEmQ%3D%3D";
 
@@ -88,6 +99,8 @@ const TripCalendar = ({ route }) => {
                 processMidWeatherData(midData);
             } catch (error) {
                 console.error('Error fetching weather data:', error);
+            }finally {
+                setLoading(false); // 데이터 로드 완료 후 로딩 상태 false로 변경
             }
         };
 
@@ -450,6 +463,32 @@ const TripCalendar = ({ route }) => {
         );
     };
 
+    if (loading) {
+        return (
+            <SafeAreaView style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#0000ff" />
+                <Text>Loading...</Text>
+            </SafeAreaView>
+        );
+    }
+
+    // 하단바 일정관리 아이콘
+    const handlePlanCalendarIconPress = () => {
+        if (userInfo) {
+            navigation.navigate("TripCalendar",{userInfo:userInfo});
+        } else {
+            navigation.navigate("Signin");
+        }
+    };
+
+    const goMypage = () =>{
+        if(userInfo){
+            navigation.navigate('Mypage', {userInfo:userInfo})
+        }else{
+            navigation.navigate('Signin')
+        }
+    }
+
     return (
         <View style={styles.container}>
             {renderHeader()}
@@ -461,19 +500,19 @@ const TripCalendar = ({ route }) => {
                 </TouchableOpacity>
             </ScrollView>
             <View style={styles.tabBar}>
-                <TouchableOpacity style={styles.tabItem}>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Main')}>
                     <Entypo name="home" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem}>
+                <TouchableOpacity style={styles.tabItem} onPress={handlePlanCalendarIconPress}>
                     <FontAwesome name="calendar-check-o" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem}>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('PinBall')}>
                     <FontAwesome name="calendar-check-o" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem}>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('CommunityList', {userInfo:userInfo})}>
                     <Ionicons name="chatbubbles-outline" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem}>
+                <TouchableOpacity style={styles.tabItem} onPress={() => goMypage()}>
                     <Feather name="user" size={24} color="black" />
                 </TouchableOpacity>
             </View>
@@ -663,6 +702,11 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         textAlign: 'center',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
 
