@@ -12,21 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 
 const NoticeList = ({ route }) => {
     const navigation = useNavigation();
-    const NotiList = [
-        { "message": "박지뉴님의 친구 요청이 도착했습니다.", "nt_at": "2024-06-27", "nt_type": "1" },
-        { "message": "박지뉴님이 여행일정에 초대했습니다.", "nt_at": "2024-06-27", "nt_type": "2" },
-        { "message": "2024-07-02 광주 여행 3일전입니다", "nt_at": "2024-06-27", "nt_type": "0" },
-    ];
-
-    const handleAccept = (noti) => {
-        // 수락 버튼 클릭 처리
-        console.log("Accepted:", noti);
-    };
-
-    const handleReject = (noti) => {
-        // 거절 버튼 클릭 처리
-        console.log("Rejected:", noti);
-    };
+    const NotiList = route.params.noticeList;
 
     // Header 컴포넌트
     const Header = () => {
@@ -53,22 +39,6 @@ const NoticeList = ({ route }) => {
                     {NotiList.map((noti, index) => (
                         <View key={index} style={styles.notiItem}>
                             <Text style={styles.notiText}>{noti.message}</Text>
-                            {(noti.nt_type === "1" || noti.nt_type === "2") && (
-                                <View style={styles.buttonContainer}>
-                                    <TouchableOpacity
-                                        style={[styles.button, styles.acceptButton]}
-                                        onPress={() => handleAccept(noti)}
-                                    >
-                                        <Text style={styles.buttonText}>수락</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        style={[styles.button, styles.rejectButton]}
-                                        onPress={() => handleReject(noti)}
-                                    >
-                                        <Text style={styles.rejectbuttonText}>거절</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            )}
                         </View>
                     ))}
                 </ScrollView>

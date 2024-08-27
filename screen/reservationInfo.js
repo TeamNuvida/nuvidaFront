@@ -205,23 +205,6 @@ const ReservationInfo = ({ route }) => {
                     </View>
                 </View>
             </ScrollView>
-            <View style={styles.tabBar}>
-                <TouchableOpacity style={styles.tabItem}>
-                    <Entypo name="home" size={24} color="black" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem}>
-                    <FontAwesome name="calendar-check-o" size={24} color="black" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem}>
-                    <FontAwesome name="calendar-check-o" size={24} color="black" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem}>
-                    <Ionicons name="chatbubbles-outline" size={24} color="black" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem}>
-                    <Feather name="user" size={24} color="black" />
-                </TouchableOpacity>
-            </View>
 
             {/* 티켓 추가 모달 */}
             <Modal

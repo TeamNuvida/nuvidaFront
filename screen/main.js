@@ -59,6 +59,8 @@ export default function Main({ weather, particulateMatter, store, location }) {
         useCallback(() => {
             const user = async () => {
                 try {
+                    setUserInfo(null);
+                    setIsLoggedIn(false);
                     const storedUserInfo = await AsyncStorage.getItem('userInfo');
                     console.log(JSON.parse(storedUserInfo));
                     if (storedUserInfo) {
@@ -333,6 +335,26 @@ export default function Main({ weather, particulateMatter, store, location }) {
         }
 
         console.log("얻은 포인트: " + getPoint);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         setSelectedTeam(null);
         setModalVisible(false);
     };

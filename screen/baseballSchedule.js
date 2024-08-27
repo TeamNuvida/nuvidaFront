@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, Dimensions } from 'react-native';
-import { AntDesign, FontAwesome, Entypo, Ionicons, Feather } from '@expo/vector-icons';
+import {AntDesign, FontAwesome, Entypo, Ionicons, Feather, MaterialCommunityIcons} from '@expo/vector-icons';
 import { Calendar } from 'react-native-calendars';
 import { useNavigation } from '@react-navigation/native';
 import axios from "axios";
@@ -74,21 +74,22 @@ export default function BaseballSchedule() {
         }
     };
 
-    const handlePlanCalendarIconPress = () => {
-        if (isLoggedIn) {
-            navigation.navigate("planCalendarPage");
-        } else {
-            navigation.navigate("loginPage");
-        }
-    };
-
     const renderHeader = () => {
         return (
             <View style={[styles.headerContainer, {zIndex: 6}]}>
-                <View style={[{ justifyContent: 'center', alignItems: 'center', flexDirection: 'row', marginTop: '3%', }]}>
+                <View style={styles.flexRow}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.header}>
                     <Image source={require('../assets/logo.png')} style={{ width: 20, height: 20, marginRight: '1%' }} />
                     <Text style={{ fontSize: 13, fontWeight: 'bold' }}>경기일정・결과</Text>
                 </View>
+                <View style={styles.headerRight}>
+                    {/* 빈 공간을 넣어서 헤더 중앙 정렬 */}
+                </View>
+
             </View>
         );
     };
@@ -197,33 +198,10 @@ export default function BaseballSchedule() {
         );
     };
 
-    const renderTabBar = () => {
-        return (
-            <View style={styles.tabBar}>
-                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Main')}>
-                    <Entypo name="home" size={24} color="black" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={handlePlanCalendarIconPress}>
-                    <FontAwesome name="calendar-check-o" size={24} color="black" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('game')}>
-                    <FontAwesome name="calendar-check-o" size={24} color="black" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('community')}>
-                    <Ionicons name="chatbubbles-outline" size={24} color="black" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('mypage')}>
-                    <Feather name="user" size={24} color="black" />
-                </TouchableOpacity>
-            </View>
-        );
-    };
-
     return (
         <SafeAreaView style={styles.container}>
             {renderHeader()}
             {renderCalendar()}
-            {renderTabBar()}
         </SafeAreaView>
     );
 }
@@ -248,10 +226,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
     },
     headerContainer: {
+        flexDirection: 'row',
         backgroundColor: '#fff',
-        height: 85,
+        height: 80,
+        alignItems: 'center',
+        paddingHorizontal: 10,
         paddingTop: '10%',
         paddingBottom: '2%',
+        justifyContent: 'space-between',  // 양쪽 끝과 중앙에 배치
     },
     headerText: {
         fontSize: 16,
@@ -282,5 +264,18 @@ const styles = StyleSheet.create({
     },
     arrowContainer: {
         padding: 10,
+    },
+    header:{
+        flex: 2,  // 중앙 텍스트와 이미지를 위한 공간
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    flexRow:{
+        flex: 1,  // 왼쪽 버튼을 위한 공간
+        justifyContent: 'flex-start',
+    },
+    headerRight: {
+        flex: 1,  // 오른쪽의 빈 공간을 위한 설정
     },
 });
