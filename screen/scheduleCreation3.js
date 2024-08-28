@@ -43,6 +43,7 @@ const ScheduleCreation3 = ({ route, navigation }) => {
     console.log(scheduleInfo);
 
     const localhost = "192.168.55.35";
+
     const userInfo = {user_id:'test', user_nick:'test', user_point:200};
 
     const [friendsList,setFriendsList] = useState(null);

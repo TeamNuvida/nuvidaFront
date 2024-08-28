@@ -5,6 +5,8 @@ import { Entypo, FontAwesome, Ionicons, Feather, MaterialIcons } from '@expo/vec
 import MapView, { Marker } from 'react-native-maps';
 import axios from "axios";
 import { WebView } from 'react-native-webview';
+import { navigateTo } from '@react-native-kakao/navi';
+import { Linking } from 'react-native';
 
 const TripSchedule = ({ route }) => {
     const navigation = useNavigation();
@@ -17,71 +19,92 @@ const TripSchedule = ({ route }) => {
     // 일정 식별자
     const plan_seq = route.params.plan_seq;
 
-    const accommodation = null;
+    const [accommodation,setAccommodation] = useState(null);
+    const [planInfo, setPlanInfo] = useState(null);
+    const [isLeader, setIsLeader] = useState(false);
 
-    console.log(plan_seq)
+
+    const localhost = "192.168.55.35";
+
+    console.log("plan_seq",plan_seq)
 
     const [selectedDay, setSelectedDay] = useState('전체');
     const [showDeleteIcons, setShowDeleteIcons] = useState(false);
 
     const [schedule, setSchedule] = useState({});
+    const [routeList, setRouteList] = useState(null);
 
     useEffect(() => {
         // 기존 API 호출 코드가 있다고 가정하고, 여기서 데이터를 가져옵니다.
-        const fetchSchedule = async () => {
+        const fetchAcc = async () => {
             try {
-                // const response = await axios.get(`http://example.com/your-api/${plan_seq}`);
-                // const rawData = response.data; // 예를 들어 위에 주어진 배열
+                const response = await axios.post(`http://${localhost}:8090/nuvida/getAcc`, {
+                    plan_seq: plan_seq,
+                });
+                setAccommodation(response.data);
 
-                const rawData =[
-                    {route_seq:14, plan_seq:7, seq:1, title:"광주 남구문화원", addr:"광주광역시 남구 봉선로 208 (봉선동)", image:"http://tong.visitkorea.or.kr/cms/resource/11/1888811_image2_1.jpg", contentid:"130392", contenttypeid:"14", lat:"35.1221", lng:"126.917", reser_dt:"2024-08-17 10:00:00", travel_date:"2024-08-17"},
+                const getPlanInfo = await axios.post(`http://${localhost}:8090/nuvida/getPlanInfo`, {
+                    plan_seq: plan_seq,
+                });
+                setPlanInfo(getPlanInfo.data);
 
-                    {route_seq:15, plan_seq:7, seq:2, title:"광주 3·1 만세운동 기념비", addr:"광주광역시 남구 백서로 13 (양림동)", image:"http://tong.visitkorea.or.kr/cms/resource/11/1888811_image2_1.jpg", contentid:"130392", contenttypeid:"14", lat:"35.1368", lng:"126.91", reser_dt:null, travel_date:"2024-08-17"},
+                const getLeader = await axios.post(`http://${localhost}:8090/nuvida/getLeader`, {
+                    plan_seq: plan_seq,
+                    user_id:userInfo.user_id
+                });
+                setIsLeader(getLeader.data)
 
-                    {route_seq:16, plan_seq:7, seq:3, title:"광주 경찰충혼탑", addr:"광주광역시 남구 사직길 49 )", image:"http://tong.visitkorea.or.kr/cms/resource/11/1888811_image2_1.jpg", contentid:"130392", contenttypeid:"14", lat:"35.1425", lng:"126.916", reser_dt:null, travel_date:"2024-08-17"},
-
-                    {route_seq:17, plan_seq:7, seq:1, title:"광주 대인시장 (대인예술시장)", addr:"광주광역시 동구 제봉로184번길 9-10 ", image:"http://tong.visitkorea.or.kr/cms/resource/11/1888811_image2_1.jpg", contentid:"130392", contenttypeid:"14", lat:"35.1541", lng:"126.917", reser_dt:null, travel_date:"2024-08-18"}
-                ]
-
-                const newSchedule = rawData.reduce((acc, item) => {
-                    const dayKey = `${new Date(item.travel_date).getMonth() + 1}월 ${new Date(item.travel_date).getDate()}일`;
-
-
-                    if (!acc[dayKey]) acc[dayKey] = [];
-
-                    acc[dayKey].push({
-                        time: item.reser_dt ? new Date(item.reser_dt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }) : null,
-                        title: item.title,
-                        details: item.reser_dt ? `${new Date(item.reser_dt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })} - ${new Date(item.reser_dt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}` : null,
-                        address: item.addr,
-                        lat: item.lat,
-                        lng: item.lng,
-                        category: getCategory(item.contenttypeid), // 카테고리
-                        icon: getIcon(item.contenttypeid), // 카테고리에 맞는 아이콘 선택
-                    });
-
-                    // if (!acc['전체']) acc['전체'] = [];
-                    // acc['전체'].push({
-                    //     time: item.reser_dt ? new Date(item.reser_dt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }) : null,
-                    //     title: item.title,
-                    //     details: item.reser_dt ? `${new Date(item.reser_dt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })} - ${new Date(item.reser_dt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}` : null,
-                    //     address: item.addr,
-                    //     icon: 'place',
-                    //     lat: item.lat,
-                    //     lng: item.lng,
-                    // });
-
-                    return acc;
-                }, {});
-
-                setSchedule(newSchedule);
             } catch (error) {
                 console.error("Error fetching schedule data:", error);
             }
         };
 
-        fetchSchedule();
+        fetchAcc();
     }, [plan_seq]);
+
+    useFocusEffect(
+        useCallback(() => {
+            const fetchSchedule = async () => {
+                try {
+                    const response = await axios.post(`http://${localhost}:8090/nuvida/getRouteList`, {
+                        plan_seq: plan_seq,
+                    });
+                    const rawData = response.data;
+                    setRouteList(rawData)
+
+                    const newSchedule = rawData.reduce((acc, item) => {
+                        const dayKey = `${new Date(item.travel_date).getMonth() + 1}월 ${new Date(item.travel_date).getDate()}일`;
+
+
+                        if (!acc[dayKey]) acc[dayKey] = [];
+
+                        acc[dayKey].push({
+                            seq:item.route_seq,
+                            reservation:item.reser_dt,
+                            title: item.title,
+                            address: item.addr,
+                            lat: item.lat,
+                            lng: item.lng,
+                            category: getCategory(item.contenttypeid), // 카테고리
+                            icon: getIcon(item.contenttypeid), // 카테고리에 맞는 아이콘 선택
+                        });
+
+                        return acc;
+                    }, {});
+
+                    setSchedule(newSchedule);
+                } catch (error) {
+                    console.error("Error fetching schedule data:", error);
+                }
+            };
+
+            fetchSchedule();
+
+            return () => {
+                // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
+            };
+        }, []) // 의존성으로 route.params.userInfo를 추가하여, 값이 변경될 때마다 렌더링
+    );
 
     const getIcon = (contenttypeid) => {
         switch (contenttypeid) {
@@ -120,6 +143,34 @@ const TripSchedule = ({ route }) => {
                 return '관광지'; // 기본 아이콘
         }
     };
+
+    const formatTime = (reserDt) => {
+        // 시간 부분만 추출
+        const timePart = reserDt.split(' ')[1]; // "10:30:00"
+
+        // 시간과 분을 분리
+        const [hour, minute] = timePart.split(':');
+
+        // 결과 생성
+        let formattedTime;
+        if (minute === '00') {
+            formattedTime = `${hour}시`;
+        } else {
+            formattedTime = `${hour}시 ${minute}분`;
+        }
+        return formattedTime;
+    }
+
+    const formatReserDt = (reserDt) =>{
+
+        // 문자열을 Date 객체로 변환
+        const dateObj = new Date(reserDt);
+
+        // 날짜를 원하는 형식으로 변환
+        const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' };
+        const formattedDate = dateObj.toLocaleDateString('ko-KR', options);
+        return formattedDate;
+    }
 
     const html = `
     <!DOCTYPE html>
@@ -269,7 +320,7 @@ const TripSchedule = ({ route }) => {
             // 숙소 마커 추가
             var accommodation = ${JSON.stringify(accommodation)};
             accommodation.forEach(function(hotel, index) {
-              var markerPosition = new kakao.maps.LatLng(hotel.lng, hotel.lat); // 숙소 위치 설정
+              var markerPosition = new kakao.maps.LatLng(hotel.lat, hotel.lng ); // 숙소 위치 설정
               addMarker(markerPosition, 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png', {width: 44, height: 55}, hotel.acc_name, hotel.addr, 'H', '#FFD700'); // 숙소 마커 추가 (금색)
             });
           });
@@ -292,6 +343,40 @@ const TripSchedule = ({ route }) => {
             ]
         );
     };
+
+    const handleNavi = async (item) => {
+        const destination = encodeURIComponent(item.title); // 목적지 이름
+        const endLat = item.lat; // 목적지 위도
+        const endLng = item.lng; // 목적지 경도
+
+        // 카카오맵 길찾기 URL
+        const url = `kakaomap://route?ep=${endLat},${endLng}&by=PUBLIC`; // by=FOOT, CAR, PUBLIC 등이 가능합니다.
+        const installUrl = 'https://play.google.com/store/apps/details?id=net.daum.android.map';  // 카카오맵 설치 페이지 URL
+
+        try {
+            const canOpen = await Linking.canOpenURL(url);
+            console.log('Can open URL:', canOpen);
+
+            if (canOpen) {
+                await Linking.openURL(url);
+            } else {
+                Alert.alert(
+                    '카카오맵 설치되어 있지 않습니다.',
+                    '카카오맵 설치 페이지로 이동하시겠습니까?',
+                    [
+                        { text: '취소', style: 'cancel' },
+                        { text: '확인', onPress: () => Linking.openURL(installUrl) },
+                    ]
+                );
+            }
+        } catch (error) {
+            console.error('Error launching KakaoNavi:', error);
+            Alert.alert('오류 발생', '카카오내비 실행 중 오류가 발생했습니다. 다시 시도해 주세요.');
+        }
+    };
+
+
+
 
     const renderDaySchedule = (day) => {
         if (day === "전체") {
@@ -328,9 +413,12 @@ const TripSchedule = ({ route }) => {
                                         </TouchableOpacity>
                                     )}
                                 </View>
-                                <Text style={styles.timeText}>{item.time}</Text>
-                                <Text style={styles.detailsText}>{item.details}</Text>
+                                <Text style={styles.categoryText}>{item.category}</Text>
                                 {item.address && <Text style={styles.addressText}>{item.address}</Text>}
+                                {item.reservation && <Text style={styles.detailsText}>{formatReserDt(item.reservation)} {formatTime(item.reservation)}</Text>}
+                                <TouchableOpacity style={styles.naviButton} onPress={()=>handleNavi(item)}>
+                                    <Text style={styles.naviText}>길찾기</Text>
+                                </TouchableOpacity>
                             </View>
                         </View>
                     ))}
@@ -356,9 +444,12 @@ const TripSchedule = ({ route }) => {
                                 </TouchableOpacity>
                             )}
                         </View>
-                        <Text style={styles.timeText}>{item.time}</Text>
-                        <Text style={styles.detailsText}>{item.details}</Text>
+                        <Text style={styles.categoryText}>{item.category}</Text>
                         {item.address && <Text style={styles.addressText}>{item.address}</Text>}
+                        {item.reservation && <Text style={styles.detailsText}>{formatReserDt(item.reservation)} {formatTime(item.reservation)}</Text>}
+                        <TouchableOpacity style={styles.naviButton} onPress={()=>handleNavi(item)}>
+                            <Text style={styles.naviText}>길찾기</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
             ));
@@ -390,31 +481,78 @@ const TripSchedule = ({ route }) => {
         setMapFoldTF(!mapFoldTF);
     }
 
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const options = { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' };
+        const formattedDate = new Intl.DateTimeFormat('ko-KR', options).format(date);
+        return formattedDate.replace(/\./g, '. ');
+    };
+
+    const checkDeletePlan = () =>{
+        Alert.alert(
+            "삭제 확인",
+            "삭제하시겠습니까?",
+            [
+                { text: "아니요", style: "cancel" },
+                { text: "예", onPress: () => deletePlan()}
+            ]
+        );
+    }
+
+    const deletePlan = async () =>{ 
+        
+        if(isLeader){
+            console.log("리더 플랜 삭제")
+            try {
+                const response = await axios.post(`http://${localhost}:8090/nuvida/delPlanLeader`, {
+                    plan_seq: plan_seq
+                });
+                navigation.navigate("Mypage", {userInfo:userInfo});
+            } catch (e) {
+                console.error(e)
+            }
+        }else{
+            console.log("멤버 플랜 삭제")
+            try {
+                const response = await axios.post(`http://${localhost}:8090/nuvida/delPlanMem`, {
+                    plan_seq: plan_seq,
+                    user_id:userInfo.user_id
+                });
+                navigation.navigate("Mypage", {userInfo:userInfo});
+            } catch (e) {
+                console.error(e)
+            }
+        }
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.topBar}>
-                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("Mypage", {userInfo})}>
                     <Text style={styles.backButtonText}>이전</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.deleteButton} onPress={() => setShowDeleteIcons(!showDeleteIcons)}>
+                <TouchableOpacity style={styles.deleteButton} onPress={() => checkDeletePlan()}>
                     <Text style={styles.deleteButtonText}>삭제</Text>
                 </TouchableOpacity>
             </View>
                 <View style={styles.header}>
-                    <Text style={styles.location}>광 주</Text>
-                    <Text style={styles.date}>2024. 05. 21 (토) - 2024. 05. 23 (월)</Text>
+                    {planInfo?(<Text style={styles.location}>{planInfo.plan_name}</Text>):
+                        (<Text style={styles.location}>광주 여행</Text>)}
+
+                    {planInfo?(<Text style={styles.date}>{formatDate(planInfo.start_date)} - {formatDate(planInfo.end_date)}</Text>):
+                        (<Text style={styles.date}>2024. 05. 21 (토) - 2024. 05. 23 (월)</Text>)}
                 </View>
                 <View style={styles.tabContainer}>
                     <TouchableOpacity style={styles.tabButtonActive} onPress={() => navigation.navigate("TripSchedule", { userInfo, plan_seq })}>
                         <Text style={styles.tabTextActive}>여행일정</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate("ReservationInfo", { userInfo, plan_seq })}>
+                    <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate("ReservationInfo", { userInfo, plan_seq, planInfo, routeList , isLeader})}>
                         <Text style={styles.tabText}>예약정보</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate("MemberList", { userInfo, plan_seq })}>
+                    <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate("MemberList", { userInfo, plan_seq, planInfo, routeList, isLeader })}>
                         <Text style={styles.tabText}>멤버목록</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate("Calculate", { userInfo, plan_seq })}>
+                    <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate("Calculate", { userInfo, plan_seq, planInfo, routeList, isLeader })}>
                         <Text style={styles.tabText}>정산하기</Text>
                     </TouchableOpacity>
                 </View>
@@ -575,7 +713,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         padding: 15,
         borderRadius: 10,
-
+        height:150,
         elevation: 5,
     },
     scheduleItemHeader: {
@@ -591,6 +729,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
     },
+
     titleText: {
         fontSize: 16,
         fontWeight: 'bold',
@@ -598,8 +737,12 @@ const styles = StyleSheet.create({
         marginLeft: 10,
     },
     detailsText: {
-        fontSize: 14,
+        fontSize: 13,
         color: '#666',
+    },
+    categoryText:{
+        fontSize: 14,
+        color: '#000000',
     },
     addressText: {
         fontSize: 14,
@@ -636,6 +779,16 @@ const styles = StyleSheet.create({
         paddingVertical:5,
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
+    },
+    naviButton:{
+        width: "30%",
+        height: "30%",
+        borderRadius: 5,
+        backgroundColor: '#f35353',
+        alignItems:"center",
+    },
+    naviText:{
+        fontWeight:"bold"
     },
 });
 

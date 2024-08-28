@@ -80,8 +80,8 @@ export default function ScheduleCreationAccommodation({ route }) {
             addr: formatAddr(place.addr1, place.addr2),
             check_in: place.checkInTime,
             check_out: place.checkOutTime,
-            lat: place.mapx,
-            lng: place.mapy,
+            lat: place.mapy,
+            lng: place.mapx,
             contentid:place.contentid
         }));
         console.log(accommodation);
@@ -241,13 +241,13 @@ export default function ScheduleCreationAccommodation({ route }) {
                         <Text style={styles.modalTitle}>시간 입력</Text>
                         <TextInput
                             style={styles.timeInput}
-                            placeholder="입실 시간을 입력하세요. ((예: 2024.11.13 10:00))"
+                            placeholder="입실 시간을 입력하세요. (예: 2024.11.13 10:00)"
                             value={checkInTime}
                             onChangeText={(text) => setCheckInTime(text)}
                         />
                         <TextInput
                             style={styles.timeInput}
-                            placeholder="퇴실 시간을 입력하세요.((예: 2024.11.14 10:00))"
+                            placeholder="퇴실 시간을 입력하세요. (예: 2024.11.14 10:00)"
                             value={checkOutTime}
                             onChangeText={(text) => setCheckOutTime(text)}
                         />

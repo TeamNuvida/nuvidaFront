@@ -12,7 +12,8 @@ export default function ScheduleCreation8({ route }) {
     const localhost = '192.168.55.35';
 
     const scheduleInfo = route.params.scheduleInfo; // 일정 생성 정보
-    console.log(scheduleInfo)
+    const plan_seq = route.params.plan_seq;
+    console.log(plan_seq)
 
     // 상단 바
     const renderHeader = () => {
@@ -45,7 +46,7 @@ export default function ScheduleCreation8({ route }) {
                 </View>
 
                 <View style={styles.actionButtons}>
-                    <TouchableOpacity style={styles.actionButton}>
+                    <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate("TripSchedule", { userInfo, plan_seq })}>
                         <Text style={styles.actionButtonText}>교통편 등록하기</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.actionButton}>

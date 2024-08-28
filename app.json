@@ -23,7 +23,33 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "@react-native-kakao/core",
+        {
+          "nativeAppKey": "6296063fa9605cbce03f740b74991eb3",
+          "ios": {
+            "naviApplicationQuerySchemes": true
+          }
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true,
+            "extraMavenRepos": [
+              "https://devrepo.kakao.com/nexus/content/groups/public/"
+            ]
+          }
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "0558d377-e748-46af-a71f-c8888f4e6365"
+      }
     }
   }
 }
-

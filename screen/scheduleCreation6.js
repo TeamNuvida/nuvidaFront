@@ -297,7 +297,7 @@ export default function ScheduleCreation6({ route }) {
             // 숙소 마커 추가
             var accommodation = ${JSON.stringify(accommodation)};
             accommodation.forEach(function(hotel, index) {
-              var markerPosition = new kakao.maps.LatLng(hotel.lng, hotel.lat); // 숙소 위치 설정
+              var markerPosition = new kakao.maps.LatLng(hotel.lat, hotel.lng); // 숙소 위치 설정
               addMarker(markerPosition, 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png', {width: 44, height: 55}, hotel.acc_name, hotel.addr, 'H', '#FFD700'); // 숙소 마커 추가 (금색)
             });
           });
@@ -537,7 +537,7 @@ export default function ScheduleCreation6({ route }) {
                 {user_id:userInfo.user_id, plan_name:plan_name,start_date:start_date,
                     end_date:end_date, route:route,members:members,traveltime:traveltime,accommodation:accommodation});
 
-            navigation.navigate('ScheduleCreation8', {scheduleInfo:scheduleInfo});
+            navigation.navigate('ScheduleCreation8', {scheduleInfo:scheduleInfo, plan_seq:response.data});
 
         } catch (error) {
             console.error('Error fetching plan data:', error);

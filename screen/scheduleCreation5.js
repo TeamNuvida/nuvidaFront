@@ -22,6 +22,8 @@ export default function ScheduleCreation5({route}) {
     const [reservationTime, setReservationTime] = useState('');
     const [dropdownVisible, setDropdownVisible] = useState(false);
 
+
+
     console.log("값확인",scheduleInfo);
 
     // 루트 정보 추가

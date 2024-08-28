@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback  } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { View, Text, StyleSheet, Button, TouchableOpacity, ScrollView, Modal, TextInput } from 'react-native';
+import {View, Text, StyleSheet, Button, TouchableOpacity, ScrollView, Modal, TextInput, Alert} from 'react-native';
 import { AntDesign, MaterialCommunityIcons, Entypo, FontAwesome, Ionicons, Feather } from '@expo/vector-icons';
 import axios from "axios";
+import { Share } from 'react-native';
 
 const Calculate = ({ route }) => {
     const navigation = useNavigation();
@@ -12,67 +13,299 @@ const Calculate = ({ route }) => {
 
     // 일정 식별자
     const plan_seq = route.params.plan_seq;
+    const planInfo = route.params.planInfo;
+    const routeList = route.params.routeList;
+    const isLeader = route.params.isLeader;
 
-    console.log(plan_seq)
+    const localhost = "192.168.55.35";
 
     const [modalVisible, setModalVisible] = useState(false);
     const [newItemTitle, setNewItemTitle] = useState('');
     const [newItemPrice, setNewItemPrice] = useState('');
 
-    const [items, setItems] = useState([
-        { title: '광전제과', price: 128000 },
-        { title: '광주패밀리랜드', price: 22000 }
-    ]);
+    const [calculateModalVisible, setCalculateModalVisible] = useState(false);
+    const [memCount, setMemCount] = useState(1);
+    const [totalPrice, setTotalPrice] = useState(0);
+    const [price, setPrice] = useState(0);
+    const [bankName, setBankName] = useState('');
+    const [accountNumber, setAccountNumber] = useState('');
 
-    const handleAddItem = () => {
+    const [items, setItems] = useState([]);
+
+
+    const getCalculate = async () =>{
+        try {
+            const response = await axios.post(`http://${localhost}:8090/nuvida/getCalculate`, {
+                plan_seq: plan_seq,
+            });
+            setItems(response.data)
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    useFocusEffect(
+        useCallback(() => {
+            getCalculate();
+
+            return () => {
+                // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
+            };
+        }, [])
+    );
+
+
+    useFocusEffect(
+        useCallback(() => {
+            const getMemCount = async () =>{
+                try {
+                    const response = await axios.post(`http://${localhost}:8090/nuvida/getMemCount`, {
+                        plan_seq: plan_seq,
+                    });
+                    setMemCount(response.data)
+                } catch (e) {
+                    console.error(e)
+                }
+            }
+
+            getMemCount();
+
+            return () => {
+                // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
+            };
+        }, [])
+    );
+
+
+    useFocusEffect(
+        useCallback(() => {
+            let add = 0;
+            if(items){
+                items.map((item=>{
+                    add += item.price;
+                }))
+            }
+            setTotalPrice(add)
+
+            return () => {
+                // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
+            };
+        }, [items])
+    );
+
+
+    useFocusEffect(
+        useCallback(() => {
+            setPrice(totalPrice/memCount);
+
+            return () => {
+                // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
+            };
+        }, [totalPrice])
+    );
+
+    const handleCancel = () => {
+        setNewItemTitle('');
+        setNewItemPrice('');
+        setModalVisible(false);
+    }
+
+    const handleAddItem = async () => {
         if (newItemTitle && newItemPrice) {
-            setItems([...items, { title: newItemTitle, price: parseInt(newItemPrice) }]);
-            setNewItemTitle('');
-            setNewItemPrice('');
-            setModalVisible(false);
+            try {
+                const response = await axios.post(`http://${localhost}:8090/nuvida/addCalculate`, {
+                    plan_seq: plan_seq,
+                    title:newItemTitle,
+                    price: parseInt(newItemPrice)
+                });
+                getCalculate();
+            } catch (e) {
+                console.error(e)
+            }finally {
+                setNewItemTitle('');
+                setNewItemPrice('');
+                setModalVisible(false);
+            }
+
         } else {
             alert("제목과 금액을 입력하세요.");
         }
     };
 
+    const handleDelItem = async (cal_seq) => {
+        try {
+            const response = await axios.post(`http://${localhost}:8090/nuvida/delCalculate`, {
+                cal_seq: cal_seq
+            });
+            getCalculate();
+        } catch (e) {
+            console.error(e)
+        }
+    };
+
+    const handleDelete = (cal_seq) => {
+        console.log(cal_seq);
+        Alert.alert(
+            "삭제 확인",
+            "삭제하시겠습니까?",
+            [
+                { text: "아니요", style: "cancel" },
+                { text: "예", onPress: () => handleDelItem(cal_seq)}
+            ]
+        );
+    };
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const options = { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' };
+        const formattedDate = new Intl.DateTimeFormat('ko-KR', options).format(date);
+        return formattedDate.replace(/\./g, '. ');
+    };
+
+    const handleCalculate = async () =>{
+        console.log("정산하기 1인당 금액 : ", price);
+        console.log(items)
+        console.log(planInfo.plan_name)
+
+        if (!bankName || !accountNumber) {
+            Alert.alert('입력 오류', '은행명과 계좌번호를 모두 입력해주세요.');
+            return;
+        }
+
+        // 항목별 정산 내역을 구성
+        let itemDetails = '';
+        items.forEach(item => {
+            itemDetails += `${item.title} ${item.price.toLocaleString()}원\n`;
+        });
+
+        // 메시지 구성
+        const msg = `${planInfo.plan_name} 일정 정산\n` +
+            `${itemDetails}` +
+            `총합 ${totalPrice.toLocaleString()}원\n` +
+            `1인당 ${price.toLocaleString()}원\n\n` +
+            `은행명 : ${bankName}\n` +
+            `계좌 : ${accountNumber}`;
+        try {
+            const result = await Share.share({
+                message: msg,
+            });
+
+            if (result.action === Share.sharedAction) {
+                if (result.activityType) {
+                    console.log('Shared with activity type: ', result.activityType);
+                } else {
+                    console.log('Shared successfully');
+                }
+            } else if (result.action === Share.dismissedAction) {
+                console.log('Share dismissed');
+            }
+        } catch (error) {
+            console.error('Error sharing message: ', error);
+        } finally {
+            setBankName('');
+            setAccountNumber('');
+            setCalculateModalVisible(false);
+        }
+    }
+
+    const cancelCalculate = () => {
+        setBankName('');
+        setAccountNumber('');
+        setCalculateModalVisible(false);
+    }
+
+    const openCalculateModal = () => {
+        setCalculateModalVisible(true);
+    }
+
+    const checkDeletePlan = () =>{
+        Alert.alert(
+            "삭제 확인",
+            "삭제하시겠습니까?",
+            [
+                { text: "아니요", style: "cancel" },
+                { text: "예", onPress: () => deletePlan()}
+            ]
+        );
+    }
+
+
+    const deletePlan = async () =>{
+
+        if(isLeader){
+            console.log("리더 플랜 삭제")
+            try {
+                const response = await axios.post(`http://${localhost}:8090/nuvida/delPlanLeader`, {
+                    plan_seq: plan_seq
+                });
+                navigation.navigate("Mypage", {userInfo:userInfo});
+            } catch (e) {
+                console.error(e)
+            }
+        }else{
+            console.log("멤버 플랜 삭제")
+            try {
+                const response = await axios.post(`http://${localhost}:8090/nuvida/delPlanMem`, {
+                    plan_seq: plan_seq,
+                    user_id:userInfo.user_id
+                });
+                navigation.navigate("Mypage", {userInfo:userInfo});
+            } catch (e) {
+                console.error(e)
+            }
+        }
+    }
+    
     return (
         <View style={styles.container}>
             <View style={styles.topBar}>
-                <TouchableOpacity style={styles.backButton} onPress={() => { /* Back button action */ }}>
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("Mypage", {userInfo})}>
                     <Text style={styles.backButtonText}>이전</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.deleteButton} onPress={() => { /* Delete button action */ }}>
+                <TouchableOpacity style={styles.deleteButton} onPress={() => checkDeletePlan()}>
                     <Text style={styles.deleteButtonText}>삭제</Text>
                 </TouchableOpacity>
             </View>
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
+
                 <View style={styles.header}>
-                    <Text style={styles.location}>광 주</Text>
-                    <Text style={styles.date}>2024. 05. 21 (화) - 2024. 05. 23 (목)</Text>
+                    {planInfo?(<Text style={styles.location}>{planInfo.plan_name}</Text>):
+                        (<Text style={styles.location}>광주 여행</Text>)}
+
+                    {planInfo?(<Text style={styles.date}>{formatDate(planInfo.start_date)} - {formatDate(planInfo.end_date)}</Text>):
+                        (<Text style={styles.date}>2024. 05. 21 (토) - 2024. 05. 23 (월)</Text>)}
                 </View>
                 <View style={styles.tabContainer}>
-                    <TouchableOpacity style={styles.tabButton} onPress={()=>navigation.navigate("TripSchedule", {userInfo:userInfo, plan_seq:plan_seq})}>
-                        <Text style={styles.tabTextActive}>여행일정</Text>
+                    <TouchableOpacity style={styles.tabButton} onPress={()=>navigation.navigate("TripSchedule", {userInfo:userInfo, plan_seq:plan_seq, routeList:routeList})}>
+                        <Text style={styles.tabText}>여행일정</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.tabButton} onPress={()=>navigation.navigate("ReservationInfo", {userInfo:userInfo, plan_seq:plan_seq})}>
+                    <TouchableOpacity style={styles.tabButton} onPress={()=>navigation.navigate("ReservationInfo", {userInfo:userInfo, plan_seq:plan_seq, planInfo:planInfo, routeList:routeList, isLeader:isLeader})}>
                         <Text style={styles.tabText}>예약정보</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.tabButton} onPress={()=>navigation.navigate("MemberList", {userInfo:userInfo, plan_seq:plan_seq})}>
+                    <TouchableOpacity style={styles.tabButton} onPress={()=>navigation.navigate("MemberList", {userInfo:userInfo, plan_seq:plan_seq, planInfo:planInfo, routeList:routeList, isLeader:isLeader})}>
                         <Text style={styles.tabText}>멤버목록</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.tabButtonActive} onPress={()=>navigation.navigate("Calculate", {userInfo:userInfo, plan_seq:plan_seq})}>
-                        <Text style={styles.tabText}>정산하기</Text>
+                    <TouchableOpacity style={styles.tabButtonActive} onPress={()=>navigation.navigate("Calculate", {userInfo:userInfo, plan_seq:plan_seq, planInfo:planInfo, routeList:routeList, isLeader:isLeader})}>
+                        <Text style={styles.tabTextActive}>정산하기</Text>
                     </TouchableOpacity>
                 </View>
+            <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.boxContainer}>
                     <View style={styles.contentContainer}>
                         <Text style={styles.totalAmountLabel}>총액</Text>
-                        <Text style={styles.totalAmount}>150,000원</Text>
+                        <Text style={styles.totalAmount}>{totalPrice}원</Text>
                         <View style={styles.itemList}>
                             {items.map((item, index) => (
-                                <View key={index} style={styles.item}>
+                                <View key={item.cal_seq} style={styles.item}>
+                                    <View style={{flexDirection: 'row', justifyContent: 'space-between', width: '90%'}}>
                                     <Text style={styles.itemName}>{item.title}</Text>
                                     <Text style={styles.itemPrice}>{item.price.toLocaleString()}원</Text>
+                                    </View>
+                                    <TouchableOpacity
+                                        style={styles.deleteIcon}
+                                        onPress={() => handleDelete(item.cal_seq)}
+                                    >
+                                        <Entypo name="cross" size={24} color="red" />
+                                    </TouchableOpacity>
                                 </View>
                             ))}
                         </View>
@@ -83,15 +316,17 @@ const Calculate = ({ route }) => {
                 </View>
                 <View style={styles.footer}>
                     <View style={styles.footerRow}>
-                        <Text style={styles.footerText}>3명</Text>
-                        <Button title="정산하기" onPress={() => { /* 정산하기 action */ }} />
+                        <Text style={styles.footerText}>총 멤버 : {memCount}명</Text>
+                        <Button title="정산하기" onPress={openCalculateModal} />
                     </View>
                     <View style={styles.footerRow}>
                         <Text style={styles.footerText}>1인당금액</Text>
-                        <Text style={styles.perPersonAmount}>50,000원</Text>
+                        <Text style={styles.perPersonAmount}>{price}원</Text>
                     </View>
                 </View>
             </ScrollView>
+
+            {/*정산 목록 추가 모달*/}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -119,7 +354,7 @@ const Calculate = ({ route }) => {
                         <View style={styles.modalButtonContainer}>
                             <TouchableOpacity
                                 style={[styles.button, styles.buttonClose]}
-                                onPress={() => setModalVisible(!modalVisible)}
+                                onPress={handleCancel}
                             >
                                 <Text style={styles.textStyle}>취소</Text>
                             </TouchableOpacity>
@@ -128,6 +363,49 @@ const Calculate = ({ route }) => {
                                 onPress={handleAddItem}
                             >
                                 <Text style={styles.textStyle}>추가</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/*은행명과 계좌번호 입력 모달*/}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={calculateModalVisible}
+                onRequestClose={() => {
+                    setCalculateModalVisible(!calculateModalVisible);
+                }}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalView}>
+                        <Text style={styles.modalText}>정산하기</Text>
+                        <TextInput
+                            placeholder="은행명 입력"
+                            value={bankName}
+                            onChangeText={setBankName}
+                            style={styles.input}
+                        />
+                        <TextInput
+                            placeholder="계좌번호 입력"
+                            value={accountNumber}
+                            onChangeText={setAccountNumber}
+                            keyboardType="numeric"
+                            style={styles.input}
+                        />
+                        <View style={styles.modalButtonContainer}>
+                            <TouchableOpacity
+                                style={[styles.button, styles.buttonClose]}
+                                onPress={cancelCalculate}
+                            >
+                                <Text style={styles.textStyle}>취소</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.button, styles.buttonAdd]}
+                                onPress={handleCalculate}
+                            >
+                                <Text style={styles.textStyle}>정산하기</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -341,6 +619,9 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         textAlign: 'center',
+    },
+    deleteIcon: {
+        top: 5,
     },
 });
 
