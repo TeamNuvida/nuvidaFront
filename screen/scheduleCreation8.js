@@ -16,6 +16,52 @@ export default function ScheduleCreation8({ route }) {
     const plan_seq = route.params.plan_seq;
     console.log(plan_seq)
 
+    const [notiState, setNotiState] = useState(false);
+
+    const getNotiState = async () => {
+        try{
+            const response = await axios.post(`http://${localhost}:8090/nuvida/checkNoti`,{
+                user_id: userInfo.user_id
+            });
+            if(response.data > 0){
+                setNotiState(true);
+            }else {
+                setNotiState(false);
+            }
+        }catch (e) {
+            console.error(e);
+        }
+
+    }
+
+    useFocusEffect(
+        useCallback(() => {
+            if(userInfo){
+                getNotiState();
+            }else {
+                setNotiState(false);
+            }
+            return () => {
+                // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
+            };
+        }, [userInfo])
+    );
+
+    // 상단바 알림 아이콘
+    const handleNoticeIconPress = async () => {
+        if (userInfo) {
+            try{
+                const response = await axios.post(`http://${localhost}:8090/nuvida/setNoti`,{user_id:userInfo.user_id});
+                navigation.navigate("NoticeList", {noticeList:response.data});
+            }catch (e) {
+                console.error(e)
+            }
+
+        } else {
+            navigation.navigate("Signin");
+        }
+    }
+
     // 상단 바
     const renderHeader = () => {
         return (
@@ -26,8 +72,12 @@ export default function ScheduleCreation8({ route }) {
                     <Text style={styles.headerText}>NUVIDA</Text>
                 </View>
                 <View style={[styles.headerIconContainer, { width: '30%', height: '100%' }]}>
-                    <TouchableOpacity style={styles.headerIcon} onPress={() => console.log("알림페이지")}>
-                        <MaterialCommunityIcons name="bell-plus" size={24} color="black" />
+                    <TouchableOpacity style={styles.headerIcon} onPress={handleNoticeIconPress}>
+                        {notiState?(
+                            <MaterialCommunityIcons name="bell-plus" size={24} color="red" />
+                        ):(
+                            <MaterialCommunityIcons name="bell-plus" size={24} color="black" />
+                        )}
                     </TouchableOpacity>
                 </View>
             </View>
@@ -104,6 +154,15 @@ export default function ScheduleCreation8({ route }) {
         );
     };
 
+    // 하단바 일정관리 아이콘
+    const handlePlanCalendarIconPress = () => {
+        if (userInfo) {
+            navigation.navigate("TripCalendar",{userInfo:userInfo});
+        } else {
+            navigation.navigate("Signin");
+        }
+    };
+
     // 하단 바
     const renderTabBar = () => {
         return (
@@ -111,16 +170,16 @@ export default function ScheduleCreation8({ route }) {
                 <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Main')}>
                     <Entypo name="home" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={() => console.log("핀볼빵")}>
+                <TouchableOpacity style={styles.tabItem} onPress={handlePlanCalendarIconPress}>
                     <FontAwesome name="calendar-check-o" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('game')}>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('PinBall')}>
                     <FontAwesome name="calendar-check-o" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('community')}>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('CommunityList', {userInfo:userInfo})}>
                     <Ionicons name="chatbubbles-outline" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('mypage')}>
+                <TouchableOpacity style={styles.tabItem} onPress={() => goMypage()}>
                     <Feather name="user" size={24} color="black" />
                 </TouchableOpacity>
             </View>

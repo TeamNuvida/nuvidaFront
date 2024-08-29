@@ -18,7 +18,7 @@ export default function ScheduleCreation6({ route }) {
     const scheduleInfo = route.params.scheduleInfo; // 일정 생성 정보
     const [selectedDay, setSelectedDay] = useState('전체');
 
-    const localhost = "192.168.55.35";
+    const localhost = '192.168.55.35';
     const userInfo = route.params.userInfo;
 
     const [schedule, setSchedule] = useState([])
@@ -607,7 +607,6 @@ export default function ScheduleCreation6({ route }) {
     return (
         <SafeAreaView style={styles.container}>
             {map()}
-            {renderTabBar()}
         </SafeAreaView>
     );
 }

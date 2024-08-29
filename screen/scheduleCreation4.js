@@ -71,7 +71,11 @@ export default function ScheduleCreation4({ route }) {
 
             try {
                 const categoryParam = selectedCategory ? `&contentTypeId=${selectedCategory}` : '';
-                const response = await axios.get(`http://apis.data.go.kr/B551011/KorService1/searchKeyword1?serviceKey=${API_KEY}&MobileApp=NUVIDA&MobileOS=AND&pageNo=1&numOfRows=10&listYN=Y&arrange=A&keyword=${queryToSearch}&areaCode=5${categoryParam}&_type=JSON`);
+                const totalResponso = await axios.get(`http://apis.data.go.kr/B551011/KorService1/searchKeyword1?serviceKey=${API_KEY}&MobileApp=NUVIDA&MobileOS=AND&pageNo=1&numOfRows=10&listYN=N&arrange=A&keyword=${queryToSearch}&areaCode=5${categoryParam}&_type=JSON`);
+                const totalCount = totalResponso.data.response.body.items.item[0].totalCnt;
+
+
+                const response = await axios.get(`http://apis.data.go.kr/B551011/KorService1/searchKeyword1?serviceKey=${API_KEY}&MobileApp=NUVIDA&MobileOS=AND&pageNo=1&numOfRows=${totalCount}&listYN=Y&arrange=A&keyword=${queryToSearch}&areaCode=5${categoryParam}&_type=JSON`);
                 const items = response.data.response.body.items.item;
                 console.log(items);
                 setPlaceList(items);
@@ -412,7 +416,6 @@ export default function ScheduleCreation4({ route }) {
         <SafeAreaView style={styles.container}>
             {renderHeader()}
             {renderTitle()}
-            {renderTabBar()}
         </SafeAreaView>
     );
 }

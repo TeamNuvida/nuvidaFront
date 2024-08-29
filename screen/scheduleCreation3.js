@@ -42,7 +42,7 @@ const ScheduleCreation3 = ({ route, navigation }) => {
 
     console.log(scheduleInfo);
 
-    const localhost = "192.168.55.35";
+    const localhost = '192.168.55.35';
 
     const userInfo = route.params.userInfo;
 

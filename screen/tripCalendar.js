@@ -69,7 +69,7 @@ const TripCalendar = ({ route }) => {
 
     const [notiState, setNotiState] = useState(false);
 
-    const localhost = "192.168.55.35";
+    const localhost = '192.168.55.35';
 
     const [userInfo, setUserInfo] = useState(route.params.userInfo);
     // API KEY

@@ -12,7 +12,7 @@ export default function ScheduleCreation5({route}) {
     const [loading, setLoading] = useState(true); // 로딩 상태 추가
     const scheduleInfo = route.params.scheduleInfo; // 일정 생성 정보
 
-    const localhost = "192.168.55.35";
+    const localhost = '192.168.55.35';
 
     const [reservations, setReservations] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
@@ -259,7 +259,6 @@ export default function ScheduleCreation5({route}) {
         <SafeAreaView style={styles.container}>
             {renderHeader()}
             {reservation()}
-            {renderTabBar()}
         </SafeAreaView>
     );
 }

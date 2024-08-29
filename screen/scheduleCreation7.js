@@ -515,7 +515,6 @@ export default function ScheduleCreation7({ route }) {
     return (
         <SafeAreaView style={styles.container}>
             {map()}
-            {renderTabBar()}
         </SafeAreaView>
     );
 }

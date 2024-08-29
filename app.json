@@ -26,15 +26,6 @@
     },
     "plugins": [
       [
-        "@react-native-kakao/core",
-        {
-          "nativeAppKey": "6296063fa9605cbce03f740b74991eb3",
-          "ios": {
-            "naviApplicationQuerySchemes": true
-          }
-        }
-      ],
-      [
         "expo-build-properties",
         {
           "android": {

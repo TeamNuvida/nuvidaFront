@@ -5,7 +5,6 @@ import { Entypo, FontAwesome, Ionicons, Feather, MaterialIcons } from '@expo/vec
 import MapView, { Marker } from 'react-native-maps';
 import axios from "axios";
 import { WebView } from 'react-native-webview';
-import { navigateTo } from '@react-native-kakao/navi';
 import { Linking } from 'react-native';
 
 const TripSchedule = ({ route }) => {
