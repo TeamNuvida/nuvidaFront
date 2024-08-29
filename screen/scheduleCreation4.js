@@ -49,7 +49,7 @@ export default function ScheduleCreation4({ route }) {
     const navigation = useNavigation();
 
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userInfo, setUserInfo] = useState(null);
+    const [userInfo, setUserInfo] = useState(route.params.userInfo);
     const [loading, setLoading] = useState(true);
     const [placeList, setPlaceList] = useState(null);
     const scheduleInfo = route.params.scheduleInfo;
@@ -90,7 +90,7 @@ export default function ScheduleCreation4({ route }) {
         }
 
         const updateScheduleInfo = { ...scheduleInfo, selectedPlaces: selectedPlaces };
-        navigation.navigate('ScheduleCreation5', { scheduleInfo: updateScheduleInfo });
+        navigation.navigate('ScheduleCreation5', { scheduleInfo: updateScheduleInfo, userInfo:userInfo });
     }
 
     const formatAddr = (addr1, addr2) => {

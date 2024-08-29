@@ -87,7 +87,6 @@ export default function Main({ weather, particulateMatter, store, location }) {
     );
 
     const getNotiState = async () => {
-        if (!userInfo) return;
         try{
             const response = await axios.post(`http://${localhost}:8090/nuvida/checkNoti`,{
                 user_id: userInfo.user_id
@@ -105,17 +104,15 @@ export default function Main({ weather, particulateMatter, store, location }) {
 
     useFocusEffect(
         useCallback(() => {
-            if(isLoggedIn){
+            if(userInfo){
                 getNotiState();
             }else {
                 setNotiState(false);
             }
-
-
             return () => {
                 // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
             };
-        }, [userInfo]) // 의존성으로 route.params.userInfo를 추가하여, 값이 변경될 때마다 렌더링
+        }, [userInfo])
     );
 
     // 여행 일정
@@ -175,39 +172,52 @@ export default function Main({ weather, particulateMatter, store, location }) {
         }
     };
 
-    // 유저 베팅 정보
-    useEffect(() => {
-        const fetchUserBetData = async () => {
-            try{
-                if(userInfo){
-                    const matches = await axios.post(`http://${localhost}:8090/nuvida/getMatch`);
-                    const response = await axios.post(`http://${localhost}:8090/nuvida/getUserBtPoin`, {bs_seq:matches.data.bs_seq, user_id:userInfo.user_id})
-                    setUserBetData(response.data);
-                }else{
-                    console.log("배팅null")
+   // 유저 배팅 정보
+    useFocusEffect(
+        useCallback(() => {
+            const fetchUserBetData = async () => {
+                try{
+                    if(userInfo){
+                        const matches = await axios.post(`http://${localhost}:8090/nuvida/getMatch`);
+                        const response = await axios.post(`http://${localhost}:8090/nuvida/getUserBtPoin`, {bs_seq:matches.data.bs_seq, user_id:userInfo.user_id})
+                        setUserBetData(response.data);
+                    }else{
+                        console.log("배팅null")
+                    }
+                }catch (e) {
+                    console.error(e)
+
                 }
-            }catch (e) {
-                console.error(e)
+            };
 
-            }
-        };
+            fetchUserBetData();
 
-        fetchUserBetData();
-    }, [userInfo]);
+            return () => {
+                // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
+            };
+        }, [userInfo])
+    );
 
 
     // 이번주 경기 일정
-    useEffect(() => {
-        const fetchWeeklyMatchData = async () => {
-            try{
-                const response = await axios.post(`http://${localhost}:8090/nuvida/getWeeklyMatchData`);
-                setWeeklyMatchData(response.data);
-            }catch (error){
-                console.error(error)
-            }
-        };
-        fetchWeeklyMatchData();
-    }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            const fetchWeeklyMatchData = async () => {
+                try{
+                    const response = await axios.post(`http://${localhost}:8090/nuvida/getWeeklyMatchData`);
+                    setWeeklyMatchData(response.data);
+                }catch (error){
+                    console.error(error)
+                }
+            };
+            fetchWeeklyMatchData();
+
+            return () => {
+                // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
+            };
+        }, [])
+    );
 
 
     // 인기 글
@@ -270,7 +280,6 @@ export default function Main({ weather, particulateMatter, store, location }) {
             return;
         }
 
-
         // 유저 배팅 등록
         try{
             if(!userBetData){
@@ -281,6 +290,10 @@ export default function Main({ weather, particulateMatter, store, location }) {
 
             // 나중에 유저 정보 저장하는 코드 수정
             const userSet = await axios.post(`http://${localhost}:8090/nuvida/setUser`, {user_id:userInfo.user_id});
+
+            const userInfoString = JSON.stringify(userSet.data);
+            await AsyncStorage.setItem('userInfo', userInfoString);
+
             setUserInfo(userSet.data);
         }catch (error) {
             console.error(error)
@@ -325,6 +338,10 @@ export default function Main({ weather, particulateMatter, store, location }) {
 
             // 나중에 유저 정보 저장하는 코드 수정
             const userSet = await axios.post(`http://${localhost}:8090/nuvida/setUser`, {user_id:userInfo.user_id});
+
+            const userInfoString = JSON.stringify(userSet.data);
+            await AsyncStorage.setItem('userInfo', userInfoString);
+
             setUserInfo(userSet.data);
 
             alert('포인트 획득\n내 포인트: ' + point);
@@ -335,26 +352,6 @@ export default function Main({ weather, particulateMatter, store, location }) {
         }
 
         console.log("얻은 포인트: " + getPoint);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         setSelectedTeam(null);
         setModalVisible(false);
     };
@@ -491,7 +488,13 @@ export default function Main({ weather, particulateMatter, store, location }) {
         if (!weeklyBetData){
             console.log('formatBtPoint betData loading..')
         }
-        return ((point / (weeklyBetData.kiaBtPoint + weeklyBetData.opBtPoint)) * 100).toFixed(2);
+        // return ((point / (weeklyBetData.kiaBtPoint + weeklyBetData.opBtPoint)) * 100).toFixed(2);
+
+        const totalPoints = weeklyBetData.kiaBtPoint + weeklyBetData.opBtPoint;
+        const percentage = (point / totalPoints) * 100;
+
+        // percentage가 NaN이면 0을 반환
+        return isNaN(percentage) ? 0 : percentage.toFixed(2);
     };
 
     // 상단 바
@@ -853,47 +856,49 @@ export default function Main({ weather, particulateMatter, store, location }) {
         sky = weatherData["SKY"];
         pty = weatherData["PTY"];
 
-        switch (true) {
-            case pty === 1:
-                weatherName = '비';
-                iconName = 'weather-pouring';
-                IconComponent = MaterialCommunityIcons;
-                break;
-            case pty === 2 || pty === 6:
-                weatherName = '비 / 눈';
-                iconName = 'weather-snowy-rainy';
-                IconComponent = MaterialCommunityIcons;
-                break;
-            case pty === 3:
-                weatherName = '눈';
-                iconName = 'weather-snowy';
-                IconComponent = MaterialCommunityIcons;
-                break;
-            case pty === 5:
-                weatherName = '빗방울';
-                iconName = 'weather-rainy';
-                IconComponent = MaterialCommunityIcons;
-                break;
-            case pty === 7:
-                weatherName = '눈날림';
-                iconName = 'weather-snowy-heavy';
-                IconComponent = MaterialCommunityIcons;
-                break;
-            case sky === 1:
+        if(pty ==='0'){
+            if(sky === '1'){
                 weatherName = '맑음';
                 iconName = 'sun';
                 IconComponent = Feather;
-                break;
-            case sky === 3:
+            }else if(sky ==='3'){
                 weatherName = '구름많음';
                 iconName = 'day-cloudy';
                 IconComponent = Fontisto;
-                break;
-            default:
+            }else{
                 weatherName = '흐림';
                 iconName = 'cloudy';
                 IconComponent = Fontisto;
-                break;
+            }
+
+        } else if (pty === '1'){
+            weatherName = '비';
+            iconName = 'weather-pouring';
+            IconComponent = MaterialCommunityIcons;
+        } else if (pty === '2'){
+            weatherName = '비 / 눈';
+            iconName = 'weather-snowy-rainy';
+            IconComponent = MaterialCommunityIcons;
+        } else if (pty === '3'){
+            weatherName = '눈';
+            iconName = 'weather-snowy';
+            IconComponent = MaterialCommunityIcons;
+        } else if (pty === '5'){
+            weatherName = '빗방울';
+            iconName = 'weather-rainy';
+            IconComponent = MaterialCommunityIcons;
+        } else if (pty === '6'){
+            weatherName = '비 / 눈';
+            iconName = 'weather-snowy-rainy';
+            IconComponent = MaterialCommunityIcons;
+        } else if (pty === '7'){
+            weatherName = '눈날림';
+            iconName = 'weather-snowy-heavy';
+            IconComponent = MaterialCommunityIcons;
+        }else {
+            weatherName = '흐림';
+            iconName = 'cloudy';
+            IconComponent = Fontisto;
         }
 
         return (
@@ -961,6 +966,14 @@ export default function Main({ weather, particulateMatter, store, location }) {
         );
     };
 
+    const goBetting = () =>{
+        if(isLoggedIn){
+            navigation.navigate('Betting', {userInfo:userInfo})
+        }else{
+            navigation.navigate("Signin");
+        }
+    }
+
     // 이번주 경기 일정
     // cs 나중에 수정하기
     const renderWeeklyMatchList = () => {
@@ -995,7 +1008,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                                 <Text style={styles.betScore}>{formatBtPoint(page,page.kiaBtPoint)}% : {formatBtPoint(page,page.opBtPoint)}%</Text>
                             </View>
                             <View style={{width: '35%',}}>
-                                <TouchableOpacity style={[styles.center, styles.betButton]} onPress={() => navigation.navigate('Betting')}>
+                                <TouchableOpacity style={[styles.center, styles.betButton]} onPress={() => goBetting()}>
                                     <Text style={styles.betButtonText}>배팅하기</Text>
                                 </TouchableOpacity>
                             </View>

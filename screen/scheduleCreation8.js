@@ -3,11 +3,12 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, ScrollView, FlatList, Image, Modal, TextInput, Alert, ActivityIndicator } from "react-native";
 import { MaterialCommunityIcons, AntDesign, FontAwesome, Entypo, Ionicons, Feather, Fontisto } from '@expo/vector-icons';
 import axios from 'axios';
+import { Share } from 'react-native';
 
 export default function ScheduleCreation8({ route }) {
     const navigation = useNavigation();
     const [cmtList, setCmtList] = useState(null); // 로딩 상태 추가
-    const userInfo = { user_id: 'test', user_nick: 'test' }
+    const userInfo = route.params.userInfo;
 
     const localhost = '192.168.55.35';
 
@@ -33,6 +34,48 @@ export default function ScheduleCreation8({ route }) {
         );
     };
 
+    const sendMsg = async () => {
+        // scheduleInfo에서 필요한 데이터 추출
+        const { dateRange, plan_name, selectedPlaces } = scheduleInfo;
+
+        // 날짜 범위를 포맷
+        const formattedDateRange = `${dateRange[0].split('T')[0]} ~ ${dateRange[1].split('T')[0]}`;
+
+        // 방문할 장소 목록 작성
+        const placeNames = selectedPlaces.map(place => place.name).join('\n');
+
+        // 장소 개수 계산
+        const placeCount = selectedPlaces.length;
+
+        // 메시지 구성
+        const msg = `${formattedDateRange}\n` +
+            `${plan_name} 일정\n` +
+            `====================\n` +
+            `${placeNames}\n` +
+            `================\n` +
+            `총 ${placeCount}장소 방문 예정`;
+
+        try {
+            const result = await Share.share({
+                message: msg,
+            });
+
+            if (result.action === Share.sharedAction) {
+                if (result.activityType) {
+                    console.log('Shared with activity type: ', result.activityType);
+                } else {
+                    console.log('Shared successfully');
+                }
+            } else if (result.action === Share.dismissedAction) {
+                console.log('Share dismissed');
+            }
+        } catch (error) {
+            console.error('Error sharing message: ', error);
+        } finally {
+
+        }
+    }
+
     // 일정 정보 표시
     const renderScheduleInfo = () => {
         return (
@@ -49,10 +92,14 @@ export default function ScheduleCreation8({ route }) {
                     <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate("TripSchedule", { userInfo, plan_seq })}>
                         <Text style={styles.actionButtonText}>교통편 등록하기</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionButton}>
+                    <TouchableOpacity style={styles.actionButton} onPress={()=>sendMsg()}>
                         <Text style={styles.actionButtonText}>일정 공유하기</Text>
                     </TouchableOpacity>
                 </View>
+
+                <TouchableOpacity style={styles.mainButton} onPress={()=>navigation.navigate("Main")}>
+                    <Text style={styles.actionButtonText}>메인으로 이동하기</Text>
+                </TouchableOpacity>
             </View>
         );
     };
@@ -152,6 +199,14 @@ const styles = StyleSheet.create({
     placeTime: {
         fontSize: 12,
         color: '#999',
+    },
+    mainButton:{
+        flex: 1,
+        padding: 10,
+        backgroundColor: '#f35353',
+        borderRadius: 10,
+        alignItems: 'center',
+        marginTop:10,
     },
     actionButtons: {
         flexDirection: 'row',

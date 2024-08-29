@@ -44,16 +44,10 @@ const ScheduleCreation3 = ({ route, navigation }) => {
 
     const localhost = "192.168.55.35";
 
-    const userInfo = {user_id:'test', user_nick:'test', user_point:200};
+    const userInfo = route.params.userInfo;
 
     const [friendsList,setFriendsList] = useState(null);
 
-    // const friendsList = [
-    //     { user_id: "user1", user_nick: "이건학" },
-    //     { user_id: "user2", user_nick: "박지뉴" },
-    //     { user_id: "user3", user_nick: "이태희" },
-    //     { user_id: "user4", user_nick: "지수빈" }
-    // ];
 
     useEffect(() => {
         const getFriends = async () => {
@@ -98,7 +92,7 @@ const ScheduleCreation3 = ({ route, navigation }) => {
             return;
         }
 
-        navigation.navigate('ScheduleCreationAccommodation', { scheduleInfo: updateScheduleInfo });
+        navigation.navigate('ScheduleCreationAccommodation', { scheduleInfo: updateScheduleInfo, userInfo:userInfo });
     }
 
     const toggleFriendsModal = () => {
@@ -210,15 +204,6 @@ const ScheduleCreation3 = ({ route, navigation }) => {
         setMarkedDates(dates);
     };
 
-    // 하단바 일정 아이콘
-    const handlePlanCalendarIconPress = () => {
-        if (isLoggedIn) {
-            navigation.navigate("planCalendarPage");
-        } else {
-            navigation.navigate("loginPage");
-        }
-    };
-
     const renderDateModal = () => (
         <Modal isVisible={isDateModalVisible}>
             <View style={styles.modalContent}>
@@ -301,27 +286,6 @@ const ScheduleCreation3 = ({ route, navigation }) => {
         );
     }
 
-    // 하단 바
-    const renderTabBar = () => (
-        <View style={styles.tabBar}>
-            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Main')}>
-                <Entypo name="home" size={24} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem} onPress={handlePlanCalendarIconPress}>
-                <FontAwesome name="calendar-check-o" size={24} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('game')}>
-                <FontAwesome name="calendar-check-o" size={24} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('community')}>
-                <Ionicons name="chatbubbles-outline" size={24} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('mypage')}>
-                <Feather name="user" size={24} color="black" />
-            </TouchableOpacity>
-        </View>
-    );
-
     const formatTime = (date) => {
         if (!date) return "시간 선택";
         const hours = date.getHours().toString().padStart(2, '0');
@@ -373,7 +337,6 @@ const ScheduleCreation3 = ({ route, navigation }) => {
                     onChange={handleDateChange}
                 />
             )}
-            {renderTabBar()}
         </View>
     );
 };

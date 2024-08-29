@@ -52,28 +52,6 @@ const TravelLog = ({route}) => {
         );
     };
 
-    // 하단 바 컴포넌트
-    const bottomHeader = () => {
-        return (
-            <View style={styles.tabBar}>
-                <TouchableOpacity style={styles.tabItem}>
-                    <Entypo name="home" size={24} color="black"/>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem}>
-                    <FontAwesome name="calendar-check-o" size={24} color="black"/>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem}>
-                    <FontAwesome name="calendar-check-o" size={24} color="black"/>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem}>
-                    <Ionicons name="chatbubbles-outline" size={24} color="black"/>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem}>
-                    <Feather name="user" size={24} color="black"/>
-                </TouchableOpacity>
-            </View>
-        );
-    };
 
     // 대표 일정 날짜 표시 변경 -> 2024-05-28
     const formatPlanDate = (date) => {
@@ -112,7 +90,7 @@ const TravelLog = ({route}) => {
                     <Text >여행기록이 없습니다.</Text>
                 </View>
             )}
-            {bottomHeader()}
+
         </View>
 
     );

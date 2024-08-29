@@ -20,11 +20,7 @@ export default function ScheduleCreation1({route}) {
     useEffect(() => {
         const user = async () => {
             try {
-                const data = {
-                    user_id: "1",
-                    user_nick: "먹고대학생"
-                };
-                setUserInfo(data);
+                setUserInfo(route.params.userInfo);
                 setIsLoggedIn(true);
             } catch (error) {
                 console.error('Error fetching user data:', error);
@@ -48,7 +44,7 @@ export default function ScheduleCreation1({route}) {
         }
 
         const updateScheduleInfo = { ...scheduleInfo, plan_name: planName, move: selectedBox };
-        navigation.navigate('ScheduleCreation3', { scheduleInfo: updateScheduleInfo });
+        navigation.navigate('ScheduleCreation3', { scheduleInfo: updateScheduleInfo, userInfo:userInfo });
     }
 
     // 여행 이름 삭제
@@ -71,15 +67,6 @@ export default function ScheduleCreation1({route}) {
             </SafeAreaView>
         );
     }
-
-    // 하단바 일정 아이콘
-    const handlePlanCalendarIconPress = () => {
-        if (isLoggedIn) {
-            navigation.navigate("planCalendarPage");
-        } else {
-            navigation.navigate("loginPage");
-        }
-    };
 
     // 상단 바
     const renderHeader = () => {
@@ -183,27 +170,6 @@ export default function ScheduleCreation1({route}) {
         );
     }
 
-    // 하단 바
-    const renderTabBar = () => (
-        <View style={styles.tabBar}>
-            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Main')}>
-                <Entypo name="home" size={24} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem} onPress={handlePlanCalendarIconPress}>
-                <FontAwesome name="calendar-check-o" size={24} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('game')}>
-                <FontAwesome name="calendar-check-o" size={24} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('community')}>
-                <Ionicons name="chatbubbles-outline" size={24} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('mypage')}>
-                <Feather name="user" size={24} color="black" />
-            </TouchableOpacity>
-        </View>
-    );
-
     return (
         <SafeAreaView style={styles.container}>
             {renderHeader()}
@@ -211,8 +177,6 @@ export default function ScheduleCreation1({route}) {
                 backgroundColor: '#fff',}}>
                 {renderTravelRoute()}
             </ScrollView>
-
-            {renderTabBar()}
         </SafeAreaView>
     );
 }

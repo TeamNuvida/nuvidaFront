@@ -19,8 +19,13 @@ import {useFocusEffect, useNavigation} from "@react-navigation/native";
 const { width } = Dimensions.get('window');
 
 const generateCalendar = (year, month) => {
-    const firstDay = moment(`${year}-${month}-01`).startOf('month').day();
-    const daysInMonth = moment(`${year}-${month}`, "YYYY-MM").daysInMonth();
+    // const firstDay = moment(`${year}-${month}-01`).startOf('month').day();
+    // const daysInMonth = moment(`${year}-${month}`, "YYYY-MM").daysInMonth();
+
+    const formattedMonth = month.toString().padStart(2, '0');
+    const firstDay = moment(`${year}-${formattedMonth}-01`).startOf('month').day();
+    const daysInMonth = moment(`${year}-${formattedMonth}`, "YYYY-MM").daysInMonth();
+
 
     const calendar = [];
     let week = [];
@@ -93,50 +98,66 @@ const TripCalendar = ({ route }) => {
             }else {
                 setNotiState(false);
             }
-
-
             return () => {
                 // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
             };
         }, [userInfo]) // 의존성으로 route.params.userInfo를 추가하여, 값이 변경될 때마다 렌더링
     );
 
+    useFocusEffect(
+        useCallback(() => {
+            const getPlanList = async () => {
+                try {
+                    const response = await axios.post(`http://${localhost}:8090/nuvida/getPlanList`, {user_id:userInfo.user_id});
+                    setPlanList(response.data);
+                    console.log(response.data)
+                } catch (error) {
+                    console.error('Error fetching plan data:', error);
+                }
+            };
 
-    useEffect(() => {
-        const getPlanList = async () => {
-            try {
-                const response = await axios.post(`http://${localhost}:8090/nuvida/getPlanList`, {user_id:userInfo.user_id});
-                setPlanList(response.data);
-                console.log(response.data)
-            } catch (error) {
-                console.error('Error fetching plan data:', error);
-            }
-        };
+            getPlanList();
 
-        getPlanList();
-    }, []);
+            return () => {
+                // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
+            };
+        }, []) // 의존성으로 route.params.userInfo를 추가하여, 값이 변경될 때마다 렌더링
+    );
 
-    useEffect(() => {
-        const fetchWeatherData = async () => {
-            const date = new Date();
-            const base_date = formatWeatherDate(date);
-            const base_time = formatWeatherTime(date);
-            try {
-                const response = await axios.get(`http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst?serviceKey=${API_KEY}&numOfRows=60&pageNo=1&base_date=${base_date}&base_time=${base_time}&nx=59&ny=74&dataType=JSON`);
-                const data = response.data.response.body.items.item;
-                processWeatherData(data);
-                const responseMid = await axios.get(`http://apis.data.go.kr/1360000/MidFcstInfoService/getMidLandFcst?serviceKey=${API_KEY}&numOfRows=10&pageNo=1&regId=11F20000&tmFc=${base_date}0600&dataType=JSON`);
-                const midData = responseMid.data.response.body.items.item[0];
-                processMidWeatherData(midData);
-            } catch (error) {
-                console.error('Error fetching weather data:', error);
-            }finally {
-                setLoading(false); // 데이터 로드 완료 후 로딩 상태 false로 변경
-            }
-        };
+    useFocusEffect(
+        useCallback(() => {
+            const fetchWeatherData = async () => {
+                const date = new Date();
+                const base_date = formatWeatherDate(date);
+                const base_time = (formatWeatherTime(date));
 
-        fetchWeatherData();
-    }, []);
+                try{
+                    const response = await axios.get(`http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey=${API_KEY}&numOfRows=809&pageNo=1&base_date=${base_date}&base_time=${base_time}&nx=59&ny=74&dataType=JSON`);
+                    const data = response.data.response.body.items.item;
+                    processWeatherData(data);
+                }catch (e) {
+                    console.error(e)
+                }finally {
+                    try {
+                        const responseMid = await axios.get(`http://apis.data.go.kr/1360000/MidFcstInfoService/getMidLandFcst?serviceKey=${API_KEY}&numOfRows=10&pageNo=1&regId=11F20000&tmFc=${base_date}0600&dataType=JSON`);
+                        const midData = responseMid.data.response.body.items.item[0];
+                        processMidWeatherData(midData);
+                    } catch (error) {
+                        console.error('Error fetching weather data:', error);
+                    }finally {
+                        setLoading(false); // 데이터 로드 완료 후 로딩 상태 false로 변경
+                    }
+                }
+
+            };
+
+            fetchWeatherData();
+            return () => {
+                // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
+            };
+        }, [userInfo]) // 의존성으로 route.params.userInfo를 추가하여, 값이 변경될 때마다 렌더링
+    );
+
 
     // 날짜 표시 변경 -> 날씨 api
     const formatWeatherDate = (date) => {
@@ -152,15 +173,35 @@ const TripCalendar = ({ route }) => {
         const hours = ('0' + date.getHours()).slice(-2);
         const minutes = ('0' + date.getMinutes()).slice(-2);
 
-        if (minutes >= '45') {
-            return (hours + '45').toString();
-        } else {
-            const getHoursTime = date.getHours() - 1;
-            const setHoursTime = ('0' + getHoursTime).slice(-2);
-
-            return (setHoursTime + '00').toString();
+        if(hours < 5){
+            return '0200';
+        }else if(hours < 8){
+            return '0500';
+        }else if(hours < 11){
+            return '0800';
+        }else if (hours < 14){
+            return '1100';
+        }else if (hours < 17){
+            return '1400';
+        }else if ( hours < 20){
+            return '1700';
+        } else if (hours <23){
+            return '2000';
+        }else{
+            return '2300';
         }
+
+        // if (minutes >= '45') {
+        //     return (hours + '45').toString();
+        // } else {
+        //     const getHoursTime = date.getHours() - 1;
+        //     const setHoursTime = ('0' + getHoursTime).slice(-2);
+        //
+        //     return (setHoursTime + '00').toString();
+        // }
     };
+
+
 
     const getCurrentTimeSlot = () => {
         const now = new Date();
@@ -294,55 +335,57 @@ const TripCalendar = ({ route }) => {
 
         filteredData.forEach(dayWeather => {
             const date = moment(dayWeather.date).format('YYYY-MM-DD');
-            const sky = dayWeather.sky;
-            const pty = dayWeather.pty;
+            const sky = dayWeather.SKY;
+            const pty = dayWeather.PTY;
 
             let weatherName = '';
             let iconName = '';
             let IconComponent = null;
 
-            switch (true) {
-                case pty === 1:
-                    weatherName = '비';
-                    iconName = 'weather-pouring';
-                    IconComponent = MaterialCommunityIcons;
-                    break;
-                case pty === 2 || pty === 6:
-                    weatherName = '비 / 눈';
-                    iconName = 'weather-snowy-rainy';
-                    IconComponent = MaterialCommunityIcons;
-                    break;
-                case pty === 3:
-                    weatherName = '눈';
-                    iconName = 'weather-snowy';
-                    IconComponent = MaterialCommunityIcons;
-                    break;
-                case pty === 5:
-                    weatherName = '빗방울';
-                    iconName = 'weather-rainy';
-                    IconComponent = MaterialCommunityIcons;
-                    break;
-                case pty === 7:
-                    weatherName = '눈날림';
-                    iconName = 'weather-snowy-heavy';
-                    IconComponent = MaterialCommunityIcons;
-                    break;
-                case sky === 1:
+
+            if(pty === '0'){
+                if(sky === '1'){
+                    // 맑음
                     weatherName = '맑음';
                     iconName = 'sun';
                     IconComponent = Feather;
-                    break;
-                case sky === 3:
+                }else if (sky === '3'){
+                //     구름 많음
                     weatherName = '구름많음';
                     iconName = 'day-cloudy';
                     IconComponent = Fontisto;
-                    break;
-                default:
+                }else {
+                //     흐림
                     weatherName = '흐림';
                     iconName = 'cloudy';
                     IconComponent = Fontisto;
-                    break;
+                }
+            } else if (pty === '1'){
+            //     비
+                weatherName = '비';
+                iconName = 'weather-pouring';
+                IconComponent = MaterialCommunityIcons;
+            }else if (pty === '2'){
+            //     비/눈
+                weatherName = '비 / 눈';
+                iconName = 'weather-snowy-rainy';
+                IconComponent = MaterialCommunityIcons;
+            }else if (pty === '3'){
+            //     눈
+                weatherName = '눈';
+                iconName = 'weather-snowy';
+                IconComponent = MaterialCommunityIcons;
+            }else if (pty === '4'){
+            //     소나기
+                weatherName = '소나기';
+                iconName = 'weather-pouring';
+                IconComponent = MaterialCommunityIcons;
+            } else{
+                weatherName = '흐림';
+                iconName = 'cloudy';
+                IconComponent = Fontisto;
             }
+
 
             weatherMap[date] = { weatherName, iconName, IconComponent };
         });

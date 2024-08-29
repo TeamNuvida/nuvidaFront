@@ -101,28 +101,6 @@ const FavoriteList = ({route}) => {
         );
     };
 
-    // 하단 바 컴포넌트
-    const bottomHeader = () => {
-        return (
-            <View style={styles.tabBar}>
-                <TouchableOpacity style={styles.tabItem}>
-                    <Entypo name="home" size={24} color="black"/>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem}>
-                    <FontAwesome name="calendar-check-o" size={24} color="black"/>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem}>
-                    <FontAwesome name="calendar-check-o" size={24} color="black"/>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem}>
-                    <Ionicons name="chatbubbles-outline" size={24} color="black"/>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem}>
-                    <Feather name="user" size={24} color="black"/>
-                </TouchableOpacity>
-            </View>
-        );
-    };
 
     return (
         <View style={styles.container}>
@@ -138,7 +116,7 @@ const FavoriteList = ({route}) => {
                     <Text >관심 목록이 없습니다.</Text>
                 </View>
             )}
-            {bottomHeader()}
+
         </View>
 
     );

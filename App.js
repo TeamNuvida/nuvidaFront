@@ -59,10 +59,7 @@ export default function App() {
             const base_time = formatWeatherTime(date);
 
             try {
-
                 const response = await axios.get(`http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst?serviceKey=${API_KEY}&numOfRows=60&pageNo=1&base_date=${base_date}&base_time=${base_time}&nx=59&ny=74&dataType=JSON`);
-
-
 
                 const items = response.data.response.body.items.item;
 
@@ -75,41 +72,46 @@ export default function App() {
                     }, {});
 
                 setWeatherData(filteredItems);
+            }catch (e) {
+                console.error(e)
+            }finally {
+
+                try {
+                    const responseParticulateMatterData = await axios.get(`http://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getCtprvnRltmMesureDnsty?sidoName=광주&pageNo=1&numOfRows=100&returnType=json&serviceKey=${API_KEY}&ver=1.3`);
+                    const itemsParticulateMatterData = responseParticulateMatterData.data.response.body.items;
+                    const filteredItemsParticulateMatterData = itemsParticulateMatterData.filter(item => item.stationName === "농성동") // 농성동이 제일 가까운 관측소여서 여기로 설정함
+                        .map(item => (
+                            { pm10Grade1h: item.pm10Grade1h, pm25Grade1h: item.pm25Grade1h }
+                        ));
+
+                    console.log(itemsParticulateMatterData)
+                    setParticulateMatterData(filteredItemsParticulateMatterData);
 
 
+                    const storeListNum = await axios.get(`http://apis.data.go.kr/B551011/KorService1/locationBasedList1?serviceKey=${API_KEY}&numOfRows=20&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&arrange=E&mapX=126.8890596255&mapY=35.1682414234&radius=10000&listYN=N&_type=JSON&contentTypeId=12`)
+                    const storeNum = storeListNum.data.response.body.items.item[0].totalCnt;
+                    const storeResponse = await axios.get(`http://apis.data.go.kr/B551011/KorService1/locationBasedList1?serviceKey=${API_KEY}&numOfRows=${storeNum}&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&arrange=E&mapX=126.8890596255&mapY=35.1682414234&radius=10000&listYN=Y&_type=JSON&contentTypeId=12`)
 
-                const responseParticulateMatterData = await axios.get(`http://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getCtprvnRltmMesureDnsty?sidoName=광주&pageNo=1&numOfRows=100&returnType=json&serviceKey=${API_KEY}&ver=1.3`);
-                const itemsParticulateMatterData = responseParticulateMatterData.data.response.body.items;
-                const filteredItemsParticulateMatterData = itemsParticulateMatterData.filter(item => item.stationName === "농성동") // 농성동이 제일 가까운 관측소여서 여기로 설정함
-                    .map(item => (
-                        { pm10Grade1h: item.pm10Grade1h, pm25Grade1h: item.pm25Grade1h }
-                    ));
-
-                console.log(itemsParticulateMatterData)
-                setParticulateMatterData(filteredItemsParticulateMatterData);
+                    const storeList = storeResponse.data.response.body.items.item.sort(() => Math.random() - 0.5).slice(0,5);
+                    setStoreList(storeList);
 
 
-                const storeListNum = await axios.get(`http://apis.data.go.kr/B551011/KorService1/locationBasedList1?serviceKey=${API_KEY}&numOfRows=20&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&arrange=E&mapX=126.8890596255&mapY=35.1682414234&radius=10000&listYN=N&_type=JSON&contentTypeId=12`)
-                const storeNum = storeListNum.data.response.body.items.item[0].totalCnt;
-                const storeResponse = await axios.get(`http://apis.data.go.kr/B551011/KorService1/locationBasedList1?serviceKey=${API_KEY}&numOfRows=${storeNum}&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&arrange=E&mapX=126.8890596255&mapY=35.1682414234&radius=10000&listYN=Y&_type=JSON&contentTypeId=12`)
+                    const locationListNum = await axios.get(`http://apis.data.go.kr/B551011/KorService1/locationBasedList1?serviceKey=${API_KEY}&numOfRows=20&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&arrange=E&mapX=126.8890596255&mapY=35.1682414234&radius=10000&listYN=N&_type=JSON&contentTypeId=12`)
+                    const locationNum = locationListNum.data.response.body.items.item[0].totalCnt;
+                    const locationResponse = await axios.get(`http://apis.data.go.kr/B551011/KorService1/locationBasedList1?serviceKey=${API_KEY}&numOfRows=${locationNum}&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&arrange=E&mapX=126.8890596255&mapY=35.1682414234&radius=10000&listYN=Y&_type=JSON&contentTypeId=12`)
 
-                const storeList = storeResponse.data.response.body.items.item.sort(() => Math.random() - 0.5).slice(0,5);
-                setStoreList(storeList);
-
-
-                const locationListNum = await axios.get(`http://apis.data.go.kr/B551011/KorService1/locationBasedList1?serviceKey=${API_KEY}&numOfRows=20&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&arrange=E&mapX=126.8890596255&mapY=35.1682414234&radius=10000&listYN=N&_type=JSON&contentTypeId=12`)
-                const locationNum = locationListNum.data.response.body.items.item[0].totalCnt;
-                const locationResponse = await axios.get(`http://apis.data.go.kr/B551011/KorService1/locationBasedList1?serviceKey=${API_KEY}&numOfRows=${locationNum}&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&arrange=E&mapX=126.8890596255&mapY=35.1682414234&radius=10000&listYN=Y&_type=JSON&contentTypeId=12`)
-
-                const locationList = locationResponse.data.response.body.items.item.sort(() => Math.random() - 0.5).slice(0,5);
-                setLocationList(locationList);
+                    const locationList = locationResponse.data.response.body.items.item.sort(() => Math.random() - 0.5).slice(0,5);
+                    setLocationList(locationList);
 
 
-            } catch (e) {
-                console.warn(e);
-            } finally {
-                setIsReady(true);
+                } catch (e) {
+                    console.warn(e);
+                } finally {
+                    setIsReady(true);
+                }
+
             }
+
         };
 
         prepareResources();

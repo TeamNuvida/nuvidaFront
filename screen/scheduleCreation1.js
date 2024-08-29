@@ -7,7 +7,7 @@ export default function ScheduleCreation1({route}) {
     const navigation = useNavigation();
 
     const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태
-    const [userInfo, setUserInfo] = useState(null);  // 로그인 정보
+    const [userInfo, setUserInfo] = useState(route.params.userInfo);  // 로그인 정보
     const [loading, setLoading] = useState(true); // 로딩 상태 추가
 
     // localhost 주소값
@@ -42,7 +42,7 @@ export default function ScheduleCreation1({route}) {
     // 루트 정보 추가
     const handleScheduleInfoPress = (routeNumber) => {
         const scheduleInfo = { route: routeNumber };
-        navigation.navigate('ScheduleCreation2', { scheduleInfo });
+        navigation.navigate('ScheduleCreation2', { scheduleInfo, userInfo });
     }
 
 

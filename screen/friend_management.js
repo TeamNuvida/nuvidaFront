@@ -318,7 +318,7 @@ const FriendList = ({route}) => {
                 </View>
             </View>
             {activeTab === 'friends' ? renderFriendsList() : renderFriendRequests()}
-            {bottomHeader()}
+
         </View>
     );
 };

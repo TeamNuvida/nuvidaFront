@@ -15,20 +15,11 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const Betting = () => {
+const Betting = ({route}) => {
     const navigation = useNavigation();
     const [currentTab, setCurrentTab] = useState('list');
-
-    const [matchList, setMatchList] = useState([
-        { bs_seq: 1, op_team: '롯데', logo_img: 6, match_date: '2024-08-13 18:30:00', kiaBtPoint: 10000, opBtPoint: 10000, team_name: 'kia', bt_point: 1000 },
-        { bs_seq: 2, op_team: '롯데', logo_img: 6, match_date: '2024-08-14 18:30:00', kiaBtPoint: 0, opBtPoint: 0, team_name: null, bt_point: 0 },
-        { bs_seq: 3, op_team: 'ssg', logo_img: 9, match_date: '2024-08-15 18:30:00', kiaBtPoint: 0, opBtPoint: 0, team_name: null, bt_point: 0 },
-    ]);
-
-    const [batList, setBatList] = useState([
-        { bs_seq: 1, op_team: '롯데', logo_img: 6, match_date: '2024-08-13 18:30:00', kiaBtPoint: 10000, opBtPoint: 10000, team_name: 'kia', bt_point: 1000 },]);
-
 
     const [bettingPoints, setBettingPoints] = useState({});
     const [selectedTeams, setSelectedTeams] = useState({});
@@ -46,7 +37,7 @@ const Betting = () => {
         require("../assets/ssg_landers.png"),
     ];
 
-    const userInfo = {user_id:'test', user_nick:'test', user_point:200}
+    const [userInfo, setUserInfo] = useState(route.params.userInfo);
 
     const localhost = '192.168.55.35';
 
@@ -94,9 +85,9 @@ const Betting = () => {
         const points = parseInt(bettingPoints[bs_seq]) || 0;
         const team_name = selectedTeams[bs_seq] || battingList.find(game => game.bs_seq === bs_seq)?.team_name;
 
-        console.log(bs_seq, bt_point, points)
+        console.log(bs_seq, team_name, points)
 
-        if (isNaN(value)) {
+        if (isNaN(points)) {
             Alert.alert('숫자만 입력 가능합니다.');
             return;
         }
@@ -115,6 +106,14 @@ const Betting = () => {
             console.log("배팅 전")
             try {
                 const response = await axios.post(`http://${localhost}:8090/nuvida/setUserBT`, {user_id:userInfo.user_id, bs_seq:bs_seq, selectedTeam:team_name, betPoint:points});
+
+                const userSet = await axios.post(`http://${localhost}:8090/nuvida/setUser`, {user_id:userInfo.user_id});
+
+                const userInfoString = JSON.stringify(userSet.data);
+                await AsyncStorage.setItem('userInfo', userInfoString);
+
+                setUserInfo(userSet.data);
+
                 if(currentTab=='list'){
                     getBattingList();
                 } else {
@@ -129,6 +128,14 @@ const Betting = () => {
 
             try {
                 const response = await axios.post(`http://${localhost}:8090/nuvida/UpDateUserBT`, {user_id:userInfo.user_id, bs_seq:bs_seq, nowPoint:bt_point, betPoint:points});
+
+                const userSet = await axios.post(`http://${localhost}:8090/nuvida/setUser`, {user_id:userInfo.user_id});
+
+                const userInfoString = JSON.stringify(userSet.data);
+                await AsyncStorage.setItem('userInfo', userInfoString);
+
+                setUserInfo(userSet.data);
+
                 if(currentTab=='list'){
                     getBattingList();
                 } else {
@@ -160,6 +167,14 @@ const Betting = () => {
     const getPoint = async (bs_seq, bt_point) =>{
         try {
             const response = await axios.post(`http://${localhost}:8090/nuvida/getBtPoint`, {user_id:userInfo.user_id, bs_seq:bs_seq, getPoint:bt_point});
+
+            const userSet = await axios.post(`http://${localhost}:8090/nuvida/setUser`, {user_id:userInfo.user_id});
+
+            const userInfoString = JSON.stringify(userSet.data);
+            await AsyncStorage.setItem('userInfo', userInfoString);
+
+            setUserInfo(userSet.data);
+
             if(currentTab=='list'){
                 getBattingList();
             } else {
@@ -189,7 +204,7 @@ const Betting = () => {
                 </View>
                 <Text style={styles.matchDate}>{item.match_date.split(' ')[0]}</Text>
                 <Text>현재 보유한 포인트 : {userInfo.user_point}</Text>
-                {item.op_seq > 0 && (<Text>베팅한 포인트 : {item.bt_point}</Text>)}
+                {item.op_seq > 0 && (<Text>배팅한 포인트 : {item.bt_point}</Text>)}
 
                 {item.result == '4' ?
                     (
@@ -232,7 +247,7 @@ const Betting = () => {
                                     />
                                     <View style={styles.buttonContainer}>
                                         <TouchableOpacity onPress={() => handleBet(item.bs_seq, item.op_seq, item.bt_point)} style={styles.betButton}>
-                                            <Text style={styles.buttonText}>{item.team_name === null ? '베팅하기' : '추가 베팅하기'}</Text>
+                                            <Text style={styles.buttonText}>{item.team_name === null ? '배팅하기' : '추가 베팅하기'}</Text>
                                         </TouchableOpacity>
                                     </View>
                                 </View>
@@ -279,7 +294,7 @@ const Betting = () => {
                         ]}
                     >
                         <Text style={currentTab === 'myBets' ? styles.activeTabText : styles.inactiveTabText}>
-                            내가 한 베팅
+                            내가 한 배팅
                         </Text>
                     </TouchableOpacity>
                 </View>

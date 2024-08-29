@@ -8,7 +8,7 @@ export default function ScheduleCreation5({route}) {
     const navigation = useNavigation();
 
     const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태
-    const [userInfo, setUserInfo] = useState(null);  // 로그인 정보
+    const [userInfo, setUserInfo] = useState(route.params.userInfo);  // 로그인 정보
     const [loading, setLoading] = useState(true); // 로딩 상태 추가
     const scheduleInfo = route.params.scheduleInfo; // 일정 생성 정보
 
@@ -52,9 +52,9 @@ export default function ScheduleCreation5({route}) {
 
 
         if(scheduleInfo.route == '1'){
-            navigation.navigate('ScheduleCreation6', { scheduleInfo: scheduleInfo});
+            navigation.navigate('ScheduleCreation6', { scheduleInfo: scheduleInfo, userInfo:userInfo});
         } else{
-            navigation.navigate('ScheduleCreation7', { scheduleInfo: scheduleInfo});
+            navigation.navigate('ScheduleCreation7', { scheduleInfo: scheduleInfo, userInfo:userInfo});
         }
 
         console.log("예약확인", scheduleInfo.selectedPlaces)

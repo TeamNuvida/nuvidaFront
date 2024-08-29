@@ -7,6 +7,7 @@ import axios from "axios";
 export default function ScheduleCreationAccommodation({ route }) {
     const API_KEY = "q9%2BtR1kSmDAYUNoOjKOB3vkl1rLYVTSEVfg4sMDG2UYDAL4KiJo5GaFq9nfn%2FdUnUFjK%2FrOY3UfgJvHtOBAEmQ%3D%3D";
     const navigation = useNavigation();
+    const userInfo = route.params.userInfo;
 
     const [searchModalVisible, setSearchModalVisible] = useState(false);
     const [timeModalVisible, setTimeModalVisible] = useState(false);
@@ -87,7 +88,7 @@ export default function ScheduleCreationAccommodation({ route }) {
         console.log(accommodation);
 
         const updateScheduleInfo = { ...scheduleInfo, accommodation: accommodation};
-        navigation.navigate('ScheduleCreation4', { scheduleInfo: updateScheduleInfo });
+        navigation.navigate('ScheduleCreation4', { scheduleInfo: updateScheduleInfo, userInfo:userInfo });
     }
 
     const renderHeader = () => {

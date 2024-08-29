@@ -20,7 +20,7 @@ export default function ScheduleCreation7({ route }) {
 
 
     const localhost = "192.168.55.35";
-    const userInfo = {user_id:'test', user_nick:'test', user_point:200};
+    const userInfo = route.params.userInfo;
 
     const accommodation = scheduleInfo.accommodation;
 
@@ -184,7 +184,7 @@ export default function ScheduleCreation7({ route }) {
                 {user_id:userInfo.user_id, plan_name:plan_name,start_date:start_date,
                     end_date:end_date, route:route,members:members,traveltime:traveltime,accommodation:accommodation});
 
-            navigation.navigate('ScheduleCreation8', {scheduleInfo:scheduleInfo, plan_seq:response.data});
+            navigation.navigate('ScheduleCreation8', {scheduleInfo:scheduleInfo, plan_seq:response.data, userInfo:userInfo});
         } catch (error) {
             console.error('Error fetching plan data:', error);
         }

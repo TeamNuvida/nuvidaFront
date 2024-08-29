@@ -528,7 +528,7 @@ const TripSchedule = ({ route }) => {
     return (
         <View style={styles.container}>
             <View style={styles.topBar}>
-                <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("Mypage", {userInfo})}>
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("TripCalendar",{userInfo:userInfo})}>
                     <Text style={styles.backButtonText}>이전</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.deleteButton} onPress={() => checkDeletePlan()}>
