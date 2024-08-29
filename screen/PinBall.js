@@ -155,14 +155,16 @@ export default function PinBall() {
         let ballsPerPlayer = parseInt(numBallsPerPlayer, 10);
 
         if (isNaN(players) || players < 2 || players > 8 || isNaN(ballsPerPlayer) || ballsPerPlayer < 1 || ballsPerPlayer > 3) {
-            Alert.alert('',"참가자 수(2-8)와 공의 개수(1-3)를 입력해주세요.");
+            Alert.alert('', "참가자 수(2-8)와 공의 개수(1-3)를 입력해주세요.");
             return;
         }
 
         let balls = [];
         const ballRadius = 10;
-        const initialX = width / 2;
-        const initialY = height / 2;
+
+        // gameContainerWrapper의 중앙을 기준으로 공을 배치
+        const initialX = width * 0.7 / 2; // gameContainerWrapper의 폭의 중앙
+        const initialY = height * 0.8 / 2; // gameContainerWrapper의 높이의 중앙
 
         for (let player = 0; player < players; player++) {
             const color = colors[player % colors.length];
@@ -170,27 +172,34 @@ export default function PinBall() {
 
             for (let ball = 0; ball < ballsPerPlayer; ball++) {
                 let angle = (2 * Math.PI / (players * ballsPerPlayer)) * (player * ballsPerPlayer + ball);
-                let posX = initialX + Math.cos(angle) * (ballRadius * 3);
-                let posY = initialY + Math.sin(angle) * (ballRadius * 3);
+                let posX = initialX + Math.cos(angle) * (ballRadius * 3); // 공을 중앙에 가깝게 위치시킴
+                let posY = initialY + Math.sin(angle) * (ballRadius * 3); // 공을 중앙에 가깝게 위치시킴
                 let newBall = createBall(world, color, { x: posX, y: posY }, ballRadius, name);
                 balls.push(newBall);
             }
         }
 
-        let walls = [
-            createWall(world, 'blue', { x: width / 2, y: 50 }, { width: width - 20, height: 20 }),
-            createWall(world, 'blue', { x: width / 2, y: height - 50 }, { width: width - 20, height: 20 }),
-            createWall(world, 'red', { x: 50, y: height / 2 }, { width: 20, height: height - 20 }),
-            createWall(world, 'green', { x: width - 50, y: height / 2 }, { width: 20, height: height - 20 }),
+        const wallThickness = 15;
+        const gameAreaWidth = width * 0.7; // gameContainerWrapper의 폭
+        const gameAreaHeight = height * 0.8; // gameContainerWrapper의 높이
+
+        // 구멍을 먼저 정의
+        let holes = [
+            createHole(world, { x: wallThickness / 2 + 5, y: wallThickness / 2 + 10 }, 20), // 왼쪽 상단 구멍 (조금 아래로 내림)
+            createHole(world, { x: gameAreaWidth - wallThickness / 2 - 5, y: wallThickness / 2 + 10 }, 20), // 오른쪽 상단 구멍 (조금 아래로 내림)
+            createHole(world, { x: wallThickness / 2 + 5, y: gameAreaHeight - wallThickness / 2 - 10 }, 20), // 왼쪽 하단 구멍 (조금 올림)
+            createHole(world, { x: gameAreaWidth - wallThickness / 2 - 5, y: gameAreaHeight - wallThickness / 2 - 10 }, 20), // 오른쪽 하단 구멍 (조금 올림)
+            createHole(world, { x: wallThickness / 2 + 5, y: gameAreaHeight / 2 }, 20), // 왼쪽 중앙 구멍
+            createHole(world, { x: gameAreaWidth - wallThickness / 2 - 5, y: gameAreaHeight / 2 }, 20), // 오른쪽 중앙 구멍
         ];
 
-        let holes = [
-            createHole(world, { x: 50, y: 50 }, 20),
-            createHole(world, { x: width - 50, y: 50 }, 20),
-            createHole(world, { x: 50, y: height - 50 }, 20),
-            createHole(world, { x: width - 50, y: height - 50 }, 20),
-            createHole(world, { x: 50, y: height / 2 }, 20), // 왼쪽 벽 가운데 구멍
-            createHole(world, { x: width - 50, y: height / 2 }, 20), // 오른쪽 벽 가운데 구멍
+
+        // 벽을 나중에 정의
+        let walls = [
+            createWall(world, 'blue', { x: gameAreaWidth / 2, y: wallThickness / 2 }, { width: gameAreaWidth, height: wallThickness }), // 상단 벽
+            createWall(world, 'blue', { x: gameAreaWidth / 2, y: gameAreaHeight - wallThickness / 2 }, { width: gameAreaWidth, height: wallThickness }), // 하단 벽
+            createWall(world, 'red', { x: wallThickness / 2, y: gameAreaHeight / 2 }, { width: wallThickness, height: gameAreaHeight }), // 왼쪽 벽
+            createWall(world, 'green', { x: gameAreaWidth - wallThickness / 2, y: gameAreaHeight / 2 }, { width: wallThickness, height: gameAreaHeight }), // 오른쪽 벽
         ];
 
         const newEntities = {
@@ -199,12 +208,12 @@ export default function PinBall() {
                 acc[`ball_${idx}`] = ball;
                 return acc;
             }, {}),
-            ...walls.reduce((acc, wall, idx) => {
-                acc[`wall_${idx}`] = wall;
-                return acc;
-            }, {}),
             ...holes.reduce((acc, hole, idx) => {
                 acc[`hole_${idx}`] = hole;
+                return acc;
+            }, {}),
+            ...walls.reduce((acc, wall, idx) => {
+                acc[`wall_${idx}`] = wall;
                 return acc;
             }, {})
         };
@@ -232,6 +241,8 @@ export default function PinBall() {
             });
         });
     };
+
+
 
     const checkLastBall = (world) => {
         const remainingBalls = Object.values(world.bodies).filter(
@@ -274,71 +285,73 @@ export default function PinBall() {
     return (
         <View style={styles.container}>
 
-                {entities && (
-                    <TouchableOpacity style={styles.touchableArea} onPress={startGame} disabled={showSettings} activeOpacity={1}>
-                        <View style={styles.backButtonContainer}>
-                            <TouchableOpacity onPress={ExitGame} style={styles.backButton}>
-                                <MaterialCommunityIcons name="arrow-left" size={24} color="white" />
-                            </TouchableOpacity>
-                            <Text style={styles.backButtonText}>게임 설정으로 돌아가기</Text>
-                        </View>
+            {entities && (
+                <TouchableOpacity style={styles.touchableArea} onPress={startGame} disabled={showSettings} activeOpacity={1}>
+                    <View style={styles.backButtonContainer}>
+                        <TouchableOpacity onPress={ExitGame} style={styles.backButton}>
+                            <MaterialCommunityIcons name="arrow-left" size={24} color="white" />
+                        </TouchableOpacity>
+                        <Text style={styles.backButtonText}>게임 설정으로 돌아가기</Text>
+                    </View>
 
+                    <View style={styles.gameContainerWrapper}>
                         <GameEngine
-                        ref={gameEngine}
-                        style={styles.gameContainer}
-                        systems={[Physics]}
-                        entities={entities}
-                        running={running}
-                        onEvent={(e) => {
-                            if (e.type === 'game-over') {
-                                setRunning(false);
-                            }
-                        }}
-                         />
-                    </TouchableOpacity>
+                            ref={gameEngine}
+                            style={styles.gameContainer}
+                            systems={[Physics]}
+                            entities={entities}
+                            running={running}
+                            onEvent={(e) => {
+                                if (e.type === 'game-over') {
+                                    setRunning(false);
+                                }
+                            }}
+                        />
+                    </View>
+                </TouchableOpacity>
 
-                )}
+            )}
 
             {showSettings && (
                 <View>
-                <View style={styles.header}>
-                    <Text style={styles.headerText}>핀볼 미니 게임</Text>
-                </View>
+                    <View style={styles.header}>
+                        <Text style={styles.headerText}>핀볼 미니 게임</Text>
+                    </View>
 
-                <View style={styles.controls}>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="참가자 수를 입력해 주세요. (2-8)"
-                        value={numPlayers}
-                        onChangeText={setNumPlayers}
-                        keyboardType="numeric"
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="공의 개수를 입력해 주세요. (1-3)"
-                        value={numBallsPerPlayer}
-                        onChangeText={setNumBallsPerPlayer}
-                        keyboardType="numeric"
-                    />
-                    <ScrollView>
-                        {[...Array(parseInt(numPlayers) || 0)].map((_, index) => (
-                            <TextInput
-                                key={index}
-                                style={styles.input}
-                                placeholder={`참가자 ${index + 1}의 이름을 입력해주세요.`}
-                                value={playerNames[index]}
-                                onChangeText={(text) => handleNameChange(index, text)}
-                            />
-                        ))}
-                    </ScrollView>
-                    <TouchableOpacity onPress={initializeGame} style={styles.button}>
-                        <Text style={styles.buttonText}>게임시작</Text>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity onPress={() => navigation.navigate("Main")} style={styles.button}>
-                        <Text style={styles.buttonText}>메인으로 돌아가기</Text>
-                    </TouchableOpacity>
-                </View>
+                    <View style={styles.controls}>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="참가자 수를 입력해 주세요. (2-8)"
+                            value={numPlayers}
+                            onChangeText={setNumPlayers}
+                            keyboardType="numeric"
+                        />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="공의 개수를 입력해 주세요. (1-3)"
+                            value={numBallsPerPlayer}
+                            onChangeText={setNumBallsPerPlayer}
+                            keyboardType="numeric"
+                        />
+                        <ScrollView>
+                            {[...Array(parseInt(numPlayers) || 0)].map((_, index) => (
+                                <TextInput
+                                    key={index}
+                                    style={styles.input}
+                                    placeholder={`참가자 ${index + 1}의 이름을 입력해주세요.`}
+                                    value={playerNames[index]}
+                                    onChangeText={(text) => handleNameChange(index, text)}
+                                />
+                            ))}
+                        </ScrollView>
+                        <TouchableOpacity onPress={initializeGame} style={styles.button}>
+                            <Text style={styles.buttonText}>게임시작</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity onPress={() => navigation.navigate("Main")} style={styles.button}>
+                            <Text style={styles.buttonText}>메인으로 돌아가기</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             )}
             {showPopup && (
@@ -358,9 +371,15 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#000',
     },
+    gameContainerWrapper: {
+        width: "70%",
+        height: height * 0.8, // 게임 영역의 높이를 전체 화면 높이의 50%로 설정
+        alignSelf: "center",
+        backgroundColor: '#0f0', // 게임 영역의 배경 색상을 초록색으로 설정
+        marginVertical:40,
+    },
     gameContainer: {
-        flex: 1,
-        backgroundColor: '#000',
+        flex: 1, // GameEngine이 wrapper의 높이를 따르도록 설정
     },
     touchableArea: {
         flex: 1,
@@ -391,12 +410,8 @@ const styles = StyleSheet.create({
         borderRadius: 50,
     },
     controls: {
-        // position: 'absolute',
-        // bottom: 50,
-        // left: '50%',
-        // transform: [{ translateX: -50 }],
         alignItems: 'center',
-        paddingTop:'60%'
+        paddingTop: '60%',
     },
     input: {
         width: 200,
@@ -430,17 +445,16 @@ const styles = StyleSheet.create({
         fontSize: 18,
         marginBottom: 20,
     },
-    header:{
-        paddingTop:'15%',
-
+    header: {
+        paddingTop: '15%',
     },
-    headerText:{
+    headerText: {
         textAlign: 'center',
         color: 'white',
-        fontWeight:"bold",
-        fontSize: 25
+        fontWeight: "bold",
+        fontSize: 25,
     },
-    backButtonContainer:{
+    backButtonContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -451,12 +465,11 @@ const styles = StyleSheet.create({
         marginTop: 20,
         marginBottom: 10,
     },
-    backButton:{
-
-    },
-    backButtonText:{
+    backButton: {},
+    backButtonText: {
         color: 'white',
-        textAlign:'left',
+        textAlign: 'left',
         flex: 1,
-    }
+    },
 });
+
