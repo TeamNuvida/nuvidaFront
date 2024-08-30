@@ -168,56 +168,56 @@ export default function App() {
         );
     }
 
-  return (
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName="Main">
-          <Stack.Screen name="Signin" component={Signin} options={{ headerShown: false }}/>
-          <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }}/>
-            <Stack.Screen name="Calculate" component={Calculate} options={{ headerShown: false }}/>
-            <Stack.Screen name="ReservationInfo" component={ReservationInfo} options={{ headerShown: false }}/>
-            <Stack.Screen name="MemberList" component={MemberList} options={{headerShown: false}}/>
-            <Stack.Screen name="TripSchedule" component={TripSchedule} options={{headerShown: false}}/>
-            <Stack.Screen name="TripCalendar" component={TripCalendar} options={{headerShown: false}}/>
-            <Stack.Screen name="FavoriteList" component={FavoriteList} options={{headerShown: false}}/>
-            <Stack.Screen name="FriendList" component={FriendList} options={{headerShown: false}}/>
-            <Stack.Screen name="Mypage" component={Mypage} options={{headerShown: false}}/>
-            <Stack.Screen name="MypostList" component={MypostList} options={{headerShown: false}}/>
-            <Stack.Screen name="TravelLog" component={TravelLog} options={{headerShown: false}}/>
-            <Stack.Screen name="Userprofile" component={Userprofile} options={{headerShown: false}}/>
-            <Stack.Screen name="PinBall" component={PinBall} options={{ headerShown: false }}/>
-            <Stack.Screen
-                name="Main"
-                options={{ headerShown: false }}
-            >
-                {props => (
-                    <Main
-                        {...props}
-                        weather={weatherData}
-                        particulateMatter={particulateMatterData}
-                        store={storeList}
-                        location={locationList}
-                    />
-                )}
-            </Stack.Screen>
-            <Stack.Screen name="BaseballSchedule" component={BaseballSchedule} options={{ headerShown: false }}/>
-            <Stack.Screen name="ScheduleCreation1" component={ScheduleCreation1} options={{ headerShown: false }}/>
-            <Stack.Screen name="ScheduleCreation2" component={ScheduleCreation2} options={{ headerShown: false }}/>
-            <Stack.Screen name="ScheduleCreation3" component={ScheduleCreation3} options={{ headerShown: false }}/>
-            <Stack.Screen name="ScheduleCreation4" component={ScheduleCreation4} options={{ headerShown: false }}/>
-            <Stack.Screen name="ScheduleCreation5" component={ScheduleCreation5} options={{ headerShown: false }}/>
-            <Stack.Screen name="ScheduleCreation6" component={ScheduleCreation6} options={{ headerShown: false }}/>
-            <Stack.Screen name="ScheduleCreationAccommodation" component={ScheduleCreationAccommodation} options={{ headerShown: false }}/>
-            <Stack.Screen name="CommunityList" component={CommunityList} options={{ headerShown: false }}/>
-            <Stack.Screen name="CommunityInfo" component={CommunityInfo} options={{ headerShown: false }}/>
-            <Stack.Screen name="WritingPost" component={WritingPost} options={{ headerShown: false }}/>
-            <Stack.Screen name="Betting" component={Betting} options={{ headerShown: false }}/>
-            <Stack.Screen name="ScheduleCreation7" component={ScheduleCreation7} options={{ headerShown: false }}/>
-            <Stack.Screen name="ScheduleCreation8" component={ScheduleCreation8} options={{ headerShown: false }}/>
-            <Stack.Screen name="NoticeList" component={NoticeList} options={{ headerShown: false }}/>
-        </Stack.Navigator>
-        <StatusBar style="auto" />
-      </NavigationContainer>
-  );
+    return (
+        <NavigationContainer>
+            <Stack.Navigator initialRouteName="Main">
+                <Stack.Screen name="Signin" component={Signin} options={{ headerShown: false }}/>
+                <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }}/>
+                <Stack.Screen name="Calculate" component={Calculate} options={{ headerShown: false }}/>
+                <Stack.Screen name="ReservationInfo" component={ReservationInfo} options={{ headerShown: false }}/>
+                <Stack.Screen name="MemberList" component={MemberList} options={{headerShown: false}}/>
+                <Stack.Screen name="TripSchedule" component={TripSchedule} options={{headerShown: false}}/>
+                <Stack.Screen name="TripCalendar" component={TripCalendar} options={{headerShown: false}}/>
+                <Stack.Screen name="FavoriteList" component={FavoriteList} options={{headerShown: false}}/>
+                <Stack.Screen name="FriendList" component={FriendList} options={{headerShown: false}}/>
+                <Stack.Screen name="Mypage" component={Mypage} options={{headerShown: false}}/>
+                <Stack.Screen name="MypostList" component={MypostList} options={{headerShown: false}}/>
+                <Stack.Screen name="TravelLog" component={TravelLog} options={{headerShown: false}}/>
+                <Stack.Screen name="Userprofile" component={Userprofile} options={{headerShown: false}}/>
+                <Stack.Screen name="PinBall" component={PinBall} options={{ headerShown: false }}/>
+                <Stack.Screen
+                    name="Main"
+                    options={{ headerShown: false }}
+                >
+                    {props => (
+                        <Main
+                            {...props}
+                            weather={weatherData}
+                            particulateMatter={particulateMatterData}
+                            store={storeList}
+                            location={locationList}
+                        />
+                    )}
+                </Stack.Screen>
+                <Stack.Screen name="BaseballSchedule" component={BaseballSchedule} options={{ headerShown: false }}/>
+                <Stack.Screen name="ScheduleCreation1" component={ScheduleCreation1} options={{ headerShown: false }}/>
+                <Stack.Screen name="ScheduleCreation2" component={ScheduleCreation2} options={{ headerShown: false }}/>
+                <Stack.Screen name="ScheduleCreation3" component={ScheduleCreation3} options={{ headerShown: false }}/>
+                <Stack.Screen name="ScheduleCreation4" component={ScheduleCreation4} options={{ headerShown: false }}/>
+                <Stack.Screen name="ScheduleCreation5" component={ScheduleCreation5} options={{ headerShown: false }}/>
+                <Stack.Screen name="ScheduleCreation6" component={ScheduleCreation6} options={{ headerShown: false }}/>
+                <Stack.Screen name="ScheduleCreationAccommodation" component={ScheduleCreationAccommodation} options={{ headerShown: false }}/>
+                <Stack.Screen name="CommunityList" component={CommunityList} options={{ headerShown: false }}/>
+                <Stack.Screen name="CommunityInfo" component={CommunityInfo} options={{ headerShown: false }}/>
+                <Stack.Screen name="WritingPost" component={WritingPost} options={{ headerShown: false }}/>
+                <Stack.Screen name="Betting" component={Betting} options={{ headerShown: false }}/>
+                <Stack.Screen name="ScheduleCreation7" component={ScheduleCreation7} options={{ headerShown: false }}/>
+                <Stack.Screen name="ScheduleCreation8" component={ScheduleCreation8} options={{ headerShown: false }}/>
+                <Stack.Screen name="NoticeList" component={NoticeList} options={{ headerShown: false }}/>
+            </Stack.Navigator>
+            <StatusBar style="auto" />
+        </NavigationContainer>
+    );
 }
 
 const styles = StyleSheet.create({

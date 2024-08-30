@@ -77,23 +77,23 @@ const Signin = () => {
                 </View>
                 <View style={styles.inputContainer}>
                     <View style={styles.inputWrapper}>
-                    <Text style={styles.inputLabel}>아이디*</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="아이디를 입력하세요"
-                        onChangeText={(value) => handleLoginChange('id', value)}
-                        value={loginInfo.id}
-                    />
+                        <Text style={styles.inputLabel}>아이디*</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="아이디를 입력하세요"
+                            onChangeText={(value) => handleLoginChange('id', value)}
+                            value={loginInfo.id}
+                        />
                     </View>
                     <View style={styles.inputWrapper}>
-                    <Text style={styles.inputLabel}>비밀번호*</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="비밀번호를 입력하세요 "
-                        secureTextEntry={true}
-                        onChangeText={(value) => handleLoginChange('password', value)}
-                        value={loginInfo.password}
-                    />
+                        <Text style={styles.inputLabel}>비밀번호*</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="비밀번호를 입력하세요 "
+                            secureTextEntry={true}
+                            onChangeText={(value) => handleLoginChange('password', value)}
+                            value={loginInfo.password}
+                        />
                     </View>
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity style={[styles.button, styles.buttonLogin]} onPress={handleLogin}>
