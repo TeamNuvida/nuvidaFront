@@ -110,7 +110,9 @@ const CommunityInfo = ({route}) => {
                     ))}
                 </ScrollView>
             )}
+            <View style={styles.line} />
         </View>
+
     );
 
     const handleInt = async () => {
@@ -357,5 +359,11 @@ const styles = StyleSheet.create({
     commentButtonText: {
         color: '#fff',
         fontWeight: 'bold',
+    },
+    line: {
+        width: '95%',
+        height: 0.5,
+        marginVertical:15,
+        backgroundColor: '#C2C2C2'
     },
 });

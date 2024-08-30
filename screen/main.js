@@ -1,6 +1,19 @@
 import React, { useState, useEffect, useCallback  } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, ScrollView, Image, Modal, TextInput, Alert, ActivityIndicator  } from "react-native";
+import {
+    StyleSheet,
+    View,
+    Text,
+    SafeAreaView,
+    TouchableOpacity,
+    ScrollView,
+    Image,
+    Modal,
+    TextInput,
+    Alert,
+    ActivityIndicator,
+    Linking
+} from "react-native";
 import { MaterialCommunityIcons, AntDesign, FontAwesome, Entypo, Ionicons, Feather, Fontisto } from '@expo/vector-icons';
 import PagerView from '@react-native-community/viewpager';
 import axios from 'axios';
@@ -221,17 +234,23 @@ export default function Main({ weather, particulateMatter, store, location }) {
 
 
     // 인기 글
-    useEffect(() => {
-        const fetchBoardData = async () => {
-            try{
-                const response = await axios.post(`http://${localhost}:8090/nuvida/hotPost`);
-                setBoardData(response.data);
-            }catch (e) {
-                console.error(e)
-            }
-        };
-        fetchBoardData();
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            const fetchBoardData = async () => {
+                try{
+                    const response = await axios.post(`http://${localhost}:8090/nuvida/hotPost`);
+                    setBoardData(response.data);
+                }catch (e) {
+                    console.error(e)
+                }
+            };
+            fetchBoardData();
+
+            return () => {
+                // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
+            };
+        }, [])
+    );
 
     // 상단바 알림 아이콘
     const handleNoticeIconPress = async () => {
@@ -974,6 +993,59 @@ export default function Main({ weather, particulateMatter, store, location }) {
         }
     }
 
+    const handleNavi = async (item) => {
+        const destination = encodeURIComponent(item.title); // 목적지 이름
+        const endLat = item.mapy; // 목적지 위도
+        const endLng = item.mapx; // 목적지 경도
+
+        // 카카오맵 길찾기 URL
+        const url = `kakaomap://route?ep=${endLat},${endLng}&by=PUBLIC`; // by=FOOT, CAR, PUBLIC 등이 가능합니다.
+        const installUrl = 'https://play.google.com/store/apps/details?id=net.daum.android.map';  // 카카오맵 설치 페이지 URL
+
+        try {
+            const canOpen = await Linking.canOpenURL(url);
+            console.log('Can open URL:', canOpen);
+
+            if (canOpen) {
+                await Linking.openURL(url);
+            } else {
+                Alert.alert(
+                    '카카오맵 설치되어 있지 않습니다.',
+                    '카카오맵 설치 페이지로 이동하시겠습니까?',
+                    [
+                        { text: '취소', style: 'cancel' },
+                        { text: '확인', onPress: () => Linking.openURL(installUrl) },
+                    ]
+                );
+            }
+        } catch (error) {
+            console.error('Error launching KakaoNavi:', error);
+            Alert.alert('오류 발생', '카카오내비 실행 중 오류가 발생했습니다. 다시 시도해 주세요.');
+        }
+    };
+
+    // 주변 관광지
+    const renderLocationList = () =>{
+        return location.map((page) => (
+            <View key={page.contentid} style={styles.center}>
+                <View style={[ styles.locationListContainer]}>
+                    <View style={{width:"90%", alignItems: "center", alignSelf:"center"}}>
+                        {page.firstimage && page.firstimage.length > 0 ? (
+                            <Image source={{uri:page.firstimage}} style={[styles.locationImg,]} />
+                        ) : (
+                            <Image source={require('../assets/logo.png')} style={styles.nullImg} />
+                        )}
+                        <Text style={styles.locationTitleText}> {page.title}</Text>
+                        <Text style={styles.locationAddrText}>{page.addr1} {page.addr2}</Text>
+                        <TouchableOpacity style={styles.locationNavi} onPress={()=>handleNavi(page)}>
+                            <Text style={styles.locationNaviText}>길찾기</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+        ));
+    };
+
     // 이번주 경기 일정
     // cs 나중에 수정하기
     const renderWeeklyMatchList = () => {
@@ -1110,6 +1182,12 @@ export default function Main({ weather, particulateMatter, store, location }) {
                 {renderMainPlan()}
                 <View style={styles.line} />
                 {renderTodayMatch()}
+                <View style={styles.line} />
+                <Text style={styles.subTitle}>경기장 근처 관광지</Text>
+                <ScrollView horizontal style={styles.locationContainer}>
+                    {renderLocationList()}
+                </ScrollView>
+
                 <View style={styles.line} />
                 <Text style={styles.subTitle}>이번주 경기 일정</Text>
                 <PagerView style={styles.weeklyContainer}>
@@ -1514,6 +1592,54 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         bottom: 10,
+    },
+
+    locationContainer:{
+        width: '100%',
+        height: 350,
+        flexDirection: 'row',
+        marginTop: 10, // 여유 공간 추가
+    },
+
+    locationListContainer:{
+        width: 200,
+        height: 300,
+        borderColor: '#070000',
+        borderWidth: 2,
+        borderRadius: 10,
+        marginHorizontal:10,
+    },
+    locationImg:{
+        width:"100%",
+        height:150,
+        alignSelf:"center",
+        marginVertical:10,
+        borderRadius: 5,
+    },
+    nullImg:{
+          width:"100%",
+          height:150,
+          opacity:0.5,
+        alignSelf:"center",
+        marginVertical:10,
+        borderRadius: 5,
+    },
+    locationTitleText:{
+        fontWeight:"bold"
+    },
+    locationAddrText:{
+        color:"#818080",
+    },
+    locationNavi:{
+        width: "40%",
+        height: "10%",
+        borderRadius: 5,
+        backgroundColor: '#f35353',
+        alignItems:"center",
+        marginTop:10,
+    },
+    locationNaviText:{
+        fontWeight:"bold"
     },
 });
 

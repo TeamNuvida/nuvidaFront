@@ -92,7 +92,7 @@ export default function CommunityList({route}) {
 
     const PostItem = ({ item }) => (
         <TouchableOpacity style={styles.postContainer} onPress={() => communityInfo(item.post_seq)}>
-            {item.image ? <Image source={{ uri: item.image }} style={styles.image} /> : <Image source={{ uri: 'https://firebasestorage.googleapis.com/v0/b/high-service-431903-t6.appspot.com/o/imgtest%2Fprofile.png?alt=media&token=668cdcff-3447-406d-a46c-de24b34235e0' }} style={styles.image} />}
+            {item.image ? <Image source={{ uri: item.image }} style={styles.image} /> : <Image source={require('../assets/logo.png')} style={styles.nullImage} />}
             <View style={styles.textContainer}>
                 <Text style={styles.title}>{item.post_title}</Text>
                 <Text style={styles.description}>{item.details}</Text>
@@ -175,7 +175,7 @@ export default function CommunityList({route}) {
 
     const handleWriteIngPost = () => {
         if(userInfo){
-            navigation.navigate('WritingPost', {user_id:userInfo.user_id});
+            navigation.navigate('WritingPost', {userInfo:userInfo});
         }else{
             navigation.navigate('Signin');
         }
@@ -221,6 +221,12 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 8,
+    },
+    nullImage:{
+        width: 80,
+        height: 80,
+        borderRadius: 8,
+        opacity:0.5,
     },
     textContainer: {
         flex: 1,

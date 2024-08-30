@@ -56,7 +56,7 @@ export default function WritingPost({route}) {
     const [imageUrls, setImageUrls] = useState([]);
     const [isUploading, setIsUploading] = useState(false); // 업로드 상태 관리
     const navigation = useNavigation();
-    const user_id = route.params.user_id;
+    const userInfo = route.params.userInfo;
 
     const localhost = '192.168.55.35';
 
@@ -103,10 +103,10 @@ export default function WritingPost({route}) {
         console.log('Content:', content.length);
 
         try {
-            const response = await axios.post(`http://${localhost}:8090/nuvida/insertPost`, {user_id:user_id, post_title:title, details:content, imageList:imageUrls});
+            const response = await axios.post(`http://${localhost}:8090/nuvida/insertPost`, {user_id:userInfo.user_id, post_title:title, details:content, imageList:imageUrls});
             
             Alert.alert('게시물 등록이 완료되었습니다.');
-            navigation.navigate('CommunityList')
+            navigation.navigate('CommunityList', {userInfo: userInfo})
 
         } catch (error) {
             console.error('Error submitting post:', error);

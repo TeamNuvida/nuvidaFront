@@ -88,17 +88,17 @@ export default function App() {
                     setParticulateMatterData(filteredItemsParticulateMatterData);
 
 
-                    const storeListNum = await axios.get(`http://apis.data.go.kr/B551011/KorService1/locationBasedList1?serviceKey=${API_KEY}&numOfRows=20&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&arrange=E&mapX=126.8890596255&mapY=35.1682414234&radius=10000&listYN=N&_type=JSON&contentTypeId=12`)
+                    const storeListNum = await axios.get(`http://apis.data.go.kr/B551011/KorService1/locationBasedList1?serviceKey=${API_KEY}&numOfRows=20&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&arrange=E&mapX=126.8889925&mapY=35.168339&radius=5000&listYN=N&_type=JSON&contentTypeId=39`)
                     const storeNum = storeListNum.data.response.body.items.item[0].totalCnt;
-                    const storeResponse = await axios.get(`http://apis.data.go.kr/B551011/KorService1/locationBasedList1?serviceKey=${API_KEY}&numOfRows=${storeNum}&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&arrange=E&mapX=126.8890596255&mapY=35.1682414234&radius=10000&listYN=Y&_type=JSON&contentTypeId=12`)
+                    const storeResponse = await axios.get(`http://apis.data.go.kr/B551011/KorService1/locationBasedList1?serviceKey=${API_KEY}&numOfRows=${storeNum}&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&arrange=E&mapX=126.8889925&mapY=35.168339&radius=5000&listYN=Y&_type=JSON&contentTypeId=39`)
 
                     const storeList = storeResponse.data.response.body.items.item.sort(() => Math.random() - 0.5).slice(0,5);
                     setStoreList(storeList);
 
 
-                    const locationListNum = await axios.get(`http://apis.data.go.kr/B551011/KorService1/locationBasedList1?serviceKey=${API_KEY}&numOfRows=20&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&arrange=E&mapX=126.8890596255&mapY=35.1682414234&radius=10000&listYN=N&_type=JSON&contentTypeId=12`)
+                    const locationListNum = await axios.get(`http://apis.data.go.kr/B551011/KorService1/locationBasedList1?serviceKey=${API_KEY}&numOfRows=20&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&arrange=E&mapX=126.8889925&mapY=35.168339&radius=5000&listYN=N&_type=JSON&contentTypeId=12`)
                     const locationNum = locationListNum.data.response.body.items.item[0].totalCnt;
-                    const locationResponse = await axios.get(`http://apis.data.go.kr/B551011/KorService1/locationBasedList1?serviceKey=${API_KEY}&numOfRows=${locationNum}&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&arrange=E&mapX=126.8890596255&mapY=35.1682414234&radius=10000&listYN=Y&_type=JSON&contentTypeId=12`)
+                    const locationResponse = await axios.get(`http://apis.data.go.kr/B551011/KorService1/locationBasedList1?serviceKey=${API_KEY}&numOfRows=${locationNum}&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&arrange=E&mapX=126.8889925&mapY=35.168339&radius=5000&listYN=Y&_type=JSON&contentTypeId=12`)
 
                     const locationList = locationResponse.data.response.body.items.item.sort(() => Math.random() - 0.5).slice(0,5);
                     setLocationList(locationList);

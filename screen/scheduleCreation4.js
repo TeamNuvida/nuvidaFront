@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import {StyleSheet, Text, View, TouchableOpacity, SafeAreaView, FlatList, TextInput, Modal, Alert} from 'react-native';
+import {
+    StyleSheet,
+    Text,
+    View,
+    TouchableOpacity,
+    SafeAreaView,
+    FlatList,
+    TextInput,
+    Modal,
+    Alert,
+    Image,
+    ScrollView
+} from 'react-native';
 import { FontAwesome, Entypo, Ionicons, Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
@@ -15,7 +27,7 @@ const categories = [
 
 
 
-const DetailModal = ({ visible, onClose, item, onAdd }) => {
+const DetailModal = ({ visible, onClose, item, onAdd , itemInfo}) => {
 
     return (
         <Modal
@@ -29,9 +41,14 @@ const DetailModal = ({ visible, onClose, item, onAdd }) => {
                     <TouchableOpacity onPress={onClose} style={styles.detailModalCloseButton}>
                         <Entypo name="cross" size={24} color="black" />
                     </TouchableOpacity>
-                    <Text style={styles.detailModalTitle}>{item?.title}</Text>
-                    <Text style={styles.detailModalDescription}>{item?.addr1} {item?.addr2}</Text>
-                    {/*<Text style={styles.detailModalDescription}>{detail?detail:"설명이 없습니다."}</Text>*/}
+                    {itemInfo && itemInfo.firstimage && itemInfo.firstimage.length > 0 && (
+                        <Image source={{ uri: itemInfo.firstimage }} style={styles.itemImg} />
+                    )}
+                    <Text style={styles.detailModalTitle}>{itemInfo?.title}</Text>
+                    <Text style={styles.detailModalDescription}>{itemInfo?.addr1} {itemInfo?.addr2}</Text>
+                    <ScrollView style={styles.overviewContainer}>
+                        <Text style={styles.overview}>{itemInfo?.overview}</Text>
+                    </ScrollView>
                     <TouchableOpacity
                         style={styles.detailModalButton}
                         onPress={() => onAdd(item)}
@@ -63,6 +80,7 @@ export default function ScheduleCreation4({ route }) {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
+    const [selectedItemInfo, setSelectedItemInfo] = useState(null);
 
 
     useEffect(() => {
@@ -256,15 +274,31 @@ export default function ScheduleCreation4({ route }) {
         setSelectedCategory((prevCategory) => prevCategory === category ? null : category);
     };
 
+    const getItemInfo = async (item) =>{
+        try{
+            const response = await axios.get(`http://apis.data.go.kr/B551011/KorService1/detailCommon1?serviceKey=${API_KEY}&numOfRows=10&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&contentId=${item.contentid}&defaultYN=Y&_type=JSON&firstImageYN=Y&addrinfoYN=Y&overviewYN=Y&mapinfoYN=Y`);
+            const data = response.data.response.body.items.item[0];
+            setSelectedItemInfo(data);
+
+        }catch (e) {
+            console.error(e)
+        }
+    }
+
     const handleDetailButtonPress = (item) => {
         setSelectedItem(item);
         setShowDetailModal(true);
+        getItemInfo(item);
     };
 
     const handleAddToSchedule = (item) => {
         handleSelect(item);
         setShowDetailModal(false);
+        setSelectedItemInfo(null);
     };
+
+
+
 
     const renderContent = () => {
         return (
@@ -385,6 +419,7 @@ export default function ScheduleCreation4({ route }) {
                     onClose={() => setShowDetailModal(false)}
                     item={selectedItem}
                     onAdd={handleAddToSchedule}
+                    itemInfo={selectedItemInfo}
                 />
             </View>
         );
@@ -528,6 +563,7 @@ const styles = StyleSheet.create({
     },
     detailModal: {
         width: '80%',
+        height:500,
         backgroundColor: '#fff',
         borderRadius: 10,
         padding: 20,
@@ -543,6 +579,14 @@ const styles = StyleSheet.create({
     },
     detailModalDescription: {
         marginVertical: 10,
+        color:'#686868'
+    },
+    overviewContainer: {
+        flex: 1, // 스크롤뷰가 모달의 나머지 공간을 차지하도록 설정
+    },
+    overview: {
+        fontSize: 14,
+        color: '#444',
     },
     detailModalButton: {
         backgroundColor: '#007bff',
@@ -556,4 +600,8 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: 'bold',
     },
+    itemImg:{
+        width:100,
+        height:100,
+    }
 });

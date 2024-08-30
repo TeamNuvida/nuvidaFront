@@ -110,7 +110,7 @@ const TripCalendar = ({ route }) => {
                 try {
                     const response = await axios.post(`http://${localhost}:8090/nuvida/getPlanList`, {user_id:userInfo.user_id});
                     setPlanList(response.data);
-                    console.log(response.data)
+                    markPlanDates(response.data); // 일정 데이터를 마킹
                 } catch (error) {
                     console.error('Error fetching plan data:', error);
                 }
@@ -395,9 +395,10 @@ const TripCalendar = ({ route }) => {
 
     useEffect(() => {
         const today = moment().format('YYYY-MM-DD');
-        setMarkedDates({
+        setMarkedDates((prev) => ({
+            ...prev,
             [today]: { selected: true, color: 'red' }
-        });
+        }));
     }, []);
 
     const handleNoticeIconPress = async () => {
@@ -453,10 +454,34 @@ const TripCalendar = ({ route }) => {
         );
     };
 
+    const markPlanDates = (plans) => {
+        const newMarkedDates = {};
+        plans.forEach(plan => {
+            let start = moment(plan.start_date);
+            let end = moment(plan.end_date);
+
+            while (start <= end) {
+                const formattedDate = start.format('YYYY-MM-DD');
+                if (!newMarkedDates[formattedDate]) {
+                    newMarkedDates[formattedDate] = { marked: true, plans: [] };
+                }
+                newMarkedDates[formattedDate].plans.push({
+                    name: plan.plan_name,
+                    seq: plan.plan_seq,
+                });
+                start.add(1, 'day');
+            }
+        });
+        setMarkedDates(newMarkedDates);
+    };
+
+
     const renderCalendar = () => {
         const year = currentDate.year();
         const month = currentDate.month() + 1;
         const calendar = generateCalendar(year, month);
+        const today = moment().format('YYYY-MM-DD'); // 오늘 날짜
+
         return (
             <View style={styles.calendar}>
                 <View style={styles.weekdays}>
@@ -467,47 +492,77 @@ const TripCalendar = ({ route }) => {
                 {calendar.map((week, index) => (
                     <View key={index} style={styles.week}>
                         {week.map((day, idx) => {
+                            if (day === null) {
+                                return <View key={idx} style={styles.emptyDay} />;
+                            }
                             const dateString = moment(`${year}-${month}-${day}`).format('YYYY-MM-DD');
-                            const isMarked = markedDates[dateString]?.selected;
-
-                            // WeatherData에서 해당 날짜의 날씨 정보를 가져옴
+                            const isMarked = markedDates[dateString]?.marked;
+                            const isToday = dateString === today; // 오늘 날짜인지 확인
+                            const plans = markedDates[dateString]?.plans || [];
                             const weatherInfo = weatherData[dateString];
                             const midWeatherInfo = midWeatherData[dateString];
+
+                            // 이 날짜가 일정의 시작일, 중간일, 끝나는 날인지 확인하는 로직 추가
+                            let isStart = false;
+                            let isEnd = false;
+
+                            plans.forEach(plan => {
+                                const planStart = moment(plan.start_date).format('YYYY-MM-DD');
+                                const planEnd = moment(plan.end_date).format('YYYY-MM-DD');
+                                if (dateString === planStart) isStart = true;
+                                if (dateString === planEnd) isEnd = true;
+                            });
+
                             return (
-                                <View key={idx} style={styles.dayContainer}>
+                                <View
+                                    key={idx}
+                                    style={[
+                                        styles.dayContainer,
+                                        isStart && styles.planStart, // 시작 날짜 스타일
+                                        isEnd && styles.planEnd, // 종료 날짜 스타일
+                                        isStart && isEnd && styles.planSingleDay // 단일 날짜일 경우 스타일
+                                    ]}
+                                >
                                     {day ? (
-                                        <TouchableOpacity
-                                            style={[
-                                                styles.day,
-                                                isMarked && {
-                                                    backgroundColor: markedDates[dateString].color
-                                                }
-                                            ]}
-                                            onPress={() => setSelectedDate(dateString)}
-                                        >
-                                            <Text
-                                                style={[
-                                                    styles.dayText,
-                                                    isMarked && { color: 'white' }
-                                                ]}
-                                            >
-                                                {day}
-                                            </Text>
-                                            {weatherInfo && (
-                                                <weatherInfo.IconComponent
-                                                    name={weatherInfo.iconName}
-                                                    size={20}
-                                                    color="black"
-                                                />
-                                            )}
-                                            {midWeatherInfo && (
-                                                <midWeatherInfo.IconComponent
-                                                    name={midWeatherInfo.iconName}
-                                                    size={20}
-                                                    color="black"
-                                                />
-                                            )}
-                                        </TouchableOpacity>
+                                        <>
+                                            <View style={styles.day}>
+                                                <View style={styles.dateAndIcon}>
+                                                    {isToday ? (
+                                                        <Text style={[styles.todayText]}>
+                                                            {day}
+                                                        </Text>
+                                                    ) : (
+                                                        <Text style={[styles.dayText, isMarked && { color: 'black' }]}>
+                                                            {day}
+                                                        </Text>
+                                                    )}
+
+                                                    {weatherInfo && (
+                                                        <weatherInfo.IconComponent
+                                                            name={weatherInfo.iconName}
+                                                            size={16} // 크기를 조정하여 날짜와 조화를 이루도록 함
+                                                            color="black"
+                                                            style={styles.weatherIcon}
+                                                        />
+                                                    )}
+                                                    {midWeatherInfo && (
+                                                        <midWeatherInfo.IconComponent
+                                                            name={midWeatherInfo.iconName}
+                                                            size={16} // 크기를 조정하여 날짜와 조화를 이루도록 함
+                                                            color="black"
+                                                            style={styles.weatherIcon}
+                                                        />
+                                                    )}
+                                                </View>
+                                            </View>
+                                            <View style={styles.plansContainer}>
+                                                {plans.map((plan, i) => (
+                                                    <TouchableOpacity key={i} style={styles.planMarker} onPress={() => navigation.navigate("TripSchedule", { userInfo: userInfo, plan_seq: plan.seq })}>
+                                                        <Text style={styles.planMarkerText}>{plan.name}</Text>
+                                                    </TouchableOpacity>
+                                                ))}
+                                            </View>
+                                        </>
                                     ) : (
                                         <View style={styles.emptyDay} />
                                     )}
@@ -519,6 +574,9 @@ const TripCalendar = ({ route }) => {
             </View>
         );
     };
+
+
+
 
 
     const renderDatePicker = () => {
@@ -681,12 +739,13 @@ const styles = StyleSheet.create({
     week: {
         flexDirection: 'row',
         justifyContent: 'space-around',
+        height:100
     },
     dayContainer: {
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start', // 변경된 점: 아이템을 위쪽(날짜 부분)에 배치
         width: (width - 20) / 7,
-        height: 60, // Increased height for better spacing
+        height: 80, // 날짜와 일정이 모두 들어갈 수 있는 충분한 높이로 설정
     },
     day: {
         alignItems: 'center',
@@ -698,6 +757,16 @@ const styles = StyleSheet.create({
     dayText: {
         fontSize: 16,
         color: '#000',
+    },
+    todayText: {
+        fontSize: 16,
+        color: '#ff0000',
+        borderColor:"#ff0000",
+        borderWidth:1,
+        borderRadius: 20, // 고정된 값으로 원형 보더를 만드는 경우
+        textAlign: 'center', // 텍스트를 중앙에 위치
+        width: 30, // 동그라미의 너비와 높이를 동일하게 설정
+        height: 30, // 동그라미의 너비와 높이를 동일하게 설정
     },
     emptyDay: {
         width: 40,
@@ -798,6 +867,27 @@ const styles = StyleSheet.create({
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
+        alignItems: 'center',
+    },
+    dateAndIcon: {
+        flexDirection: 'row', // 날짜와 아이콘을 가로로 배치
+        alignItems: 'center', // 아이콘과 텍스트의 수직 정렬을 맞춤
+    },
+    weatherIcon: {
+        marginLeft: 4, // 날짜와 아이콘 사이의 간격을 추가
+    },
+    planMarker: {
+        marginTop: 4,
+        backgroundColor: 'lightblue',
+        borderRadius: 4,
+        paddingHorizontal: 2,
+    },
+    planMarkerText: {
+        fontSize: 10,
+        color: 'black',
+    },
+    plansContainer: {
+        marginTop: 5, // 날짜와 일정 사이의 간격
         alignItems: 'center',
     },
 });
