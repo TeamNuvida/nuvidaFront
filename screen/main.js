@@ -525,7 +525,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
         const percentage = (point / totalPoint) * 100;
 
         // percentage가 NaN이면 0을 반환
-        return isNaN(percentage) ? 0 : percentage.toFixed(2);
+        return isNaN(percentage) ? 0 : percentage.toFixed(0);
     };
 
     // 상단 바
@@ -1274,7 +1274,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
 
                 {userBetData.team_name==='KIA'? (
                     <TouchableOpacity style={{ position: 'absolute', width: '35%', height: 40, zIndex: 6, top: '89%', right: '57%', backgroundColor: '#0E1923', borderColor: '#fff', borderWidth: 2, borderRadius: 20}} onPress={() => handleTeamSelect(userBetData.team_name)}>
-                        <Text style={{ color: '#fff', fontSize: 14, margin: 'auto', fontWeight: 'bold' }}>KIA 추가 베팅하기</Text>
+                        <Text style={{ color: '#fff', fontSize: 14, margin: 'auto', fontWeight: 'bold' }}>추가 베팅하기</Text>
                     </TouchableOpacity>
 
                 ):(
@@ -1288,7 +1288,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                     </View>
                     ):(
         <TouchableOpacity style={{ position: 'absolute', width: '35%', height: 40, zIndex: 6, top: '89%', left: '57%', backgroundColor: '#0E1923', borderColor: '#fff', borderWidth: 2, borderRadius: 20}} onPress={() => handleTeamSelect(userBetData.team_name)}>
-            <Text style={{ color: '#fff', fontSize: 14, margin: 'auto', fontWeight: 'bold' }}>{matches.team_name} 추가 베팅하기</Text>
+            <Text style={{ color: '#fff', fontSize: 14, margin: 'auto', fontWeight: 'bold' }}>추가 베팅하기</Text>
         </TouchableOpacity>)}
 
 
@@ -1660,7 +1660,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                     <FontAwesome name="calendar-check-o" size={24} color="black" />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('PinBall')}>
-                    <FontAwesome name="calendar-check-o" size={24} color="black" />
+                    <MaterialCommunityIcons name="billiards-rack" size={24} color="black" />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('CommunityList', {userInfo:userInfo})}>
                     <Ionicons name="chatbubbles-outline" size={24} color="black" />

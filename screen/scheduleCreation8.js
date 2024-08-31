@@ -174,7 +174,7 @@ export default function ScheduleCreation8({ route }) {
                     <FontAwesome name="calendar-check-o" size={24} color="black" />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('PinBall')}>
-                    <FontAwesome name="calendar-check-o" size={24} color="black" />
+                    <MaterialCommunityIcons name="billiards-rack" size={24} color="black" />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('CommunityList', {userInfo:userInfo})}>
                     <Ionicons name="chatbubbles-outline" size={24} color="black" />
