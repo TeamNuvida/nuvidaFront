@@ -59,6 +59,7 @@ const CommunityInfo = ({route}) => {
                         {item.profile_img ? <Image source={{ uri: item.profile_img }} style={styles.commentProfile} /> : <Image source={{ uri: 'https://firebasestorage.googleapis.com/v0/b/high-service-431903-t6.appspot.com/o/imgtest%2Fprofile.png?alt=media&token=668cdcff-3447-406d-a46c-de24b34235e0' }} style={styles.commentProfile} />}
                         <Text style={styles.commentNick}>{item.user_nick}</Text>
                         <Text style={styles.commentDate}>{item.regi_at}</Text>
+                        <View style={{paddingLeft:10}}></View>
                     </View>
                     <Text style={styles.commentText}>{item.cmt_detail}</Text>
                     <TouchableOpacity onPress={() => setReplyTo(item)}>
@@ -71,6 +72,7 @@ const CommunityInfo = ({route}) => {
                             {reply.profile_img ? <Image source={{ uri: reply.profile_img }} style={styles.commentProfile} /> : <Image source={{ uri: 'https://firebasestorage.googleapis.com/v0/b/high-service-431903-t6.appspot.com/o/imgtest%2Fprofile.png?alt=media&token=668cdcff-3447-406d-a46c-de24b34235e0' }} style={styles.commentProfile} />}
                             <Text style={styles.commentNick}>{reply.user_nick}</Text>
                             <Text style={styles.commentDate}>{reply.regi_at}</Text>
+                            <View style={{paddingLeft:10}}></View>
                         </View>
                         <Text style={styles.commentText}>{reply.cmt_detail}</Text>
                         <TouchableOpacity onPress={() => setReplyTo(reply)}>
@@ -78,7 +80,9 @@ const CommunityInfo = ({route}) => {
                         </TouchableOpacity>
                     </View>
                 ))}
+                <View style={styles.lineCmt} />
             </>
+
         );
     };
 
@@ -99,6 +103,7 @@ const CommunityInfo = ({route}) => {
                     <TouchableOpacity onPress={()=> handleInt()}>
                         {intTF? <FontAwesome name="heart" size={24} color="red" /> : <FontAwesome name="heart-o" size={24} color="red" />}
                     </TouchableOpacity>
+                    <View style={{paddingLeft:10}}></View>
                 </View>
             </View>
             <Text style={styles.titleText}>{cmtInfo.post_title}</Text>
@@ -231,13 +236,14 @@ const styles = StyleSheet.create({
         flex: 1, // 중앙 정렬을 위해 추가
     },
     postContainer: {
-        paddingHorizontal: 5,
+        paddingHorizontal: 15,
         paddingVertical: 10,
     },
     postHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        marginBottom:20,
     },
     profileImage: {
         width: 40,
@@ -256,6 +262,7 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#888',
         marginVertical: 5,
+
     },
     postHeartContainer: {
         flexDirection: 'row',
@@ -272,12 +279,13 @@ const styles = StyleSheet.create({
     },
     detailsText: {
         fontSize: 14,
-        marginVertical: 10,
+        marginVertical: 15,
         lineHeight: 20,
     },
     imageContainer: {
         flexDirection: 'row',
         marginTop: 10, // 여유 공간 추가
+        marginBottom:10,
     },
     image: {
         width: 150,  // 이미지 폭 조정
@@ -287,10 +295,12 @@ const styles = StyleSheet.create({
     },
     commentsContainer: {
         paddingHorizontal: 7,
+        paddingTop:15,
     },
     commentContainer: {
         paddingBottom: 10,
         marginBottom: 10,
+        paddingHorizontal:15,
     },
     commentHeader: {
         flexDirection: 'row',
@@ -365,5 +375,12 @@ const styles = StyleSheet.create({
         height: 0.5,
         marginVertical:15,
         backgroundColor: '#C2C2C2'
+    },
+    lineCmt: {
+        width: '95%',
+        marginVertical: 15,
+        borderBottomWidth: 0.5,
+        borderBottomColor: 'rgba(204,204,204,0.49)',
+        borderStyle: 'dashed', // 이 부분은 적용이 안될 수 있습니다.
     },
 });

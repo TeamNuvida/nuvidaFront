@@ -217,9 +217,10 @@ const styles = StyleSheet.create({
     },
     postContainer: {
         flexDirection: 'row',
-        padding: 10,
+        padding: 20,
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
+        paddingHorizontal:30,
     },
     image: {
         width: 80,
@@ -307,19 +308,20 @@ const styles = StyleSheet.create({
         bottom: 10,
     },
     newPost:{
-        marginRight:15,
-        marginVertical: 5,
-        backgroundColor:'rgb(138,206,255)',
+        marginRight:20,
+        marginTop: 20,
+        backgroundColor:'rgb(0,0,0)',
         width: '20%',
         alignItems:'center',
-        padding:5,
+        padding:8,
         alignSelf:"flex-end",
-        borderRadius:10,
+        borderRadius:25,
 
     },
     newPostText:{
         fontWeight:"bold",
-        fontSize:15
+        fontSize:15,
+        color:"#ffffff"
     },
     nullItem:{
         alignItems: 'center',

@@ -17,6 +17,7 @@ export default function ScheduleCreationAccommodation({ route }) {
     const [currentPlace, setCurrentPlace] = useState(null);
     const [checkInTime, setCheckInTime] = useState('');
     const [checkOutTime, setCheckOutTime] = useState('');
+    const [currentDayRange, setCurrentDayRange] = useState(null);
 
     const scheduleInfo = route.params.scheduleInfo;
 
@@ -24,10 +25,8 @@ export default function ScheduleCreationAccommodation({ route }) {
         if (searchQuery.trim() === '') return;
 
         try {
-
             const totalResponso = await axios.get(`http://apis.data.go.kr/B551011/KorService1/searchKeyword1?serviceKey=${API_KEY}&MobileApp=NUVIDA&MobileOS=AND&pageNo=1&numOfRows=10&listYN=N&arrange=A&keyword=${searchQuery}&areaCode=5&contentTypeId=32&_type=JSON`);
             const totalCount = totalResponso.data.response.body.items.item[0].totalCnt;
-
 
             const response = await axios.get(`http://apis.data.go.kr/B551011/KorService1/searchKeyword1?serviceKey=${API_KEY}&MobileApp=NUVIDA&MobileOS=AND&pageNo=1&numOfRows=${totalCount}&listYN=Y&arrange=A&keyword=${searchQuery}&areaCode=5&contentTypeId=32&_type=JSON`);
             const items = response.data?.response?.body?.items?.item;
@@ -55,14 +54,16 @@ export default function ScheduleCreationAccommodation({ route }) {
     }
 
     const handleTimeSubmit = () => {
-        const timeFormat = /^\d{4}\.\d{2}\.\d{2} \d{2}:\d{2}$/;
+        const timeFormat = /^\d{2}:\d{2}$/;  // 시간만 입력받도록 변경
         if (!timeFormat.test(checkInTime) || !timeFormat.test(checkOutTime)) {
-            Alert.alert("시간 형식 오류", "올바른 시간 형식을 입력하세요. (예: 2024.11.13 10:00)");
+            Alert.alert("시간 형식 오류", "올바른 시간 형식을 입력하세요. (예: 10:00)");
             return;
         }
 
-        if (currentPlace) {
-            setSelectedPlaces([...selectedPlaces, { ...currentPlace, checkInTime, checkOutTime }]);
+        if (currentPlace && currentDayRange !== null) {
+            const formattedCheckInTime = `${formatDate(currentDayRange.start)} ${checkInTime}`;
+            const formattedCheckOutTime = `${formatDate(currentDayRange.end)} ${checkOutTime}`;
+            setSelectedPlaces([...selectedPlaces, { ...currentPlace, checkInTime: formattedCheckInTime, checkOutTime: formattedCheckOutTime, dayRange: currentDayRange }]);
         }
         setCurrentPlace(null);
         setCheckInTime('');
@@ -79,6 +80,33 @@ export default function ScheduleCreationAccommodation({ route }) {
         fetchPlace();
     };
 
+    const renderPlaceContent = (dayRange) => {
+        const selectedPlace = selectedPlaces.find(
+            (place) => place.dayRange.start.getTime() === dayRange.start.getTime()
+        );
+
+        if (selectedPlace) {
+            return (
+                <View style={styles.placeItemHeader}>
+                    <View style={styles.render}>
+                        <Text style={styles.placeTitle}>{selectedPlace.title}</Text>
+                        <Text style={styles.placeDetail}>입실: {selectedPlace.checkInTime}</Text>
+                        <Text style={styles.placeDetail}>퇴실: {selectedPlace.checkOutTime}</Text>
+                    </View>
+                    <TouchableOpacity onPress={() => handleRemovePlace(selectedPlaces.indexOf(selectedPlace))}>
+                        <Entypo name="cross" size={24} color="black" />
+                    </TouchableOpacity>
+                </View>
+            );
+        } else {
+            return (
+                <TouchableOpacity style={styles.addButton} onPress={() => { setCurrentDayRange(dayRange); setSearchModalVisible(true); }}>
+                    <Entypo name="plus" size={24} color="black" />
+                </TouchableOpacity>
+            );
+        }
+    };
+
     // 루트 정보 추가
     const handleScheduleInfoPress = () => {
         const accommodation = selectedPlaces.map(place => ({
@@ -88,13 +116,28 @@ export default function ScheduleCreationAccommodation({ route }) {
             check_out: place.checkOutTime,
             lat: place.mapy,
             lng: place.mapx,
-            contentid:place.contentid
+            contentid: place.contentid,
+            dayRange: place.dayRange,
         }));
         console.log(accommodation);
 
-        const updateScheduleInfo = { ...scheduleInfo, accommodation: accommodation};
-        navigation.navigate('ScheduleCreation4', { scheduleInfo: updateScheduleInfo, userInfo:userInfo });
-    }
+        const updateScheduleInfo = { ...scheduleInfo, accommodation: accommodation };
+        navigation.navigate('ScheduleCreation4', { scheduleInfo: updateScheduleInfo, userInfo: userInfo });
+    };
+
+    const getDaysArray = (start, end) => {
+        const arr = [];
+        let currentDate = new Date(start);
+        while (currentDate < new Date(end)) {
+            let nextDate = new Date(currentDate);
+            nextDate.setDate(currentDate.getDate() + 1);
+            arr.push({ start: new Date(currentDate), end: new Date(nextDate) });
+            currentDate = nextDate;
+        }
+        return arr;
+    };
+
+    const daysArray = getDaysArray(scheduleInfo.dateRange[0], scheduleInfo.dateRange[1]);
 
     const renderHeader = () => {
         return (
@@ -117,32 +160,12 @@ export default function ScheduleCreationAccommodation({ route }) {
         );
     };
 
-    const renderTabBar = () => (
-        <View style={styles.tabBar}>
-            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Main')}>
-                <Entypo name="home" size={24} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Calendar')}>
-                <FontAwesome name="calendar-check-o" size={24} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Game')}>
-                <FontAwesome name="gamepad" size={24} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Community')}>
-                <Ionicons name="chatbubbles-outline" size={24} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('MyPage')}>
-                <Feather name="user" size={24} color="black" />
-            </TouchableOpacity>
-        </View>
-    );
-
     const renderTitle = () => {
         return (
-            <View style={{ flex: 1, backgroundColor: '#fff', alignItems: 'center' }}>
-                <View style={{ width: '85%', height: 80 }}>
-                    <Text style={{ fontSize: 20, fontWeight: 'bold' }}>{scheduleInfo.plan_name}</Text>
-                    <Text style={{ fontSize: 16 }}>{formatDate(scheduleInfo.dateRange[0])}-{formatDate(scheduleInfo.dateRange[1])}</Text>
+            <View style={{ flex: 1, backgroundColor: '#fff', alignItems: 'center', paddingVertical: 20 }}>
+                <View style={[styles.name, { width: '80%', height: '10%', alignItems: 'center', justifyContent: 'center', paddingBottom: 5 }]}>
+                    <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#333' }}>{scheduleInfo.plan_name}</Text>
+                    <Text style={{ fontSize: 14, color: '#888' }}>{formatDate(scheduleInfo.dateRange[0])} - {formatDate(scheduleInfo.dateRange[1])}</Text>
                 </View>
                 {renderContent()}
             </View>
@@ -151,28 +174,21 @@ export default function ScheduleCreationAccommodation({ route }) {
 
     const renderContent = () => {
         return (
-            <View style={{ width: '100%', flex: 1, alignItems: 'center' }}>
-                <View style={{ width: '85%', flex: 1 }}>
-                    <Text style={{ fontSize: 18 }}>숙소 등록</Text>
+            <View style={{ width: '100%', flex: 1, alignItems: 'center', backgroundColor: 'white', borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingTop: 20 }}>
+                <View style={{ width: '90%', flex: 1 }}>
+                    <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 15, color: '#333' }}>예약된 숙소</Text>
                     <ScrollView style={{ width: '100%' }}>
-                        {selectedPlaces.length > 0 ? (
-                            selectedPlaces.map((place, index) => (
-                                <View key={index} style={styles.placeItem}>
-                                    <Text style={styles.placeTitle}>{place.title}</Text>
-                                    <Text style={styles.placeDetail}>입실시간: {place.checkInTime}</Text>
-                                    <Text style={styles.placeDetail}>퇴실시간: {place.checkOutTime}</Text>
-                                    <TouchableOpacity onPress={() => handleRemovePlace(index)} style={styles.removeButton}>
-                                        <Text style={styles.removeButtonText}>제거</Text>
-                                    </TouchableOpacity>
+                        {daysArray.map((dayRange, index) => (
+                            <View key={index} style={styles.placeItem}>
+                                <View>
+                                    <Text style={styles.placeTitle2}>{formatDate(dayRange.start)} ~ {formatDate(dayRange.end)}</Text>
+                                    <View style={styles.placeContentContainer}>
+                                        {renderPlaceContent(dayRange)}
+                                    </View>
                                 </View>
-                            ))
-                        ) : (
-                            <Text style={styles.noPlaceText}>등록된 숙소가 없습니다.</Text>
-                        )}
+                            </View>
+                        ))}
                     </ScrollView>
-                    <TouchableOpacity style={styles.addButton} onPress={() => setSearchModalVisible(true)}>
-                        <Text style={styles.addButtonText}>숙소 추가하기</Text>
-                    </TouchableOpacity>
                 </View>
             </View>
         );
@@ -187,8 +203,12 @@ export default function ScheduleCreationAccommodation({ route }) {
     };
 
     const formatDate = (date) => {
-        // 날짜를 포맷하는 유틸리티 함수
-        return new Date(date).toLocaleDateString();
+        return new Date(date).toLocaleDateString('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            weekday: 'short',
+        });
     };
 
     return (
@@ -221,7 +241,9 @@ export default function ScheduleCreationAccommodation({ route }) {
                             {placeList.length > 0 ? (
                                 renderPlaceList()
                             ) : (
-                                <Text style={{ marginTop: 20 }}>검색 결과 없음</Text>
+                                <View style={styles.noResultsContainer}>
+                                    <Text style={styles.noResultsText}>"검색 결과 없음"</Text>
+                                </View>
                             )}
                         </ScrollView>
                         <TouchableOpacity
@@ -246,13 +268,13 @@ export default function ScheduleCreationAccommodation({ route }) {
                         <Text style={styles.modalTitle}>시간 입력</Text>
                         <TextInput
                             style={styles.timeInput}
-                            placeholder="입실 시간을 입력하세요. (예: 2024.11.13 10:00)"
+                            placeholder="입실 시간 (예: 10:00)"
                             value={checkInTime}
                             onChangeText={(text) => setCheckInTime(text)}
                         />
                         <TextInput
                             style={styles.timeInput}
-                            placeholder="퇴실 시간을 입력하세요. (예: 2024.11.14 10:00)"
+                            placeholder="퇴실 시간 (예: 10:00)"
                             value={checkOutTime}
                             onChangeText={(text) => setCheckOutTime(text)}
                         />
@@ -324,17 +346,24 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContent: {
-        width: '80%',
+        width: '85%',
         maxHeight: '80%',
         padding: 20,
         backgroundColor: 'white',
-        borderRadius: 10,
+        borderRadius: 20,
         alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
+
     modalTitle: {
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 10,
+        color: '#333',
     },
     searchContainer: {
         flexDirection: 'row',
@@ -344,14 +373,14 @@ const styles = StyleSheet.create({
     searchInput: {
         flex: 1,
         height: 40,
-        borderColor: 'gray',
+        borderColor: '#ccc',
         borderWidth: 1,
-        borderRadius: 5,
+        borderRadius: 10,
         paddingHorizontal: 10,
     },
     searchButton: {
-        backgroundColor: 'blue',
-        borderRadius: 5,
+        backgroundColor: '#000000',
+        borderRadius: 10,
         padding: 10,
         justifyContent: 'center',
         alignItems: 'center',
@@ -369,75 +398,127 @@ const styles = StyleSheet.create({
         padding: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
+        backgroundColor: '#f8f8f8',
+        borderRadius: 10,
+        marginBottom: 10,
     },
     timeInput: {
         width: '100%',
         height: 40,
-        borderColor: 'gray',
+        borderColor: '#ccc',
         borderWidth: 1,
-        borderRadius: 5,
+        borderRadius: 10,
         paddingHorizontal: 10,
         marginTop: 10,
+        backgroundColor: '#f8f8f8',
     },
     selectButton: {
-        backgroundColor: 'green',
-        borderRadius: 5,
+        backgroundColor: '#000000',
+        borderRadius: 10,
         padding: 10,
         alignItems: 'center',
         marginTop: 20,
+        width: 270,
     },
     selectButtonText: {
         color: 'white',
         fontWeight: 'bold',
     },
     closeButton: {
-        backgroundColor: 'red',
-        borderRadius: 5,
+        backgroundColor: '#000000',
+        borderRadius: 10,
         padding: 10,
         alignItems: 'center',
         marginTop: 20,
+        paddingHorizontal: 110,
     },
     closeButtonText: {
         color: 'white',
         fontWeight: 'bold',
     },
     placeItem: {
-        padding: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
-        marginBottom: 10,
+        padding: 15,
+        marginBottom: 15,
+        backgroundColor: '#faf6f6',
+        borderRadius: 10,
+
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+
+    },
+    placeItemHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 5,
     },
     placeTitle: {
-        fontSize: 16,
+        fontSize: 15,
         fontWeight: 'bold',
+        color: '#333',
+
+    },
+    placeTitle2: {
+        fontSize: 15,
+        fontWeight: 'bold',
+        color: '#333',
+        marginLeft:20
+
     },
     placeDetail: {
         fontSize: 14,
+        color: '#666',
     },
     removeButton: {
-        backgroundColor: 'red',
-        borderRadius: 5,
-        padding: 10,
-        alignItems: 'center',
         marginTop: 10,
+        alignItems: 'center',
     },
     removeButtonText: {
-        color: 'white',
+        fontSize: 16,
+        color: '#f44336',
         fontWeight: 'bold',
     },
     noPlaceText: {
         fontSize: 16,
         color: 'gray',
-    },
-    addButton: {
-        backgroundColor: 'blue',
-        borderRadius: 5,
-        padding: 15,
-        alignItems: 'center',
+        textAlign: 'center',
         marginTop: 20,
     },
-    addButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
+    addButton: {
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 10,
+        alignItems: 'center',
+        marginTop: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+        marginLeft:20
     },
+    addButtonText: {
+        color: 'black',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    noResultsContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    noResultsText: {
+        margin: 10,
+        textAlign: 'center',
+        fontSize: 16,
+        color: 'gray',
+    },
+    placeContentContainer: {
+        marginTop: 10, // 날짜와 content 사이에 공간을 추가
+    },
+    render:{
+        marginLeft:20
+    }
+
 });

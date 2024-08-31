@@ -350,33 +350,33 @@ const TripCalendar = ({ route }) => {
                     iconName = 'sun';
                     IconComponent = Feather;
                 }else if (sky === '3'){
-                //     구름 많음
+                    //     구름 많음
                     weatherName = '구름많음';
                     iconName = 'day-cloudy';
                     IconComponent = Fontisto;
                 }else {
-                //     흐림
+                    //     흐림
                     weatherName = '흐림';
                     iconName = 'cloudy';
                     IconComponent = Fontisto;
                 }
             } else if (pty === '1'){
-            //     비
+                //     비
                 weatherName = '비';
                 iconName = 'weather-pouring';
                 IconComponent = MaterialCommunityIcons;
             }else if (pty === '2'){
-            //     비/눈
+                //     비/눈
                 weatherName = '비 / 눈';
                 iconName = 'weather-snowy-rainy';
                 IconComponent = MaterialCommunityIcons;
             }else if (pty === '3'){
-            //     눈
+                //     눈
                 weatherName = '눈';
                 iconName = 'weather-snowy';
                 IconComponent = MaterialCommunityIcons;
             }else if (pty === '4'){
-            //     소나기
+                //     소나기
                 weatherName = '소나기';
                 iconName = 'weather-pouring';
                 IconComponent = MaterialCommunityIcons;
@@ -423,9 +423,7 @@ const TripCalendar = ({ route }) => {
                     <Text style={styles.headerText}>NUVIDA</Text>
                 </View>
                 <View style={[styles.headerIconContainer, { width: '30%', height: '100%' }]}>
-                    <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('BaseballSchedule')}>
-                        <AntDesign name="calendar" size={24} color="black" />
-                    </TouchableOpacity>
+
                     <TouchableOpacity style={styles.headerIcon} onPress={handleNoticeIconPress}>
                         {notiState?(
                             <MaterialCommunityIcons name="bell-plus" size={24} color="red" />
@@ -440,16 +438,26 @@ const TripCalendar = ({ route }) => {
 
     const renderCalendarHeader = () => {
         return (
-            <View style={styles.calendarHeader}>
-                <TouchableOpacity onPress={() => setCurrentDate(currentDate.clone().subtract(1, 'month'))}>
-                    <AntDesign name="left" size={24} color="black" />
-                </TouchableOpacity>
-                <Text style={styles.calendarHeaderText}>
-                    {currentDate.format('YYYY년 M월')}
-                </Text>
-                <TouchableOpacity onPress={() => setCurrentDate(currentDate.clone().add(1, 'month'))}>
-                    <AntDesign name="right" size={24} color="black" />
-                </TouchableOpacity>
+            <View style={[styles.calendarHeader, {marginTop: '2%'}]}>
+
+                <View style={{width: '72%', height: '100%', marginLeft: '2%'}}>
+                    <Text style={styles.calendarHeaderText}>
+                        {currentDate.format('YYYY. MM')}
+                    </Text>
+                </View>
+                <View style={{width: '26%', height: '100%', flexDirection: 'row'}}>
+                    <View style={{width: '45%', height: '100%', alignItems: 'center'}}>
+                        <TouchableOpacity onPress={() => setCurrentDate(currentDate.clone().subtract(1, 'month'))}>
+                            <Entypo name="chevron-with-circle-left" size={24} color="black" />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={{width: '10%', height: '100%'}}></View>
+                    <View style={{width: '45%', height: '100%', alignItems: 'center', }}>
+                        <TouchableOpacity onPress={() => setCurrentDate(currentDate.clone().add(1, 'month'))}>
+                            <Entypo name="chevron-with-circle-right" size={24} color="black" />
+                        </TouchableOpacity>
+                    </View>
+                </View>
             </View>
         );
     };
@@ -483,94 +491,104 @@ const TripCalendar = ({ route }) => {
         const today = moment().format('YYYY-MM-DD'); // 오늘 날짜
 
         return (
-            <View style={styles.calendar}>
-                <View style={styles.weekdays}>
-                    {['일', '월', '화', '수', '목', '금', '토'].map(day => (
-                        <Text key={day} style={styles.weekdayText}>{day}</Text>
+            <View style={[styles.calendar,]}>
+                <View style={{width: '100%', height: '5%', flexDirection: 'row'}}>
+                    <View style={[styles.center, {width: '30%', height: '100%', marginLeft: '70%'}]}>
+                        <TouchableOpacity style={[{borderColor: '#A5A5A5', borderWidth: 1, borderRadius: 10, width: '70%', height: '82%'}, styles.center]} onPress={() => navigation.navigate("ScheduleCreation1", {userInfo:userInfo})}>
+                            <Text style={{}}>일정 추가</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+                <View style={{width : '100%', height: '95%'}}>
+                    <View style={[styles.weekdays]}>
+                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                            <Text key={day} style={{fontSize: 11}}>{day}</Text>
+                        ))}
+                    </View>
+                    {calendar.map((week, index) => (
+                        <View key={index} style={styles.week}>
+                            {week.map((day, idx) => {
+                                if (day === null) {
+                                    return <View key={idx} style={styles.emptyDay} />;
+                                }
+                                const dateString = moment(`${year}-${month}-${day}`).format('YYYY-MM-DD');
+                                const isMarked = markedDates[dateString]?.marked;
+                                const isToday = dateString === today; // 오늘 날짜인지 확인
+                                const plans = markedDates[dateString]?.plans || [];
+                                const weatherInfo = weatherData[dateString];
+                                const midWeatherInfo = midWeatherData[dateString];
+
+                                // 이 날짜가 일정의 시작일, 중간일, 끝나는 날인지 확인하는 로직 추가
+                                let isStart = false;
+                                let isEnd = false;
+
+                                plans.forEach(plan => {
+                                    const planStart = moment(plan.start_date).format('YYYY-MM-DD');
+                                    const planEnd = moment(plan.end_date).format('YYYY-MM-DD');
+                                    if (dateString === planStart) isStart = true;
+                                    if (dateString === planEnd) isEnd = true;
+                                });
+
+                                return (
+                                    <View
+                                        key={idx}
+                                        style={[
+                                            styles.dayContainer,
+                                            isStart && styles.planStart, // 시작 날짜 스타일
+                                            isEnd && styles.planEnd, // 종료 날짜 스타일
+                                            isStart && isEnd && styles.planSingleDay // 단일 날짜일 경우 스타일
+                                        ]}
+                                    >
+                                        {day ? (
+                                            <>
+                                                <View style={styles.day}>
+                                                    <View style={styles.dateAndIcon}>
+                                                        {isToday ? (
+                                                            <Text style={[styles.todayText]}>
+                                                                {day}
+                                                            </Text>
+                                                        ) : (
+                                                            <Text style={[styles.dayText, isMarked && { color: 'black' }]}>
+                                                                {day}
+                                                            </Text>
+                                                        )}
+
+                                                        {weatherInfo && (
+                                                            <weatherInfo.IconComponent
+                                                                name={weatherInfo.iconName}
+                                                                size={16} // 크기를 조정하여 날짜와 조화를 이루도록 함
+                                                                color="black"
+                                                                style={styles.weatherIcon}
+                                                            />
+                                                        )}
+                                                        {midWeatherInfo && (
+                                                            <midWeatherInfo.IconComponent
+                                                                name={midWeatherInfo.iconName}
+                                                                size={16} // 크기를 조정하여 날짜와 조화를 이루도록 함
+                                                                color="black"
+                                                                style={styles.weatherIcon}
+                                                            />
+                                                        )}
+                                                    </View>
+                                                </View>
+                                                <View style={styles.plansContainer}>
+                                                    {plans.map((plan, i) => (
+                                                        <TouchableOpacity key={i} style={styles.planMarker} onPress={() => navigation.navigate("TripSchedule", { userInfo: userInfo, plan_seq: plan.seq })}>
+                                                            <Text style={styles.planMarkerText}>{plan.name}</Text>
+                                                        </TouchableOpacity>
+                                                    ))}
+                                                </View>
+                                            </>
+                                        ) : (
+                                            <View style={styles.emptyDay} />
+                                        )}
+                                    </View>
+                                );
+                            })}
+                        </View>
                     ))}
                 </View>
-                {calendar.map((week, index) => (
-                    <View key={index} style={styles.week}>
-                        {week.map((day, idx) => {
-                            if (day === null) {
-                                return <View key={idx} style={styles.emptyDay} />;
-                            }
-                            const dateString = moment(`${year}-${month}-${day}`).format('YYYY-MM-DD');
-                            const isMarked = markedDates[dateString]?.marked;
-                            const isToday = dateString === today; // 오늘 날짜인지 확인
-                            const plans = markedDates[dateString]?.plans || [];
-                            const weatherInfo = weatherData[dateString];
-                            const midWeatherInfo = midWeatherData[dateString];
 
-                            // 이 날짜가 일정의 시작일, 중간일, 끝나는 날인지 확인하는 로직 추가
-                            let isStart = false;
-                            let isEnd = false;
-
-                            plans.forEach(plan => {
-                                const planStart = moment(plan.start_date).format('YYYY-MM-DD');
-                                const planEnd = moment(plan.end_date).format('YYYY-MM-DD');
-                                if (dateString === planStart) isStart = true;
-                                if (dateString === planEnd) isEnd = true;
-                            });
-
-                            return (
-                                <View
-                                    key={idx}
-                                    style={[
-                                        styles.dayContainer,
-                                        isStart && styles.planStart, // 시작 날짜 스타일
-                                        isEnd && styles.planEnd, // 종료 날짜 스타일
-                                        isStart && isEnd && styles.planSingleDay // 단일 날짜일 경우 스타일
-                                    ]}
-                                >
-                                    {day ? (
-                                        <>
-                                            <View style={styles.day}>
-                                                <View style={styles.dateAndIcon}>
-                                                    {isToday ? (
-                                                        <Text style={[styles.todayText]}>
-                                                            {day}
-                                                        </Text>
-                                                    ) : (
-                                                        <Text style={[styles.dayText, isMarked && { color: 'black' }]}>
-                                                            {day}
-                                                        </Text>
-                                                    )}
-
-                                                    {weatherInfo && (
-                                                        <weatherInfo.IconComponent
-                                                            name={weatherInfo.iconName}
-                                                            size={16} // 크기를 조정하여 날짜와 조화를 이루도록 함
-                                                            color="black"
-                                                            style={styles.weatherIcon}
-                                                        />
-                                                    )}
-                                                    {midWeatherInfo && (
-                                                        <midWeatherInfo.IconComponent
-                                                            name={midWeatherInfo.iconName}
-                                                            size={16} // 크기를 조정하여 날짜와 조화를 이루도록 함
-                                                            color="black"
-                                                            style={styles.weatherIcon}
-                                                        />
-                                                    )}
-                                                </View>
-                                            </View>
-                                            <View style={styles.plansContainer}>
-                                                {plans.map((plan, i) => (
-                                                    <TouchableOpacity key={i} style={styles.planMarker} onPress={() => navigation.navigate("TripSchedule", { userInfo: userInfo, plan_seq: plan.seq })}>
-                                                        <Text style={styles.planMarkerText}>{plan.name}</Text>
-                                                    </TouchableOpacity>
-                                                ))}
-                                            </View>
-                                        </>
-                                    ) : (
-                                        <View style={styles.emptyDay} />
-                                    )}
-                                </View>
-                            );
-                        })}
-                    </View>
-                ))}
             </View>
         );
     };
@@ -643,12 +661,9 @@ const TripCalendar = ({ route }) => {
         <View style={styles.container}>
             {renderHeader()}
             {renderCalendarHeader()}
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
-                {renderCalendar()}
-                <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate("ScheduleCreation1", {userInfo:userInfo})}>
-                    <Text style={styles.addButtonText}>일정 추가</Text>
-                </TouchableOpacity>
-            </ScrollView>
+            {/*<ScrollView contentContainerStyle={styles.scrollContainer}>*/}
+            {renderCalendar()}
+            {/*</ScrollView>*/}
             <View style={styles.tabBar}>
                 <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Main')}>
                     <Entypo name="home" size={24} color="black" />
@@ -713,7 +728,7 @@ const styles = StyleSheet.create({
     },
     calendarHeaderText: {
         fontSize: 18,
-        fontWeight: 'bold',
+        fontWeight: 'medium',
     },
     scrollContainer: {
         paddingBottom: 100,
@@ -728,7 +743,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         paddingVertical: 10,
         borderBottomWidth: 1,
-        borderColor: '#ccc',
+        borderColor: '#F0F0F0',
     },
     weekdayText: {
         fontSize: 16,

@@ -119,11 +119,13 @@ const ScheduleCreation3 = ({ route, navigation }) => {
 
     const renderFriendItem = ({ item }) => (
         <View style={styles.friendItem}>
-            <Text>{item.user_nick}</Text>
-            {selectedFriends.find(friend => friend.user_id === item.user_id) ? null : (
-                <Button title="초대" onPress={() => selectFriend(item)} />
-            )}
-            <Button title="X" onPress={() => setSelectedFriends(selectedFriends.filter(friend => friend.user_id !== item.user_id))} />
+            <View style={styles.friendIconContainer}>
+                <Entypo name="user" size={24} color="gray" />
+            </View>
+            <Text style={styles.friendName}>{item.user_nick}</Text>
+            <TouchableOpacity style={styles.removeButton} onPress={() => setSelectedFriends(selectedFriends.filter(friend => friend.user_id !== item.user_id))}>
+                <Entypo name="cross" size={24} color="black" />
+            </TouchableOpacity>
         </View>
     );
 
@@ -192,11 +194,19 @@ const ScheduleCreation3 = ({ route, navigation }) => {
         let current = new Date(start);
 
         if (!end) {
-            dates[start.toISOString().split('T')[0]] = { selected: true, color: 'blue', textColor: 'white' };
+            dates[start.toISOString().split('T')[0]] = {
+                selected: true,
+                color: '#FF6347',
+                textColor: 'white',
+            };
         } else {
             while (current <= end) {
                 const dateString = current.toISOString().split('T')[0];
-                dates[dateString] = { selected: true, color: 'blue', textColor: 'white' };
+                dates[dateString] = {
+                    selected: true,
+                    color: '#FF6347',
+                    textColor: 'white',
+                };
                 current.setDate(current.getDate() + 1);
             }
         }
@@ -213,8 +223,10 @@ const ScheduleCreation3 = ({ route, navigation }) => {
                     markedDates={markedDates}
                     markingType={'period'}
                 />
-                <Button title="취소" onPress={toggleDateModal} />
-                <Button title="다음" onPress={() => {
+                <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={toggleDateModal}>
+                    <Text style={styles.buttonText}>취소</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.button, styles.nextButton]} onPress={() => {
                     if (!dateRange.startDate || !dateRange.endDate || dateRange.startDate >= dateRange.endDate) {
                         alert("올바른 날짜 범위를 선택하세요.");
                         return;
@@ -225,7 +237,9 @@ const ScheduleCreation3 = ({ route, navigation }) => {
                         endTimes: Array.from({ length: Math.floor((dateRange.endDate - dateRange.startDate) / (1000 * 60 * 60 * 24)) + 1 }, () => new Date(new Date().setHours(18, 0)))
                     });
                     toggleTimeSelectionModal();
-                }} />
+                }}>
+                    <Text style={styles.buttonText}>다음</Text>
+                </TouchableOpacity>
             </View>
         </Modal>
     );
@@ -252,29 +266,49 @@ const ScheduleCreation3 = ({ route, navigation }) => {
         );
     };
 
+    const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // 월을 2자리로 맞추기
+        const day = String(date.getDate()).padStart(2, '0'); // 일을 2자리로 맞추기
+        return `${year}.${month}.${day}.`;
+    };
+
     const renderTimeSelectionModal = () => (
         <Modal isVisible={isTimeSelectionModalVisible}>
             <View style={styles.modalContent}>
                 <View style={styles.timeHeader}>
-                    <Text>여행 시작 시간</Text>
-                    <Text>여행 종료 시간</Text>
+                    <Text style={styles.timeText}>여행 시작 시간</Text>
+                    <Text style={styles.timeText}>여행 종료 시간</Text>
                 </View>
                 {Array.from({ length: Math.floor((dateRange.endDate - dateRange.startDate) / (1000 * 60 * 60 * 24)) + 1 }, (_, i) => (
                     <View key={i} style={styles.timeRow}>
-                        <Text>{new Date(dateRange.startDate.getTime() + i * 24 * 60 * 60 * 1000).toLocaleDateString()}</Text>
-                        <Button title={formatTime(times.startTimes[i])} onPress={() => toggleTimePicker(i, 'start')} />
-                        <Button title={formatTime(times.endTimes[i])} onPress={() => toggleTimePicker(i, 'end')} />
+                        <Text style={styles.dateText}>{formatDate(new Date(dateRange.startDate.getTime() + i * 24 * 60 * 60 * 1000))}</Text>
+                        <View style={styles.fixedButtonContainer}>
+                            <TouchableOpacity style={styles.customButton} onPress={() => toggleTimePicker(i, 'start')}>
+                                <Text style={styles.buttonText2}>{formatTime(times.startTimes[i])}</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.fixedButtonContainer}>
+                            <TouchableOpacity style={styles.customButton} onPress={() => toggleTimePicker(i, 'end')}>
+                                <Text style={styles.buttonText2}>{formatTime(times.endTimes[i])}</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 ))}
                 <View style={styles.buttonRow}>
-                    <Button title="이전" onPress={() => {
+                    <TouchableOpacity style={styles.customButton2} onPress={() => {
                         toggleTimeSelectionModal();
                         toggleDateModal();
-                    }} />
-                    <Button title="완료" onPress={toggleTimeSelectionModal} />
+                    }}>
+                        <Text style={styles.buttonText2}>이전</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.customButton2} onPress={toggleTimeSelectionModal}>
+                        <Text style={styles.buttonText2}>완료</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
         </Modal>
+
     );
 
     if (loading) {
@@ -299,12 +333,17 @@ const ScheduleCreation3 = ({ route, navigation }) => {
         <View style={styles.container}>
             {renderHeader()}
             <Text style={styles.title}>{scheduleInfo.plan_name}</Text>
-            <TouchableOpacity onPress={toggleDateModal}>
-                <Text>
-                    {`${dateRange.startDate ? dateRange.startDate.toLocaleDateString() : ''} - ${dateRange.endDate ? dateRange.endDate.toLocaleDateString() : ''}`}
-                </Text>
+            <View style={styles.dateContainer}>
+                <TouchableOpacity style={styles.dateButton} onPress={toggleDateModal}>
+                    <FontAwesome name="calendar" size={24} color="black" />
+                    <Text style={styles.dateText}>
+                        {`${dateRange.startDate ? dateRange.startDate.toLocaleDateString() : ''} - ${dateRange.endDate ? dateRange.endDate.toLocaleDateString() : ''}`}
+                    </Text>
+                </TouchableOpacity>
+            </View>
+            <TouchableOpacity style={styles.inviteButton} onPress={toggleFriendsModal}>
+                <Text style={styles.inviteButtonText}>일행 초대</Text>
             </TouchableOpacity>
-            <Button title="일행 초대" onPress={toggleFriendsModal} />
             <FlatList
                 data={selectedFriends}
                 renderItem={renderFriendItem}
@@ -314,16 +353,25 @@ const ScheduleCreation3 = ({ route, navigation }) => {
             <Modal isVisible={isFriendsModalVisible}>
                 <View style={styles.modalContent}>
                     {friendsList.map(friend => (
-                        <View key={friend.user_id} style={styles.friendItem}>
-                            <Text>{friend.user_nick}</Text>
+                        <View key={friend.user_id} style={styles.friendItem2}>
+                            <View style={styles.friendIconContainer}>
+                                <Entypo name="user" size={24} color="gray" />
+                            </View>
+                            <Text style={styles.friendName}>{friend.user_nick}</Text>
                             {selectedFriends.find(selectedFriend => selectedFriend.user_id === friend.user_id) ? (
-                                <Text>초대됨</Text>
+                                <View style={styles.inviteButton3}>
+                                    <Text style={styles.invitedText}>초대완료</Text>
+                                </View>
                             ) : (
-                                <Button title="초대" onPress={() => selectFriend(friend)} />
+                                <TouchableOpacity style={styles.inviteButton2} onPress={() => selectFriend(friend)}>
+                                    <Text style={styles.inviteButtonText2}>초대</Text>
+                                </TouchableOpacity>
                             )}
                         </View>
                     ))}
-                    <Button title="닫기" onPress={toggleFriendsModal} />
+                    <TouchableOpacity style={styles.modalButton} onPress={toggleFriendsModal}>
+                        <Text style={styles.modalButtonText}>닫기</Text>
+                    </TouchableOpacity>
                 </View>
             </Modal>
 
@@ -365,13 +413,42 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        textAlign: 'center'
+        textAlign: 'center',
+        marginTop:25
     },
     friendItem: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingVertical: 10,
+        paddingHorizontal:10,
+        marginHorizontal: 20,
+        marginVertical:5,
+        backgroundColor: '#fff', // 그림자가 잘 보이도록 배경색 추가
+        borderRadius: 10, // 모서리 둥글게
+        // 그림자 효과 추가
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3.84,
+        elevation: 5, // Android에서의 그림자 효과
+    },
+    friendItem2: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 10,
+        paddingHorizontal:20,
+        marginVertical:5,
+        backgroundColor: '#fff', // 그림자가 잘 보이도록 배경색 추가
+        borderRadius: 10, // 모서리 둥글게
+        // 그림자 효과 추가
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3.84,
+        elevation: 5, // Android에서의 그림자 효과
+
     },
     modalContent: {
         backgroundColor: 'white',
@@ -382,8 +459,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-end',
         paddingVertical: 10,
+    },
+    timeText: {
+        marginLeft: 20,  // 텍스트 간의 간격을 조정할 때 사용
     },
     timeRow: {
         flexDirection: 'row',
@@ -440,6 +520,126 @@ const styles = StyleSheet.create({
     tabItem: {
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    dateContainer: {
+        alignItems: 'center',
+        marginBottom: 10,
+        marginTop:15
+
+    },
+    dateButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 15,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 10,
+        paddingHorizontal:70
+    },
+    dateText:{
+        marginLeft:10
+    },
+    inviteButton: {
+        backgroundColor: '#000000',
+        borderRadius: 10,
+        marginHorizontal:20,
+        alignItems: 'center',
+        paddingHorizontal:20,
+        paddingVertical:15,
+        marginBottom:5
+    },
+    inviteButtonText: {
+        color: '#fff',
+        fontSize: 17,
+        fontWeight: 'bold',
+    },
+    inviteButton2: {
+        backgroundColor: '#000000',
+        alignItems: 'center',
+        paddingHorizontal:20,
+        paddingVertical:5,
+        borderRadius:5,
+        paddingBottom:7
+    },
+    inviteButtonText2: {
+        color: '#fff',
+        fontSize: 13,
+        fontWeight: 'bold',
+    },
+    inviteButton3: {
+        alignItems: 'center',
+        paddingHorizontal:10,
+        paddingVertical:5,
+        borderRadius:5,
+        paddingBottom:7
+    },
+    friendIconContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#ddd',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 10,
+    },
+    friendName: {
+        flex: 1,
+        fontSize: 16,
+    },
+    invitedText: {
+        color: 'green',
+        fontWeight: 'bold',
+    },
+    modalButton: {
+        marginTop: 10,
+        padding: 10,
+        backgroundColor: '#000000',
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    modalButtonText: {
+        color: '#fff',
+        fontSize: 16,
+    },
+    button: {
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginVertical: 5,
+    },
+    cancelButton: {
+        backgroundColor: 'black',
+    },
+    nextButton: {
+        backgroundColor: 'black',
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    buttonText2: {
+        color: '#fff',
+        fontSize: 15,
+        fontWeight: 'bold',
+    },
+    fixedButtonContainer: {
+        marginRight :10
+    },
+    customButton: {
+        backgroundColor: 'black', // 버튼의 배경색 변경 (초록색)
+        padding:5,
+        borderRadius:3
+    },
+    customButton2: {
+        backgroundColor: 'black', // 버튼의 배경색 변경 (초록색)
+        paddingHorizontal:10,
+        marginHorizontal:5,
+        borderRadius:3,
+        paddingVertical:3,
+        paddingBottom:5
     },
 });
 
