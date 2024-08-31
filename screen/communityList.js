@@ -79,6 +79,10 @@ export default function CommunityList({route}) {
 
     const communityInfo = async (post_seq) =>{
         console.log(post_seq)
+        if(!userInfo){
+            return navigation.navigate("Signin");
+        }
+
         try {
             const response = await axios.post(`http://${localhost}:8090/nuvida/getCmtInfo`, {post_seq:post_seq});
             console.log(response.data);

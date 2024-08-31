@@ -172,7 +172,7 @@ const SignUp = () => {
             >
                 <ScrollView style={styles.container}>
                     <View style={styles.logoContainer}>
-                        <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("signin")}>
+                        <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("Signin")}>
                             <Ionicons name="arrow-back" size={24} color="black" />
 
                         </TouchableOpacity>

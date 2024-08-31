@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,  useEffect  } from 'react';
 import {
     StyleSheet,
     View,
@@ -11,7 +11,8 @@ import {
     Text,
     Alert,
     Platform,
-    ActivityIndicator
+    ActivityIndicator,
+    BackHandler
 } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
@@ -19,6 +20,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 
 const Signin = () => {
+
     const navigation = useNavigation();
     const [loginInfo, setLoginInfo] = useState({
         id: '',
@@ -27,6 +29,20 @@ const Signin = () => {
     const [loading, setLoading] = useState(false);
 
     const localhost = "192.168.55.35";
+
+    useEffect(() => {
+        const backAction = () => {
+            // 뒤로 가기 버튼을 막습니다.
+            return true;
+        };
+
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            backAction
+        );
+
+        return () => backHandler.remove();
+    }, []);
 
 
     const handleLoginChange = (name, value) => {
@@ -49,7 +65,6 @@ const Signin = () => {
                 const userInfoString = JSON.stringify(response.data);
                 await AsyncStorage.setItem('userInfo', userInfoString);
 
-                Alert.alert('로그인 성공', '환영합니다!');
                 navigation.navigate('Main');
             }
         } catch (error) {
@@ -99,7 +114,7 @@ const Signin = () => {
                         <TouchableOpacity style={[styles.button, styles.buttonLogin]} onPress={handleLogin}>
                             <Text style={styles.buttonText}>로그인</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.button, styles.buttonSignUp]} onPress={() => navigation.navigate('signUp')}>
+                        <TouchableOpacity style={[styles.button, styles.buttonSignUp]} onPress={() => navigation.navigate('SignUp')}>
                             <Text style={styles.buttonText}>회원가입</Text>
                         </TouchableOpacity>
                     </View>

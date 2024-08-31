@@ -135,7 +135,7 @@ const Mypage = ({route}) => {
             await AsyncStorage.removeItem('userInfo'); // AsyncStorage에서 사용자 정보 제거
             AsyncStorage.clear();
             setUserInfo(null); // 로컬 상태에서도 userInfo를 제거
-            navigation.navigate("Main"); // 로그아웃 후 메인 화면으로 이동
+            navigation.navigate("Signin"); // 로그아웃 후 메인 화면으로 이동
         } catch (error) {
             console.error("로그아웃 중 오류 발생:", error);
         }
