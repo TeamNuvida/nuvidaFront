@@ -134,6 +134,21 @@ const Userprofile = ({route}) => {
             );
             return ; // 함수를 여기서 종료하여 회원가입 절차를 중단합니다.
         }
+
+        try{
+            const response = await axios.post(`http://${localhost}:8090/nuvida/checkNick`,{
+                user_id: userInfo.user_id,
+                user_nick: user_nick,
+            });
+            if(!response.data){
+                Alert.alert("", "이미 존재하는 닉네임입니다.");
+                return  ;
+            }
+        }catch (e) {
+            console.error(e);
+        }
+
+
         
         try{
 

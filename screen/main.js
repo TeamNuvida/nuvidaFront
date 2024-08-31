@@ -511,7 +511,18 @@ export default function Main({ weather, particulateMatter, store, location }) {
         // return ((point / (weeklyBetData.kiaBtPoint + weeklyBetData.opBtPoint)) * 100).toFixed(2);
 
         const totalPoints = weeklyBetData.kiaBtPoint + weeklyBetData.opBtPoint;
+
         const percentage = (point / totalPoints) * 100;
+
+        // percentage가 NaN이면 0을 반환
+        return isNaN(percentage) ? 0 : percentage.toFixed(2);
+    };
+
+
+    const BtPointPersent = (totalPoint, point) => {
+
+
+        const percentage = (point / totalPoint) * 100;
 
         // percentage가 NaN이면 0을 반환
         return isNaN(percentage) ? 0 : percentage.toFixed(2);
@@ -661,7 +672,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                             </View>
                             <View style={{width: '100%', height: '63%', flexDirection: 'row'}}>
                                 <View style={{width: '65%', height: '100%', alignItems: 'center'}}>
-                                    <Text style={{fontSize: 37, fontWeight: 'bold',}}>{formatBtPoint(betData.kiaBtPoint+betData.opBtPoint, betData.kiaBtPoint)}%</Text>
+                                    <Text style={{fontSize: 37, fontWeight: 'bold',}}>{BtPointPersent(betData.kiaBtPoint+betData.opBtPoint, betData.kiaBtPoint)}%</Text>
                                 </View>
                                 <View style={{width: '35%', height: '100%',}}></View>
                             </View>
@@ -681,7 +692,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                             <View style={{width: '100%', height: '63%', flexDirection: 'row'}}>
                                 <View style={{width: '35%', height: '100%',}}></View>
                                 <View style={{width: '65%', height: '100%', alignItems: 'center'}}>
-                                    <Text style={{fontSize: 37, fontWeight: 'bold',}}>{formatBtPoint(betData.kiaBtPoint+betData.opBtPoint, betData.opBtPoint)}%</Text>
+                                    <Text style={{fontSize: 37, fontWeight: 'bold',}}>{BtPointPersent(betData.kiaBtPoint+betData.opBtPoint, betData.opBtPoint)}%</Text>
                                 </View>
                             </View>
                         </View>
@@ -745,7 +756,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                             </View>
                             <View style={{width: '100%', height: '63%', flexDirection: 'row'}}>
                                 <View style={{width: '65%', height: '100%', alignItems: 'center'}}>
-                                    <Text style={{fontSize: 37, fontWeight: 'bold',}}>{formatBtPoint(betData.kiaBtPoint+betData.opBtPoint, betData.kiaBtPoint)}%</Text>
+                                    <Text style={{fontSize: 37, fontWeight: 'bold',}}>{BtPointPersent(betData.kiaBtPoint+betData.opBtPoint, betData.kiaBtPoint)}%</Text>
                                 </View>
                                 <View style={{width: '35%', height: '100%',}}></View>
                             </View>
@@ -765,7 +776,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                             <View style={{width: '100%', height: '63%', flexDirection: 'row'}}>
                                 <View style={{width: '35%', height: '100%',}}></View>
                                 <View style={{width: '65%', height: '100%', alignItems: 'center'}}>
-                                    <Text style={{fontSize: 37, fontWeight: 'bold',}}>{formatBtPoint(betData.kiaBtPoint+betData.opBtPoint, betData.opBtPoint)}%</Text>
+                                    <Text style={{fontSize: 37, fontWeight: 'bold',}}>{BtPointPersent(betData.kiaBtPoint+betData.opBtPoint, betData.opBtPoint)}%</Text>
                                 </View>
                             </View>
                         </View>
@@ -806,7 +817,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                             </View>
                             <View style={{width: '100%', height: '63%', flexDirection: 'row'}}>
                                 <View style={{width: '65%', height: '100%', alignItems: 'center'}}>
-                                    <Text style={{fontSize: 37, fontWeight: 'bold',}}>{formatBtPoint(betData.kiaBtPoint+betData.opBtPoint, betData.kiaBtPoint)}%</Text>
+                                    <Text style={{fontSize: 37, fontWeight: 'bold',}}>{BtPointPersent(betData.kiaBtPoint+betData.opBtPoint, betData.kiaBtPoint)}%</Text>
                                 </View>
                                 <View style={{width: '35%', height: '100%',}}></View>
                             </View>
@@ -831,7 +842,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                             <View style={{width: '100%', height: '63%', flexDirection: 'row'}}>
                                 <View style={{width: '35%', height: '100%',}}></View>
                                 <View style={{width: '65%', height: '100%', alignItems: 'center'}}>
-                                    <Text style={{fontSize: 37, fontWeight: 'bold',}}>{formatBtPoint(betData.kiaBtPoint+betData.opBtPoint, betData.opBtPoint)}%</Text>
+                                    <Text style={{fontSize: 37, fontWeight: 'bold',}}>{BtPointPersent(betData.kiaBtPoint+betData.opBtPoint, betData.opBtPoint)}%</Text>
                                 </View>
                             </View>
                         </View>
@@ -844,10 +855,60 @@ export default function Main({ weather, particulateMatter, store, location }) {
             // 경기 종료
 
             if (!userBetData) {
+                // 경기 종료 베팅X
                 return (
-                    <View>
-                        <Text>경기 종료</Text>
-
+                    <View style={[styles.center_row, {height: '100%', width: '100%'}]}>
+                        <View style={{position: 'absolute', borderColor: '#0E1923', borderRadius: 10, borderWidth: 2.5, backgroundColor: '#fff', width: '40%', height: '37%', top: '37%', zIndex: 6, elevation: 5,}}>
+                            <View style={[styles.center_row, {width: '100%', height: '100%'}]}>
+                                <View style={[styles.center, {width: '37%', height: '100%', marginLeft: '3%'}]}>
+                                    <Image source={require('../assets/KIA.png')} style={[{width: '90%', height: '81%'}]} />
+                                </View>
+                                <View style={[styles.center, {width: '20%', height: '100%',}]}>
+                                    <Text style={{fontSize: 20, fontWeight: 'bold'}}>vs</Text>
+                                </View>
+                                <View style={[styles.center, {width: '37%', height: '100%', marginRight: '3%'}]}>
+                                    <Image source={logo[Number(matches.logo_img)]} style={{width: '90%', height: '81%'}} />
+                                </View>
+                            </View>
+                        </View>
+                        <View style={{width: '50%', height: '100%', borderColor: '#0E1923', borderRightWidth: 1, zIndex: 5}}>
+                            <View style={{width: '100%', height: '17%', marginTop: '20%'}}>
+                                <View style={{flexDirection: 'row'}}>
+                                    <View style={{width: '12%', height: '100%', marginLeft: '5%'}}>
+                                        <FontAwesome name="star" size={22} color="#FFC107" />
+                                        <Text style={{position: 'absolute', zIndex: 6, fontSize: 17, fontWeight: 'bold', left: '25%'}}>P</Text>
+                                    </View>
+                                    <View style={{width: '80%', height: '100%', marginLeft: '3%'}}>
+                                        <Text style={{fontSize: 17, fontWeight: 'bold'}}>{betData.kiaBtPoint}</Text>
+                                    </View>
+                                </View>
+                            </View>
+                            <View style={{width: '100%', height: '63%', flexDirection: 'row'}}>
+                                <View style={{width: '65%', height: '100%', alignItems: 'center'}}>
+                                    <Text style={{fontSize: 37, fontWeight: 'bold',}}>{BtPointPersent(betData.kiaBtPoint+betData.opBtPoint, betData.kiaBtPoint)}%</Text>
+                                </View>
+                                <View style={{width: '35%', height: '100%',}}></View>
+                            </View>
+                        </View>
+                        <View style={{width: '50%', height: '100%', borderColor: '#0E1923', borderLeftWidth: 1, zIndex: 5}}>
+                            <View style={{width: '100%', height: '17%', marginTop: '20%'}}>
+                                <View style={{flexDirection: 'row'}}>
+                                    <View style={{width: '80%', height: '100%', marginRight: '3%', alignItems:'flex-end'}}>
+                                        <Text style={{fontSize: 17, fontWeight: 'bold'}}>{betData.opBtPoint}</Text>
+                                    </View>
+                                    <View style={{width: '12%', height: '100%', marginRight: '5%'}}>
+                                        <FontAwesome name="star" size={22} color="#FFC107" />
+                                        <Text style={{position: 'absolute', zIndex: 6, fontSize: 17, fontWeight: 'bold', right: '25%'}}>P</Text>
+                                    </View>
+                                </View>
+                            </View>
+                            <View style={{width: '100%', height: '63%', flexDirection: 'row'}}>
+                                <View style={{width: '35%', height: '100%',}}></View>
+                                <View style={{width: '65%', height: '100%', alignItems: 'center'}}>
+                                    <Text style={{fontSize: 37, fontWeight: 'bold',}}>{BtPointPersent(betData.kiaBtPoint+betData.opBtPoint, betData.opBtPoint)}%</Text>
+                                </View>
+                            </View>
+                        </View>
                     </View>
                 );
             } else {
@@ -855,12 +916,12 @@ export default function Main({ weather, particulateMatter, store, location }) {
                 let getPoint = 0;
 
                 if(matches.state=='1'){
-                    if (userBetData.result=='1'){
+                    if (userBetData.result=='1' || userBetData.result=='4' ){
                         getPoint = userBetData.bt_point/betData.kiaBtPoint*totalPoint;
                     }
 
                 }else if (matches.state=='2'){
-                    if (userBetData.result=='1'){
+                    if (userBetData.result=='1'|| userBetData.result=='4'){
                         getPoint = userBetData.bt_point/betData.opBtPoint*totalPoint;
                     }
                 } else{
@@ -870,36 +931,172 @@ export default function Main({ weather, particulateMatter, store, location }) {
 
 
                 if(userBetData.result=='4'){
-                    console.log(matches)
                     return (
-                        <View>
-                            <Text>경기 종료</Text>
-                            {matches.state=='1'?(<Text>승리 팀 : KIA</Text>):(matches.state=='2'?(<Text>승리 팀 : {matches.team_name}</Text>):(matches.state=='3'?(<Text>동점</Text>):(<Text>우천취소</Text>)))}
-                            <Text>획득 포인트 : {getPoint}</Text>
-                            {userBetData.result=='1' ? (
-                                <Text style={{ color: 'black' }}>승리 팀 예측 성공</Text>
-                            ) : (
-                                <Text style={{ color: 'black' }}>승리 팀 예측 실패</Text>
-                            )}
+                        <View style={[styles.center_row, {height: '100%', width: '100%'}]}>
+                            <View style={{position: 'absolute', borderColor: '#0E1923', borderRadius: 10, borderWidth: 2.5, backgroundColor: '#fff', width: '40%', height: '37%', top: '37%', zIndex: 6, elevation: 5,}}>
+                                <View style={[styles.center_row, {width: '100%', height: '100%'}]}>
+                                    <View style={[styles.center, {width: '37%', height: '100%', marginLeft: '3%'}]}>
+                                        <Image source={require('../assets/KIA.png')} style={[{width: '90%', height: '81%'}]} />
+                                    </View>
+                                    <View style={[styles.center, {width: '20%', height: '100%',}]}>
+                                        <Text style={{fontSize: 20, fontWeight: 'bold'}}>vs</Text>
+                                    </View>
+                                    <View style={[styles.center, {width: '37%', height: '100%', marginRight: '3%'}]}>
+                                        <Image source={logo[Number(matches.logo_img)]} style={{width: '90%', height: '81%'}} />
+                                    </View>
+                                </View>
+                            </View>
+                            <View style={{width: '50%', height: '100%', borderColor: '#0E1923', borderRightWidth: 1, zIndex: 5}}>
+                                <View style={{width: '100%', height: '17%', marginTop: '20%'}}>
+                                    <View style={{flexDirection: 'row'}}>
+                                        <View style={{width: '12%', height: '100%', marginLeft: '5%'}}>
+                                            <FontAwesome name="star" size={22} color="#FFC107" />
+                                            <Text style={{position: 'absolute', zIndex: 6, fontSize: 17, fontWeight: 'bold', left: '25%'}}>P</Text>
+                                        </View>
+                                        <View style={{width: '80%', height: '100%', marginLeft: '3%'}}>
+                                            <Text style={{fontSize: 17, fontWeight: 'bold'}}>{betData.kiaBtPoint}</Text>
+                                            {matches.state=='1'?(
+                                                    <Text>획득 포인트 : {getPoint}</Text>
+                                            ):(
+                                                <Text>획득 포인트: 0</Text>
+                                            )}
+
+                                        </View>
+                                    </View>
+                                </View>
+                                <View style={{width: '100%', height: '63%', flexDirection: 'row'}}>
+                                    <View style={{width: '65%', height: '100%', alignItems: 'center'}}>
+                                        <Text style={{fontSize: 37, fontWeight: 'bold',}}>{BtPointPersent(betData.kiaBtPoint+betData.opBtPoint, betData.kiaBtPoint)}%</Text>
+                                    </View>
+                                    <View style={{width: '35%', height: '100%',}}></View>
+                                </View>
+                            </View>
+                            <View style={{width: '50%', height: '100%', borderColor: '#0E1923', borderLeftWidth: 1, zIndex: 5}}>
+                                <View style={{width: '100%', height: '17%', marginTop: '20%'}}>
+                                    <View style={{flexDirection: 'row'}}>
+                                        <View style={{width: '80%', height: '100%', marginRight: '3%', alignItems:'flex-end'}}>
+                                            <Text style={{fontSize: 17, fontWeight: 'bold'}}>{betData.opBtPoint}</Text>
+                                            {matches.state=='1'?(
+                                                <Text>획득 포인트: 0</Text>
+
+                                            ):(
+
+                                                <Text>획득 포인트 : {getPoint}</Text>
+                                            )}
+                                        </View>
+                                        <View style={{width: '12%', height: '100%', marginRight: '5%'}}>
+                                            <FontAwesome name="star" size={22} color="#FFC107" />
+                                            <Text style={{position: 'absolute', zIndex: 6, fontSize: 17, fontWeight: 'bold', right: '25%'}}>P</Text>
+                                        </View>
+                                    </View>
+                                </View>
+                                <View style={{width: '100%', height: '63%', flexDirection: 'row'}}>
+                                    <View style={{width: '35%', height: '100%',}}></View>
+                                    <View style={{width: '65%', height: '100%', alignItems: 'center'}}>
+                                        <Text style={{fontSize: 37, fontWeight: 'bold',}}>{BtPointPersent(betData.kiaBtPoint+betData.opBtPoint, betData.opBtPoint)}%</Text>
+                                    </View>
+                                </View>
+                            </View>
 
                         </View>
                     );
 
                 }else {
                     return (
-                        <View>
-                            <Text>경기 종료</Text>
-                            {matches.state=='1'?(<Text>승리 팀 : KIA</Text>):(matches.state=='2'?(<Text>승리 팀 : {matches.team_name}</Text>):(matches.state=='3'?(<Text>동점</Text>):(<Text>우천취소</Text>)))}
-                            <Text>획득 포인트 : {getPoint}</Text>
-                            {userBetData.result!='2' ? (
-                                <TouchableOpacity
-                                    style={{ backgroundColor: 'gray', padding: 10, borderRadius: 5, alignItems: 'center' }}
-                                    onPress={()=>handleGetPoint(getPoint)}
-                                >
-                                    <Text style={{ color: 'white' }}>포인트 획득</Text>
-                                </TouchableOpacity>
-                            ) : (
-                                <Text style={{ color: 'black' }}>승리 팀 예측 실패</Text>
+                        <View style={[styles.center_row, {height: '100%', width: '100%'}]}>
+                            <View style={{position: 'absolute', borderColor: '#0E1923', borderRadius: 10, borderWidth: 2.5, backgroundColor: '#fff', width: '40%', height: '37%', top: '37%', zIndex: 6, elevation: 5,}}>
+                                <View style={[styles.center_row, {width: '100%', height: '100%'}]}>
+                                    <View style={[styles.center, {width: '37%', height: '100%', marginLeft: '3%'}]}>
+                                        <Image source={require('../assets/KIA.png')} style={[{width: '90%', height: '81%'}]} />
+                                    </View>
+                                    <View style={[styles.center, {width: '20%', height: '100%',}]}>
+                                        <Text style={{fontSize: 20, fontWeight: 'bold'}}>vs</Text>
+                                    </View>
+                                    <View style={[styles.center, {width: '37%', height: '100%', marginRight: '3%'}]}>
+                                        <Image source={logo[Number(matches.logo_img)]} style={{width: '90%', height: '81%'}} />
+                                    </View>
+                                </View>
+                            </View>
+                            <View style={{width: '50%', height: '100%', borderColor: '#0E1923', borderRightWidth: 1, zIndex: 5}}>
+                                <View style={{width: '100%', height: '17%', marginTop: '20%'}}>
+                                    <View style={{flexDirection: 'row'}}>
+                                        <View style={{width: '12%', height: '100%', marginLeft: '5%'}}>
+                                            <FontAwesome name="star" size={22} color="#FFC107" />
+                                            <Text style={{position: 'absolute', zIndex: 6, fontSize: 17, fontWeight: 'bold', left: '25%'}}>P</Text>
+                                        </View>
+                                        <View style={{width: '80%', height: '100%', marginLeft: '3%'}}>
+                                            <Text style={{fontSize: 17, fontWeight: 'bold'}}>{betData.kiaBtPoint}</Text>
+                                            {matches.state=='1'?(
+                                                    <Text>획득 포인트 : {getPoint}</Text>
+
+
+                                            ):(
+                                                <Text>획득 포인트: 0</Text>
+
+                                            )}
+                                        </View>
+                                    </View>
+                                </View>
+                                <View style={{width: '100%', height: '63%', flexDirection: 'row'}}>
+                                    <View style={{width: '65%', height: '100%', alignItems: 'center'}}>
+                                        <Text style={{fontSize: 37, fontWeight: 'bold',}}>{BtPointPersent(betData.kiaBtPoint+betData.opBtPoint, betData.kiaBtPoint)}%</Text>
+                                    </View>
+                                    <View style={{width: '35%', height: '100%',}}></View>
+                                </View>
+                            </View>
+                            <View style={{width: '50%', height: '100%', borderColor: '#0E1923', borderLeftWidth: 1, zIndex: 5}}>
+                                <View style={{width: '100%', height: '17%', marginTop: '20%'}}>
+                                    <View style={{flexDirection: 'row'}}>
+                                        <View style={{width: '80%', height: '100%', marginRight: '3%', alignItems:'flex-end'}}>
+                                            <Text style={{fontSize: 17, fontWeight: 'bold'}}>{betData.opBtPoint}</Text>
+                                            {matches.state=='1'?(
+                                                <Text>획득 포인트: 0</Text>
+
+                                            ):(
+                                                <Text>획득 포인트 : {getPoint}</Text>
+                                            )}
+                                        </View>
+                                        <View style={{width: '12%', height: '100%', marginRight: '5%'}}>
+                                            <FontAwesome name="star" size={22} color="#FFC107" />
+                                            <Text style={{position: 'absolute', zIndex: 6, fontSize: 17, fontWeight: 'bold', right: '25%'}}>P</Text>
+                                        </View>
+                                    </View>
+                                </View>
+                                <View style={{width: '100%', height: '63%', flexDirection: 'row'}}>
+                                    <View style={{width: '35%', height: '100%',}}></View>
+                                    <View style={{width: '65%', height: '100%', alignItems: 'center'}}>
+                                        <Text style={{fontSize: 37, fontWeight: 'bold',}}>{BtPointPersent(betData.kiaBtPoint+betData.opBtPoint, betData.opBtPoint)}%</Text>
+                                    </View>
+                                </View>
+                            </View>
+
+                            { userBetData.result!='2' ?( matches.state=='1' ?(
+                                        <TouchableOpacity style={{ position: 'absolute', width: '35%', height: 40, zIndex: 6, top: '89%', right: '57%', backgroundColor: '#0E1923', borderColor: '#fff', borderWidth: 2, borderRadius: 20}} onPress={() => handleGetPoint(getPoint)}>
+                                            <Text style={{ color: '#fff', fontSize: 14, margin: 'auto', fontWeight: 'bold' }}>포인트 획득</Text>
+                                        </TouchableOpacity>
+                                    ):(
+                                        <View style={{ position: 'absolute', width: '35%', height: 40, zIndex: 6, top: '89%', right: '57%', backgroundColor: '#808081', borderColor: '#fff', borderWidth: 2, borderRadius: 20}} >
+                                            <Text style={{ color: '#fff', fontSize: 14, margin: 'auto', fontWeight: 'bold' }}>예측 성공</Text>
+                                        </View>
+                                    )
+
+                            ):(
+                                <View style={{ position: 'absolute', width: '35%', height: 40, zIndex: 6, top: '89%', right: '57%', backgroundColor: '#808081', borderColor: '#fff', borderWidth: 2, borderRadius: 20}} >
+                                <Text style={{ color: '#fff', fontSize: 14, margin: 'auto', fontWeight: 'bold' }}>예측실패</Text>
+                                </View>
+                                )}
+                            { userBetData.result!='2' ?( matches.state=='1' ?(
+                                    <View style={{ position: 'absolute', width: '35%', height: 40, zIndex: 6, top: '89%', left: '57%', backgroundColor: '#808081', borderColor: '#fff', borderWidth: 2, borderRadius: 20}}  >
+                                        <Text style={{ color: '#fff', fontSize: 14, margin: 'auto', fontWeight: 'bold' }}>예측 성공</Text>
+                                    </View>
+                                ): (
+                                    <TouchableOpacity style={{ position: 'absolute', width: '35%', height: 40, zIndex: 6, top: '89%', left: '57%', backgroundColor: '#0E1923', borderColor: '#fff', borderWidth: 2, borderRadius: 20}} onPress={() => handleGetPoint(getPoint)} >
+                                        <Text style={{ color: '#fff', fontSize: 14, margin: 'auto', fontWeight: 'bold' }}>포인트 얻기</Text>
+                                    </TouchableOpacity>
+                                        )):(
+                                <View style={{ position: 'absolute', width: '35%', height: 40, zIndex: 6, top: '89%', left: '57%', backgroundColor: '#808081', borderColor: '#fff', borderWidth: 2, borderRadius: 20}}  >
+                                    <Text style={{ color: '#fff', fontSize: 14, margin: 'auto', fontWeight: 'bold' }}>예측 실패</Text>
+                                </View>
                             )}
                         </View>
                     );
@@ -940,7 +1137,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                     </View>
                     <View style={{width: '100%', height: '63%', flexDirection: 'row'}}>
                         <View style={{width: '65%', height: '100%', alignItems: 'center'}}>
-                            <Text style={{fontSize: 37, fontWeight: 'bold',}}>{formatBtPoint(betData.kiaBtPoint+betData.opBtPoint, betData.kiaBtPoint)}%</Text>
+                            <Text style={{fontSize: 37, fontWeight: 'bold',}}>{BtPointPersent(betData.kiaBtPoint+betData.opBtPoint, betData.kiaBtPoint)}%</Text>
                         </View>
                         <View style={{width: '35%', height: '100%',}}></View>
                     </View>
@@ -960,7 +1157,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                     <View style={{width: '100%', height: '63%', flexDirection: 'row'}}>
                         <View style={{width: '35%', height: '100%',}}></View>
                         <View style={{width: '65%', height: '100%', alignItems: 'center'}}>
-                            <Text style={{fontSize: 37, fontWeight: 'bold',}}>{formatBtPoint(betData.kiaBtPoint+betData.opBtPoint, betData.opBtPoint)}%</Text>
+                            <Text style={{fontSize: 37, fontWeight: 'bold',}}>{BtPointPersent(betData.kiaBtPoint+betData.opBtPoint, betData.opBtPoint)}%</Text>
                         </View>
                     </View>
                 </View>
@@ -1045,7 +1242,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                     </View>
                     <View style={{width: '100%', height: '63%', flexDirection: 'row'}}>
                         <View style={{width: '65%', height: '100%', alignItems: 'center'}}>
-                            <Text style={{fontSize: 37, fontWeight: 'bold',}}>{formatBtPoint(betData.kiaBtPoint+betData.opBtPoint, betData.kiaBtPoint)}%</Text>
+                            <Text style={{fontSize: 37, fontWeight: 'bold',}}>{BtPointPersent(betData.kiaBtPoint+betData.opBtPoint, betData.kiaBtPoint)}%</Text>
                         </View>
                         <View style={{width: '35%', height: '100%',}}></View>
                     </View>
@@ -1070,7 +1267,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                     <View style={{width: '100%', height: '63%', flexDirection: 'row'}}>
                         <View style={{width: '35%', height: '100%',}}></View>
                         <View style={{width: '65%', height: '100%', alignItems: 'center'}}>
-                            <Text style={{fontSize: 37, fontWeight: 'bold',}}>{formatBtPoint(betData.kiaBtPoint+betData.opBtPoint, betData.opBtPoint)}%</Text>
+                            <Text style={{fontSize: 37, fontWeight: 'bold',}}>{BtPointPersent(betData.kiaBtPoint+betData.opBtPoint, betData.opBtPoint)}%</Text>
                         </View>
                     </View>
                 </View>
@@ -1368,7 +1565,6 @@ export default function Main({ weather, particulateMatter, store, location }) {
     };
 
     // 이번주 경기 일정
-    // cs 나중에 수정하기
     const renderWeeklyMatchList = () => {
         return weeklyMatchData.map((page) => (
             <View key={page.bs_seq} style={styles.center}>
