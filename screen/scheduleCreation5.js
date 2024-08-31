@@ -12,7 +12,7 @@ export default function ScheduleCreation5({route}) {
     const [loading, setLoading] = useState(true); // 로딩 상태 추가
     const scheduleInfo = route.params.scheduleInfo; // 일정 생성 정보
 
-    const localhost = '192.168.55.35';
+    const localhost = "54.180.146.203";
 
     const [reservations, setReservations] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);

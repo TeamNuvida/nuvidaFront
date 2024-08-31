@@ -39,7 +39,7 @@ const Betting = ({route}) => {
 
     const [userInfo, setUserInfo] = useState(route.params.userInfo);
 
-    const localhost = '192.168.55.35';
+    const localhost = "54.180.146.203";
 
     const [battingList, setBattingList] = useState(null);
 

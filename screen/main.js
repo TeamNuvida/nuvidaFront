@@ -52,7 +52,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
     const [notiState, setNotiState] = useState(false);
 
     // localhost 주소값
-    const localhost = '192.168.55.35';
+    const localhost = "54.180.146.203";
 
     const logo = [
         require("../assets/KIA.png"),

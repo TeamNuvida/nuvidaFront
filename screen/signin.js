@@ -28,7 +28,7 @@ const Signin = () => {
     });
     const [loading, setLoading] = useState(false);
 
-    const localhost = "192.168.55.35";
+    const localhost = "54.180.146.203";
 
     useEffect(() => {
         const backAction = () => {

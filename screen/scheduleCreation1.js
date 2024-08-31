@@ -11,7 +11,7 @@ export default function ScheduleCreation1({route}) {
     const [loading, setLoading] = useState(true); // 로딩 상태 추가
 
     // localhost 주소값
-    const localhost = '192.168.55.35';
+    const localhost = "54.180.146.203";
 
     // 유저 정보 (테스트용)
     useEffect(() => {

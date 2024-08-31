@@ -63,7 +63,7 @@ const Userprofile = ({route}) => {
     const [user_phone, setUser_phone] = useState(userInfo.user_phone);
 
 
-    const localhost = '192.168.55.35';
+    const localhost = "54.180.146.203";
 
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({

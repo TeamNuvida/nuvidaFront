@@ -12,7 +12,7 @@ export default function CommunityList({route}) {
 
     const [notiState, setNotiState] = useState(false);
 
-    const localhost = '192.168.55.35';
+    const localhost = "54.180.146.203";
     
 
     useFocusEffect(

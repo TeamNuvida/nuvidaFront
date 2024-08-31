@@ -25,7 +25,7 @@ const ReservationInfo = ({ route }) => {
     const [transportaions, setTransportations] = useState(null);
     const [reservations, setReservations] = useState(null);
 
-    const localhost = "192.168.55.35";
+    const localhost = "54.180.146.203";
 
     const options = { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Seoul'};
     const [ticketModalVisible, setTicketModalVisible] = useState(false);

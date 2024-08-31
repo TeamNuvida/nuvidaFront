@@ -12,7 +12,7 @@ export default function BaseballSchedule() {
     const [matches, setMatches] = useState([]);
 
     // localhost 주소값
-    const localhost = "192.168.55.35";
+    const localhost = "54.180.146.203";
 
     const logo = [
         require("../assets/KIA.png"),

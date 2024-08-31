@@ -12,7 +12,7 @@ const TravelLog = ({route}) => {
     const [planList, setPlanList] = useState(null);
 
 
-    const localhost = '192.168.55.35';
+    const localhost = "54.180.146.203";
 
     // 관심 데이터 가져오기
     const getPlanList = async () => {

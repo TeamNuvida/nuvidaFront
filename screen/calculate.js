@@ -17,7 +17,7 @@ const Calculate = ({ route }) => {
     const routeList = route.params.routeList;
     const isLeader = route.params.isLeader;
 
-    const localhost = "192.168.55.35";
+    const localhost = "54.180.146.203";
 
     const [modalVisible, setModalVisible] = useState(false);
     const [newItemTitle, setNewItemTitle] = useState('');

@@ -9,7 +9,7 @@ import axios from "axios";
 const Mypage = ({route}) => {
     const navigation = useNavigation();
 
-    const localhost = '192.168.55.35';
+    const localhost = "54.180.146.203";
 
     // 로그인 정보
     const [userInfo, setUserInfo] = useState(route.params.userInfo);

@@ -58,7 +58,7 @@ export default function WritingPost({route}) {
     const navigation = useNavigation();
     const userInfo = route.params.userInfo;
 
-    const localhost = '192.168.55.35';
+    const localhost = "54.180.146.203";
 
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({

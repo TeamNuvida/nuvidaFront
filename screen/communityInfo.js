@@ -47,7 +47,7 @@ const CommunityInfo = ({route}) => {
     });
     const [intTF, setIntTF] = useState(route.params.intTF);
     const navigation = useNavigation();
-    const localhost = '192.168.55.35';
+    const localhost = "54.180.146.203";
     const userInfo = {user_id:'test', user_nick:'test'}
 
 

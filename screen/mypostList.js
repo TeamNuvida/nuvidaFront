@@ -17,7 +17,7 @@ const MypostList = ({route}) => {
     const [postList, setPostList] = useState(null);
 
 
-    const localhost = '192.168.55.35';
+    const localhost = "54.180.146.203";
 
 
 

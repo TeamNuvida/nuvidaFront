@@ -10,7 +10,7 @@ export default function ScheduleCreation8({ route }) {
     const [cmtList, setCmtList] = useState(null); // 로딩 상태 추가
     const userInfo = route.params.userInfo;
 
-    const localhost = '192.168.55.35';
+    const localhost = "54.180.146.203";
 
     const scheduleInfo = route.params.scheduleInfo; // 일정 생성 정보
     const plan_seq = route.params.plan_seq;

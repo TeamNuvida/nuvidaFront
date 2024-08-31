@@ -17,7 +17,7 @@ const FriendList = ({route}) => {
     const [friendList, setFriendList] = useState(null);
     const [filteredFriendList, setFilteredFriendList] = useState(null); // 필터링된 친구 목록 상태
 
-    const localhost = '192.168.55.35';
+    const localhost = "54.180.146.203";
 
     // 친구 목록 가져오기
     const getFriendList = async () => {

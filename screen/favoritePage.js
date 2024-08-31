@@ -15,7 +15,7 @@ const FavoriteList = ({route}) => {
     const [userInfo, setUserInfo] = useState(route.params.userInfo);
     const [favoritelist, setFavoritelist] = useState(null);
 
-    const localhost = '192.168.55.35';
+    const localhost = "54.180.146.203";
 
     // 관심 데이터 가져오기
     const getFavorite = async () => {

@@ -25,10 +25,7 @@ const categories = [
     { id: 39, name: '음식점' }
 ];
 
-
-
-const DetailModal = ({ visible, onClose, item, onAdd , itemInfo}) => {
-
+const DetailModal = ({ visible, onClose, item, onAdd, itemInfo }) => {
     return (
         <Modal
             transparent={true}
@@ -53,7 +50,7 @@ const DetailModal = ({ visible, onClose, item, onAdd , itemInfo}) => {
                         style={styles.detailModalButton}
                         onPress={() => onAdd(item)}
                     >
-                        <Text style={styles.detailModalButtonText}>Add to Schedule</Text>
+                        <Text style={styles.detailModalButtonText}>계획에 추가하기</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -65,9 +62,7 @@ export default function ScheduleCreation4({ route }) {
     const API_KEY = "q9%2BtR1kSmDAYUNoOjKOB3vkl1rLYVTSEVfg4sMDG2UYDAL4KiJo5GaFq9nfn%2FdUnUFjK%2FrOY3UfgJvHtOBAEmQ%3D%3D";
     const navigation = useNavigation();
 
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userInfo, setUserInfo] = useState(route.params.userInfo);
-    const [loading, setLoading] = useState(true);
+    const [userInfo] = useState(route.params.userInfo);
     const [placeList, setPlaceList] = useState(null);
     const scheduleInfo = route.params.scheduleInfo;
 
@@ -82,6 +77,7 @@ export default function ScheduleCreation4({ route }) {
     const [selectedItem, setSelectedItem] = useState(null);
     const [selectedItemInfo, setSelectedItemInfo] = useState(null);
 
+    const [showSelectedPlaces, setShowSelectedPlaces] = useState(true); // 리스트 보이기/숨기기 상태
 
     useEffect(() => {
         const fetchPlace = async () => {
@@ -92,151 +88,72 @@ export default function ScheduleCreation4({ route }) {
                 const totalResponso = await axios.get(`http://apis.data.go.kr/B551011/KorService1/searchKeyword1?serviceKey=${API_KEY}&MobileApp=NUVIDA&MobileOS=AND&pageNo=1&numOfRows=10&listYN=N&arrange=A&keyword=${queryToSearch}&areaCode=5${categoryParam}&_type=JSON`);
                 const totalCount = totalResponso.data.response.body.items.item[0].totalCnt;
 
-
                 const response = await axios.get(`http://apis.data.go.kr/B551011/KorService1/searchKeyword1?serviceKey=${API_KEY}&MobileApp=NUVIDA&MobileOS=AND&pageNo=1&numOfRows=${totalCount}&listYN=Y&arrange=A&keyword=${queryToSearch}&areaCode=5${categoryParam}&_type=JSON`);
                 const items = response.data.response.body.items.item;
-                console.log(items);
                 setPlaceList(items);
             } catch (error) {
                 console.log('tour API error', error);
             }
-        }
+        };
         fetchPlace();
     }, [queryToSearch, selectedCategory]);
 
     const handleScheduleInfoPress = () => {
-
-        if(selectedPlaces.length == 0){
-            Alert.alert('','장소를 선택해주세요.');
+        if (selectedPlaces.length === 0) {
+            Alert.alert('', '장소를 선택해주세요.');
             return;
         }
 
         const updateScheduleInfo = { ...scheduleInfo, selectedPlaces: selectedPlaces };
-        navigation.navigate('ScheduleCreation5', { scheduleInfo: updateScheduleInfo, userInfo:userInfo });
-    }
+        navigation.navigate('ScheduleCreation5', { scheduleInfo: updateScheduleInfo, userInfo: userInfo });
+    };
 
-    const formatAddr = (addr1, addr2) => {
-        return addr1.concat(' ', addr2);
-    }
-
-    const getTime = (data, item) =>{
-        switch (item.contenttypeid) {
-            case '39': // 식당
-                return data.opentimefood;
-            case '15': // 축제
-                return data.playtime;
-            case '28': // 스포츠
-                return data.usetimeleports;
-            case '38': // 쇼핑
-                return data.opentime;
-            case '14': // 문화시설
-                return data.usetimeculture;
-            default:
-                return data.usetime; // 기본 아이콘
-        }
-
-    }
-
-    const extractTimes = (timeString) => {
-        // 기본 패턴: "HH:MM~HH:MM" 형식의 시간 추출
-        const timePattern = /(\d{2}:\d{2})\s*~\s*(\d{2}:\d{2})/;
-
-        // 정규식을 이용해 시간 추출
-        const match = timeString.match(timePattern);
-        if (match) {
-            const open_time = match[1];  // 첫 번째 시간 (오픈 시간)
-            const close_time = match[2]; // 두 번째 시간 (종료 시간)
-            return { open_time, close_time };
-        }
-
-        // 패턴이 없을 때 빈 값 반환 (혹은 에러 처리)
-        return { open_time: "09:00", close_time: "20:00" };
-    }
+    const formatAddr = (addr1, addr2) => addr1.concat(' ', addr2);
 
     const handleSelect = async (item) => {
-
         try {
-            const categoryParam = selectedCategory ? `&contentTypeId=${selectedCategory}` : '';
-            const response = await axios.get(`http://apis.data.go.kr/B551011/KorService1/detailIntro1?serviceKey=${API_KEY}&numOfRows=10&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&contentId=${item.contentid}&contentTypeId=${item.contenttypeid}&_type=JSON`);
+            const response = await axios.get(`http://apis.data.go.kr/B551011/KorService1/detailCommon1?serviceKey=${API_KEY}&numOfRows=1&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&contentId=${item.contentid}&defaultYN=Y&firstImageYN=Y&_type=JSON`);
             const data = response.data.response.body.items.item[0];
-
-            // 식당이면 opentimefood
-            // 관광지면 usetime
-            // 문화시설 usetimeculture
-            // 축제공연행사 playtime
-            // 여행코스
-            // 레포츠 usetimeleports
-            // 쇼핑 opentime
-            const time = getTime(data,item)
-
-
-            const { open_time, close_time } = extractTimes(time);
-
-            const selectedItem = {
-                id: identifier,
-                name: item.title,
-                addr: formatAddr(item.addr1, item.addr2),
-                firstimage: item.firstimage,
-                contentid: item.contentid,
-                contenttypeid: item.contenttypeid,
-                cat3: item.cat3,
-                open_time: open_time,
-                close_time: close_time,
-                reservation: null,
-                visit_duration: 2,
-                lat: item.mapy,
-                lng: item.mapx
-            };
+            const itemWithImage = { ...item, firstimage: data.firstimage };
 
             setSelectedPlaces((prevSelected) => {
-                if (prevSelected.some(place => place.contentid === selectedItem.contentid)) {
-                    return prevSelected.filter((place) => place.contentid !== selectedItem.contentid);
+                if (prevSelected.some(place => place.contentid === item.contentid)) {
+                    return prevSelected.filter((place) => place.contentid !== item.contentid);
                 } else {
                     setIdentifier(prevIdentifier => prevIdentifier + 1);
-                    return [...prevSelected, selectedItem];
+                    return [...prevSelected, { ...itemWithImage, id: identifier, name: item.title }];
                 }
             });
 
         } catch (error) {
             console.log('tour API error', error);
         }
-
-
-
     };
 
     const handlePlanCalendarIconPress = () => {
-        if (isLoggedIn) {
-            navigation.navigate("planCalendarPage");
-        } else {
-            navigation.navigate("loginPage");
-        }
+        navigation.navigate(isLoggedIn ? "planCalendarPage" : "loginPage");
     };
 
-    const renderHeader = () => {
-        return (
-            <View style={[styles.center_row, styles.headerContainer]}>
-                <View style={{ width: '30%', height: '100%', justifyContent: 'center', alignItems: 'flex-start' }}>
-                    <TouchableOpacity style={[styles.center_row, { marginLeft: '12%' }]} onPress={() => navigation.goBack()}>
-                        <Entypo name="chevron-thin-left" size={14} color="black" />
-                        <Text style={{ fontSize: 14, marginLeft: '5%' }}>이전</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={{ width: '40%', height: '100%' }}>
-                </View>
-                <View style={{ width: '30%', height: '100%', justifyContent: 'center', alignItems: 'flex-end', }}>
-                    <TouchableOpacity style={[styles.center_row, { marginRight: '12%' }]} onPress={() => handleScheduleInfoPress()}>
-                        <Text style={{ fontSize: 14, marginRight: '5%' }}>다음</Text>
-                        <Entypo name="chevron-thin-right" size={14} color="black" />
-                    </TouchableOpacity>
-                </View>
+    const renderHeader = () => (
+        <View style={[styles.center_row, styles.headerContainer]}>
+            <View style={{ width: '30%', height: '100%', justifyContent: 'center', alignItems: 'flex-start' }}>
+                <TouchableOpacity style={[styles.center_row, { marginLeft: '12%' }]} onPress={() => navigation.goBack()}>
+                    <Entypo name="chevron-thin-left" size={14} color="black" />
+                    <Text style={{ fontSize: 14, marginLeft: '5%' }}>이전</Text>
+                </TouchableOpacity>
             </View>
-        );
-    };
+            <View style={{ width: '40%', height: '100%' }}></View>
+            <View style={{ width: '30%', height: '100%', justifyContent: 'center', alignItems: 'flex-end' }}>
+                <TouchableOpacity style={[styles.center_row, { marginRight: '12%' }]} onPress={handleScheduleInfoPress}>
+                    <Text style={{ fontSize: 14, marginRight: '5%' }}>다음</Text>
+                    <Entypo name="chevron-thin-right" size={14} color="black" />
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
 
     const formatDate = (timestamp) => {
         const date = new Date(timestamp);
-
         const padNumber = (num) => (num < 10 ? `0${num}` : num);
         const getDayOfWeek = (date) => {
             const days = ['일', '월', '화', '수', '목', '금', '토'];
@@ -249,21 +166,18 @@ export default function ScheduleCreation4({ route }) {
         return `${year}. ${month}. ${day} (${dayOfWeek})`;
     };
 
-    const renderTitle = () => {
-        return (
-            <View style={{ flex: 1, backgroundColor: '#fff', }}>
-                <View style={{ alignItems: 'center', width: '100%', height: 80 }}>
-                    <Text style={{ fontSize: 20, fontWeight: 'bold' }}>{scheduleInfo.plan_name}</Text>
-                    <Text style={{ fontSize: 16 }}>{formatDate(scheduleInfo.dateRange[0])}-{formatDate(scheduleInfo.dateRange[1])}</Text>
-                </View>
-                {renderContent()}
+    const renderTitle = () => (
+        <View style={{ flex: 1, backgroundColor: '#fff' }}>
+            <View style={{ alignItems: 'center', width: '100%', height: 80 }}>
+                <Text style={{ fontSize: 20, fontWeight: 'bold' }}>{scheduleInfo.plan_name}</Text>
+                <Text style={{ fontSize: 16 }}>{formatDate(scheduleInfo.dateRange[0])}-{formatDate(scheduleInfo.dateRange[1])}</Text>
             </View>
-        );
-    };
+            {renderContent()}
+        </View>
+    );
 
     const handleSearch = () => {
         setQueryToSearch(searchQuery);
-        console.log('검색어:', searchQuery);
     };
 
     const handleSubmitEditing = () => {
@@ -274,16 +188,15 @@ export default function ScheduleCreation4({ route }) {
         setSelectedCategory((prevCategory) => prevCategory === category ? null : category);
     };
 
-    const getItemInfo = async (item) =>{
-        try{
+    const getItemInfo = async (item) => {
+        try {
             const response = await axios.get(`http://apis.data.go.kr/B551011/KorService1/detailCommon1?serviceKey=${API_KEY}&numOfRows=10&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&contentId=${item.contentid}&defaultYN=Y&_type=JSON&firstImageYN=Y&addrinfoYN=Y&overviewYN=Y&mapinfoYN=Y`);
             const data = response.data.response.body.items.item[0];
             setSelectedItemInfo(data);
-
-        }catch (e) {
-            console.error(e)
+        } catch (e) {
+            console.error(e);
         }
-    }
+    };
 
     const handleDetailButtonPress = (item) => {
         setSelectedItem(item);
@@ -297,84 +210,76 @@ export default function ScheduleCreation4({ route }) {
         setSelectedItemInfo(null);
     };
 
+    const toggleSelectedPlaces = () => {
+        setShowSelectedPlaces(!showSelectedPlaces);
+    };
 
+    const renderContent = () => (
+        <View style={{ flex: 1, padding: 10 }}>
+            <View style={{ flexDirection: 'row', width: '100%', height: 80 }}>
+                <TextInput
+                    style={{
+                        flex: 1,
+                        height: 40,
+                        borderColor: '#ccc',
+                        borderWidth: 1,
+                        borderRadius: 5,
+                        paddingHorizontal: 10,
+                        marginRight: 10,
+                    }}
+                    placeholder="검색어를 입력하세요..."
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    onSubmitEditing={handleSubmitEditing}
+                    returnKeyType="search"
+                />
+                <TouchableOpacity
+                    style={{
+                        backgroundColor: 'black',
+                        paddingVertical: 10,
+                        paddingHorizontal: 15,
+                        borderRadius: 5,
+                        height: 40,
+                    }}
+                    onPress={handleSearch}
+                >
+                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>검색</Text>
+                </TouchableOpacity>
+            </View>
 
-
-    const renderContent = () => {
-        return (
-            <View style={{ flex: 1, padding: 10 }}>
-                <View style={{ flexDirection: 'row', width: '100%', height: 80, marginBottom: 10 }}>
-                    <TextInput
-                        style={{
-                            flex: 1,
-                            height: 40,
-                            borderColor: '#ccc',
-                            borderWidth: 1,
-                            borderRadius: 5,
-                            paddingHorizontal: 10,
-                            marginRight: 10,
-                        }}
-                        placeholder="검색어를 입력하세요..."
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        onSubmitEditing={handleSubmitEditing}
-                        returnKeyType="search"
-                    />
+            <View style={styles.categoryContainer}>
+                {categories.map((category) => (
                     <TouchableOpacity
-                        style={{
-                            backgroundColor: '#007bff',
-                            paddingVertical: 10,
-                            paddingHorizontal: 15,
-                            borderRadius: 5,
-                            height: 40,
-                        }}
-                        onPress={handleSearch}
+                        key={category.id}
+                        style={[
+                            styles.categoryButton,
+                            selectedCategory === category.id ? styles.selectedCategoryButton : null
+                        ]}
+                        onPress={() => handleCategorySelect(category.id)}
                     >
-                        <Text style={{ color: '#fff', fontWeight: 'bold' }}>검색</Text>
+                        <Text style={[
+                            styles.categoryText,
+                            selectedCategory === category.id ? { color: '#fff' } : null
+                        ]}>
+                            {category.name}
+                        </Text>
                     </TouchableOpacity>
-                </View>
+                ))}
+            </View>
 
-                {/* Render category buttons */}
-                <View style={styles.categoryContainer}>
-                    {categories.map((category) => (
-                        <TouchableOpacity
-                            key={category.id}
-                            style={[
-                                styles.categoryButton,
-                                selectedCategory === category.id ? styles.selectedCategoryButton : null
-                            ]}
-                            onPress={() => handleCategorySelect(category.id)}
-                        >
-                            <Text style={[
-                                styles.categoryText,
-                                selectedCategory === category.id ? { color: '#fff' } : null
-                            ]}>
-                                {category.name}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-
-                <FlatList
-                    style={{ width: '100%', flex: 1 }}
-                    data={placeList}
-                    keyExtractor={(item) => item.contentid}
-                    renderItem={({ item }) => (
-                        <View style={{
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            padding: 20,
-                            borderBottomWidth: 1,
-                            borderBottomColor: '#ccc',
-                        }}>
-                            <View style={{ flex: 1 }}>
-                                <Text style={{ fontSize: 18 }}>{item.title}</Text>
-                            </View>
-                            <View style={{ flexDirection: 'row' }}>
+            <FlatList
+                style={{ width: '100%', flex: 1 }}
+                data={placeList}
+                keyExtractor={(item) => item.contentid}
+                renderItem={({ item }) => (
+                    <View style={styles.itemContainer}>
+                        <Image source={{ uri: item.firstimage }} style={styles.resultImage} />
+                        <View style={styles.itemContent}>
+                            <Text style={{ fontSize: 18 }}>{item.title}</Text>
+                            <View style={{ flexDirection: 'row', marginTop: 10 }}>
                                 <TouchableOpacity
                                     style={{
-                                        backgroundColor: '#007bff',
+                                        backgroundColor: 'black',
                                         paddingVertical: 5,
                                         paddingHorizontal: 10,
                                         borderRadius: 5,
@@ -383,24 +288,34 @@ export default function ScheduleCreation4({ route }) {
                                     onPress={() => handleSelect(item)}
                                 >
                                     <Text style={{ color: '#fff', fontWeight: 'bold' }}>
-                                        {selectedPlaces.some(place => place.contentid === item.contentid) ? 'Remove' : 'Add'}
+                                        {selectedPlaces.some(place => place.contentid === item.contentid) ? '삭제' : '추가'}
                                     </Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     style={{
-                                        backgroundColor: '#007bff',
+                                        backgroundColor: 'black',
                                         paddingVertical: 5,
                                         paddingHorizontal: 10,
                                         borderRadius: 5,
                                     }}
                                     onPress={() => handleDetailButtonPress(item)}
                                 >
-                                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>Detail</Text>
+                                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>상세보기</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
-                    )}
-                />
+                    </View>
+                )}
+            />
+
+            {/* 추가된 장소 목록을 보이거나 숨기는 버튼 */}
+            <TouchableOpacity onPress={toggleSelectedPlaces} style={styles.toggleButton}>
+                <Text style={styles.toggleButtonText}>
+                    {showSelectedPlaces ? '장소 목록 숨기기' : '장소 목록 보기'}
+                </Text>
+            </TouchableOpacity>
+
+            {showSelectedPlaces && (
                 <View style={styles.selectedContainer}>
                     <FlatList
                         data={selectedPlaces}
@@ -413,39 +328,37 @@ export default function ScheduleCreation4({ route }) {
                         ListEmptyComponent={<Text style={styles.noSelectionText}>선택된 장소가 없습니다.</Text>}
                     />
                 </View>
+            )}
 
-                <DetailModal
-                    visible={showDetailModal}
-                    onClose={() => setShowDetailModal(false)}
-                    item={selectedItem}
-                    onAdd={handleAddToSchedule}
-                    itemInfo={selectedItemInfo}
-                />
-            </View>
-        );
-    };
+            <DetailModal
+                visible={showDetailModal}
+                onClose={() => setShowDetailModal(false)}
+                item={selectedItem}
+                onAdd={handleAddToSchedule}
+                itemInfo={selectedItemInfo}
+            />
+        </View>
+    );
 
-    const renderTabBar = () => {
-        return (
-            <View style={styles.tabBar}>
-                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Main')}>
-                    <Entypo name="home" size={24} color="black" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={handlePlanCalendarIconPress}>
-                    <FontAwesome name="calendar-check-o" size={24} color="black" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('game')}>
-                    <FontAwesome name="calendar-check-o" size={24} color="black" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('community')}>
-                    <Ionicons name="chatbubbles-outline" size={24} color="black" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('mypage')}>
-                    <Feather name="user" size={24} color="black" />
-                </TouchableOpacity>
-            </View>
-        );
-    };
+    const renderTabBar = () => (
+        <View style={styles.tabBar}>
+            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Main')}>
+                <Entypo name="home" size={24} color="black" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.tabItem} onPress={handlePlanCalendarIconPress}>
+                <FontAwesome name="calendar-check-o" size={24} color="black" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('game')}>
+                <FontAwesome name="calendar-check-o" size={24} color="black" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('community')}>
+                <Ionicons name="chatbubbles-outline" size={24} color="black" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('mypage')}>
+                <Feather name="user" size={24} color="black" />
+            </TouchableOpacity>
+        </View>
+    );
 
     return (
         <SafeAreaView style={styles.container}>
@@ -456,22 +369,26 @@ export default function ScheduleCreation4({ route }) {
 }
 
 const styles = StyleSheet.create({
-    item: {
-        padding: 20,
+    itemContainer: {
+        flexDirection: 'row',
+        padding: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#ccc',
     },
-    title: {
-        fontSize: 18,
+    resultImage: {
+        width: 80,
+        height: 80,
+        borderRadius: 5,
+        marginRight: 10,
     },
-    selectedItem: {
-        backgroundColor: '#e0e0e0',
+    itemContent: {
+        flex: 1,
+        justifyContent: 'center',
     },
     selectedContainer: {
-        flex: 1,
-        marginTop: 20,
+        marginTop: 10,
         padding: 10,
-        backgroundColor: '#f0f0f0',
+        backgroundColor: '#fbf1f1',
         borderRadius: 10,
     },
     selectedItemContainer: {
@@ -482,6 +399,7 @@ const styles = StyleSheet.create({
     selectedText: {
         fontSize: 18,
         fontWeight: 'bold',
+        color: 'black',
     },
     noSelectionText: {
         fontSize: 16,
@@ -524,7 +442,7 @@ const styles = StyleSheet.create({
     },
     tabBar: {
         height: 60,
-        flexDirection: 'row',
+        flexDirection    : 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
         backgroundColor: '#fff',
@@ -539,6 +457,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         marginBottom: 10,
+        justifyContent: 'center',
+        alignItems: 'center'
     },
     categoryButton: {
         backgroundColor: '#f0f0f0',
@@ -563,7 +483,7 @@ const styles = StyleSheet.create({
     },
     detailModal: {
         width: '80%',
-        height:500,
+        height: 500,
         backgroundColor: '#fff',
         borderRadius: 10,
         padding: 20,
@@ -579,7 +499,7 @@ const styles = StyleSheet.create({
     },
     detailModalDescription: {
         marginVertical: 10,
-        color:'#686868'
+        color: '#686868',
     },
     overviewContainer: {
         flex: 1, // 스크롤뷰가 모달의 나머지 공간을 차지하도록 설정
@@ -589,7 +509,7 @@ const styles = StyleSheet.create({
         color: '#444',
     },
     detailModalButton: {
-        backgroundColor: '#007bff',
+        backgroundColor: 'black',
         paddingVertical: 10,
         paddingHorizontal: 15,
         borderRadius: 5,
@@ -600,8 +520,21 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: 'bold',
     },
-    itemImg:{
-        width:100,
-        height:100,
-    }
+    itemImg: {
+        width: 100,
+        height: 100,
+    },
+    toggleButton: {
+        marginTop: 20,
+        backgroundColor: 'black',
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    toggleButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
 });
+
