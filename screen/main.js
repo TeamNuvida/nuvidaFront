@@ -2097,7 +2097,7 @@ const styles = StyleSheet.create({
     /* 베팅 */
     betContainer: {
         width: "90%",
-        height: 250,
+        height: 230,
         borderColor: '#0E1923',
         borderWidth: 2,
         borderRadius: 10,

@@ -4,7 +4,7 @@
     "slug": "nuvida",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/nuvidaIcon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/loading_test.gif",
