@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback  } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { Entypo, FontAwesome, Ionicons, Feather, MaterialIcons } from '@expo/vector-icons';
+import {Entypo, FontAwesome, Ionicons, Feather, MaterialIcons, MaterialCommunityIcons} from '@expo/vector-icons';
 import MapView, { Marker } from 'react-native-maps';
 import axios from "axios";
 import { WebView } from 'react-native-webview';
@@ -21,7 +21,6 @@ const TripSchedule = ({ route }) => {
     const [accommodation,setAccommodation] = useState(null);
     const [planInfo, setPlanInfo] = useState(null);
     const [isLeader, setIsLeader] = useState(false);
-
 
     const localhost = "54.180.146.203";
 
@@ -73,7 +72,6 @@ const TripSchedule = ({ route }) => {
 
                     const newSchedule = rawData.reduce((acc, item) => {
                         const dayKey = `${new Date(item.travel_date).getMonth() + 1}월 ${new Date(item.travel_date).getDate()}일`;
-
 
                         if (!acc[dayKey]) acc[dayKey] = [];
 
@@ -374,9 +372,6 @@ const TripSchedule = ({ route }) => {
         }
     };
 
-
-
-
     const renderDaySchedule = (day) => {
         if (day === "전체") {
             const allDaysSchedule = Object.keys(schedule).flatMap((day) =>
@@ -498,8 +493,8 @@ const TripSchedule = ({ route }) => {
         );
     }
 
-    const deletePlan = async () =>{ 
-        
+    const deletePlan = async () =>{
+
         if(isLeader){
             console.log("리더 플랜 삭제")
             try {
@@ -524,37 +519,117 @@ const TripSchedule = ({ route }) => {
         }
     }
 
-    return (
-        <View style={styles.container}>
-            <View style={styles.topBar}>
-                <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("TripCalendar",{userInfo:userInfo})}>
-                    <Text style={styles.backButtonText}>이전</Text>
+    // 상단 바
+    const renderHeader = () => {
+        return (
+            <View style={[styles.center_row, styles.headerContainer]}>
+                <View style={[{width: '30%', height: '100%', justifyContent: 'center', alignItems: 'flex-start'}]}>
+                    <TouchableOpacity style={[styles.center_row, {marginLeft: '12%'}]} onPress={() => navigation.navigate("TripCalendar", {userInfo})}>
+                        <Entypo name="chevron-thin-left" size={14} color="black" />
+                        <Text style={{fontSize: 14, marginLeft: '5%'}}>이전</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={{width: '40%', height: '100%'}}>
+                </View>
+                <View style={[{width: '30%', height: '100%', justifyContent: 'center', alignItems: 'flex-end',}]}>
+                    <TouchableOpacity style={[styles.center_row, {marginRight: '12%'}]} onPress={() => checkDeletePlan()}>
+                        <Text style={{fontSize: 14, marginRight: '5%', color: 'red'}}>삭제</Text>
+                        <Entypo name="chevron-thin-right" size={14} color="red" />
+                    </TouchableOpacity>
+                </View>
+            </View>
+        );
+    };
+
+    // 여행 상단바
+    const renderTripHeader = () => {
+        return (
+            <View style={[{width: '100%', height: '10%'}]}>
+                <View style={{width: '100%', height: '50%', flexDirection: 'row', alignItems: 'center'}}>
+                    <View style={[styles.center, {width: '10%', height: '100%', marginLeft: '5%'}]}>
+                        <Ionicons name="paper-plane-outline" size={28} color="black" />
+                    </View>
+                    <View style={[{width: '80%', height: '100%', marginRight: '5%', justifyContent: 'center'}]}>
+                        {planInfo ? (
+                            <Text style={{fontSize: 19, letterSpacing: 2}}>{planInfo.plan_name}</Text>
+                        ) : (
+                            <Text style={{fontSize: 19, letterSpacing: 2}}>광주 여행</Text>
+                        )}
+                    </View>
+                </View>
+                <View style={{width: '100%', height: '50%'}}>
+                    <View style={{width: '70%', height: '100%', marginLeft: '13%', marginRight: '17%', }}>
+                        {planInfo ? (
+                            <Text style={{fontSize: 13}}>
+                                {formatDate(planInfo.start_date)} - {formatDate(planInfo.end_date)}
+                            </Text>
+                        ) : (
+                            <Text style={{fontSize: 13}}>2024. 05. 21 (토) - 2024. 05. 23 (월)</Text>
+                        )}
+                    </View>
+                </View>
+            </View>
+        )
+    }
+
+    const goMypage = () =>{
+        if(userInfo){
+            navigation.navigate('Mypage', {userInfo:userInfo})
+        }else{
+            navigation.navigate('Signin')
+        }
+    }
+
+    // 하단 바
+    const renderTabBar = () => {
+        return (
+            <View style={styles.tabBar}>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Main')}>
+                    <Entypo name="home" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.deleteButton} onPress={() => checkDeletePlan()}>
-                    <Text style={styles.deleteButtonText}>삭제</Text>
+                <TouchableOpacity style={styles.tabItem} onPress={handlePlanCalendarIconPress}>
+                    <FontAwesome name="calendar-check-o" size={24} color="black" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('PinBall')}>
+                    <MaterialCommunityIcons name="billiards-rack" size={24} color="black" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('CommunityList', {userInfo:userInfo})}>
+                    <Ionicons name="chatbubbles-outline" size={24} color="black" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem} onPress={() => goMypage()}>
+                    <Feather name="user" size={24} color="black" />
                 </TouchableOpacity>
             </View>
-                <View style={styles.header}>
-                    {planInfo?(<Text style={styles.location}>{planInfo.plan_name}</Text>):
-                        (<Text style={styles.location}>광주 여행</Text>)}
+        );
+    };
 
-                    {planInfo?(<Text style={styles.date}>{formatDate(planInfo.start_date)} - {formatDate(planInfo.end_date)}</Text>):
-                        (<Text style={styles.date}>2024. 05. 21 (토) - 2024. 05. 23 (월)</Text>)}
-                </View>
-                <View style={styles.tabContainer}>
-                    <TouchableOpacity style={styles.tabButtonActive} onPress={() => navigation.navigate("TripSchedule", { userInfo, plan_seq })}>
-                        <Text style={styles.tabTextActive}>여행일정</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate("ReservationInfo", { userInfo, plan_seq, planInfo, routeList , isLeader})}>
-                        <Text style={styles.tabText}>예약정보</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate("MemberList", { userInfo, plan_seq, planInfo, routeList, isLeader })}>
-                        <Text style={styles.tabText}>멤버목록</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate("Calculate", { userInfo, plan_seq, planInfo, routeList, isLeader })}>
-                        <Text style={styles.tabText}>정산하기</Text>
-                    </TouchableOpacity>
-                </View>
+    // 하단바 일정관리 아이콘
+    const handlePlanCalendarIconPress = () => {
+        if (userInfo) {
+            navigation.navigate("TripCalendar",{userInfo:userInfo});
+        } else {
+            navigation.navigate("Signin");
+        }
+    };
+
+    return (
+        <View style={styles.container}>
+            {renderHeader()}
+            {renderTripHeader()}
+            <View style={styles.tabContainer}>
+                <TouchableOpacity style={styles.tabButtonActive} onPress={() => navigation.navigate("TripSchedule", { userInfo, plan_seq })}>
+                    <Text style={styles.tabTextActive}>여행일정</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate("ReservationInfo", { userInfo, plan_seq, planInfo, routeList , isLeader})}>
+                    <Text style={styles.tabText}>예약정보</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate("MemberList", { userInfo, plan_seq, planInfo, routeList, isLeader })}>
+                    <Text style={styles.tabText}>멤버목록</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabButton} onPress={() => navigation.navigate("Calculate", { userInfo, plan_seq, planInfo, routeList, isLeader })}>
+                    <Text style={styles.tabText}>정산하기</Text>
+                </TouchableOpacity>
+            </View>
 
             {mapFoldTF&&(
                 <View style={{ height: 300 }}>
@@ -580,17 +655,65 @@ const TripSchedule = ({ route }) => {
                     (<Text style={styles.mapFoldText}>지도접기</Text>) : (<Text style={styles.mapFoldText}>지도열기</Text>)
                 }
             </TouchableOpacity>
-                {renderDayTabs()}
+            {renderDayTabs()}
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.scheduleContainer}>
                     {renderDaySchedule(selectedDay)}
                 </View>
             </ScrollView>
+            {renderTabBar()}
         </View>
     );
 };
 
 const styles = StyleSheet.create({
+    /* 상단바 */
+    headerContainer: {
+        backgroundColor: '#fff',
+        height: 85,
+        paddingTop: '10%',
+        marginBottom: '2%',
+    },
+    headerText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: 'red'
+    },
+    headerIconContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+    },
+    headerIcon: {
+        width: 26,
+        height: 26,
+        marginRight: '12%',
+    },
+
+    /* 하단바 */
+    tabBar: {
+        height: 70,
+        flexDirection: 'row',
+        borderTopColor: '#ccc',
+        borderTopWidth: 1,
+    },
+    tabItem: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        bottom: 10,
+    },
+
+    center: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    center_row: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row',
+    },
     container: {
         flex: 1,
         backgroundColor: '#fff',
@@ -633,9 +756,8 @@ const styles = StyleSheet.create({
     tabContainer: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        borderBottomWidth: 1,
-        borderColor: '#ccc',
-        paddingBottom: 10,
+        borderBottomWidth: 0.7,
+        borderColor: '#EAEAEA',
     },
     tabButton: {
         flex: 1,
@@ -650,11 +772,13 @@ const styles = StyleSheet.create({
         borderColor: '#000',
     },
     tabText: {
-        fontSize: 16,
+        fontSize: 15,
+        fontWeight: 'bold',
         color: '#999',
     },
     tabTextActive: {
-        fontSize: 16,
+        fontSize: 15,
+        fontWeight: 'bold',
         color: '#000',
     },
     map: {
@@ -681,9 +805,13 @@ const styles = StyleSheet.create({
     },
     dayTabText: {
         color: '#000',
+        fontSize: 14,
+        textAlign: 'center',
     },
     dayTabTextActive: {
         color: '#fff',
+        fontSize: 14,
+        textAlign: 'center',
     },
     scheduleContainer: {
         padding: 20,
@@ -712,7 +840,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         padding: 15,
         borderRadius: 10,
-        height:150,
+        height: 150,
         elevation: 5,
     },
     scheduleItemHeader: {
@@ -758,36 +886,28 @@ const styles = StyleSheet.create({
     deleteIcon: {
         marginLeft: 10,
     },
-    tabBar: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        paddingVertical: 10,
-        borderTopWidth: 1,
-        borderColor: '#ccc',
-        backgroundColor: '#fff',
-        position: 'absolute',
-        bottom: 0,
-        width: '100%',
-        marginBottom:20
-    },
-    tabItem: {
-        alignItems: 'center',
-    },
     mapFold:{
         alignItems: 'center',
-        paddingVertical:5,
+        paddingVertical: 5,
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
+    },
+    mapFoldText: {
+        fontSize: 14, // 지도 접기/열기 텍스트 크기 조정
+        color: '#000',
     },
     naviButton:{
         width: "30%",
         height: "30%",
         borderRadius: 5,
         backgroundColor: '#f35353',
-        alignItems:"center",
+        alignItems: "center",
+        justifyContent: "center",
     },
     naviText:{
-        fontWeight:"bold"
+        fontWeight:"bold",
+        fontSize: 14, // 길찾기 버튼 텍스트 크기 조정
+        color: '#fff',
     },
 });
 

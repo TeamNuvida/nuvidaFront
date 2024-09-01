@@ -542,25 +542,24 @@ const TripCalendar = ({ route }) => {
                     </View>
                 </View>
                 <View style={{width : '100%', height: '95%'}}>
-                    <View style={[styles.weekdays]}>
+                    <View style={[styles.weekdays, {flexDirection: 'row', justifyContent: 'space-around'}]}>
                         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                            <Text key={day} style={{fontSize: 11}}>{day}</Text>
+                            <Text key={day} style={{fontSize: 11, textAlign: 'center', width: '14.28%'}}>{day}</Text>
                         ))}
                     </View>
                     {calendar.map((week, index) => (
-                        <View key={index} style={styles.week}>
+                        <View key={index} style={[styles.week, {flexDirection: 'row', justifyContent: 'space-around'}]}>
                             {week.map((day, idx) => {
                                 if (day === null) {
-                                    return <View key={idx} style={styles.emptyDay} />;
+                                    return <View key={idx} style={[styles.emptyDay, {width: '14.28%'}]} />;
                                 }
                                 const dateString = moment(`${year}-${month}-${day}`).format('YYYY-MM-DD');
                                 const isMarked = markedDates[dateString]?.marked;
-                                const isToday = dateString === today; // 오늘 날짜인지 확인
+                                const isToday = dateString === today;
                                 const plans = markedDates[dateString]?.plans || [];
                                 const weatherInfo = weatherData[dateString];
                                 const midWeatherInfo = midWeatherData[dateString];
 
-                                // 이 날짜가 일정의 시작일, 중간일, 끝나는 날인지 확인하는 로직 추가
                                 let isStart = false;
                                 let isEnd = false;
 
@@ -576,9 +575,10 @@ const TripCalendar = ({ route }) => {
                                         key={idx}
                                         style={[
                                             styles.dayContainer,
-                                            isStart && styles.planStart, // 시작 날짜 스타일
-                                            isEnd && styles.planEnd, // 종료 날짜 스타일
-                                            isStart && isEnd && styles.planSingleDay // 단일 날짜일 경우 스타일
+                                            {width: '14.28%'},
+                                            isStart && styles.planStart,
+                                            isEnd && styles.planEnd,
+                                            isStart && isEnd && styles.planSingleDay
                                         ]}
                                     >
                                         {day ? (
@@ -594,11 +594,10 @@ const TripCalendar = ({ route }) => {
                                                                 {day}
                                                             </Text>
                                                         )}
-
                                                         {weatherInfo && (
                                                             <weatherInfo.IconComponent
                                                                 name={weatherInfo.iconName}
-                                                                size={16} // 크기를 조정하여 날짜와 조화를 이루도록 함
+                                                                size={16}
                                                                 color="black"
                                                                 style={styles.weatherIcon}
                                                             />
@@ -606,7 +605,7 @@ const TripCalendar = ({ route }) => {
                                                         {midWeatherInfo && (
                                                             <midWeatherInfo.IconComponent
                                                                 name={midWeatherInfo.iconName}
-                                                                size={16} // 크기를 조정하여 날짜와 조화를 이루도록 함
+                                                                size={16}
                                                                 color="black"
                                                                 style={styles.weatherIcon}
                                                             />
@@ -634,9 +633,6 @@ const TripCalendar = ({ route }) => {
             </View>
         );
     };
-
-
-
 
 
     const renderDatePicker = () => {
@@ -728,6 +724,37 @@ const TripCalendar = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
+
+    dayContainer: {
+        alignItems: 'center',
+        justifyContent: 'flex-start', // 날짜 부분을 위쪽에 배치
+        width: (width - 20) / 7,
+        height: 80, // 날짜와 일정이 모두 들어갈 수 있는 충분한 높이로 설정
+    },
+    plansContainer: {
+        marginTop: '5%', // 날짜와 일정 사이의 간격
+        alignItems: 'center',
+        justifyContent: 'center', // 일정 텍스트를 가운데 정렬
+        width: '100%', // 일정 표시 영역을 전체 너비로 확장
+        height: '40%', // 일정 표시 영역의 고정 높이 설정
+    },
+    planMarker: {
+        backgroundColor: 'lightblue',
+        borderRadius: 4,
+        paddingHorizontal: 2,
+        width: '90%', // 일정 텍스트의 너비를 고정
+        textAlign: 'center', // 텍스트 중앙 정렬
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginVertical: 2, // 일정 사이의 간격 설정 (필요에 따라 조정 가능)
+    },
+    planMarkerText: {
+        fontSize: 10,
+        color: 'black',
+        textAlign: 'center', // 텍스트를 중앙에 위치
+    },
+
+
     container: {
         flex: 1,
         backgroundColor: '#fff',
@@ -798,12 +825,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         height:100
     },
-    dayContainer: {
-        alignItems: 'center',
-        justifyContent: 'flex-start', // 변경된 점: 아이템을 위쪽(날짜 부분)에 배치
-        width: (width - 20) / 7,
-        height: 80, // 날짜와 일정이 모두 들어갈 수 있는 충분한 높이로 설정
-    },
+
     day: {
         alignItems: 'center',
         justifyContent: 'center',
@@ -812,14 +834,14 @@ const styles = StyleSheet.create({
         borderRadius: 20,
     },
     dayText: {
-        fontSize: 16,
+        fontSize: 15,
         color: '#000',
     },
     todayText: {
-        fontSize: 16,
+        fontSize: 15,
         color: '#ff0000',
         borderColor:"#ff0000",
-        borderWidth:1,
+        borderWidth: 1,
         borderRadius: 20, // 고정된 값으로 원형 보더를 만드는 경우
         textAlign: 'center', // 텍스트를 중앙에 위치
         width: 30, // 동그라미의 너비와 높이를 동일하게 설정
@@ -933,20 +955,7 @@ const styles = StyleSheet.create({
     weatherIcon: {
         marginLeft: 4, // 날짜와 아이콘 사이의 간격을 추가
     },
-    planMarker: {
-        marginTop: 4,
-        backgroundColor: 'lightblue',
-        borderRadius: 4,
-        paddingHorizontal: 2,
-    },
-    planMarkerText: {
-        fontSize: 10,
-        color: 'black',
-    },
-    plansContainer: {
-        marginTop: 5, // 날짜와 일정 사이의 간격
-        alignItems: 'center',
-    },
+
 });
 
 export default TripCalendar;

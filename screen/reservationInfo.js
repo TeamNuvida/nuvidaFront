@@ -2,7 +2,16 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, TextInput, Alert, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { AntDesign, MaterialIcons, Entypo, FontAwesome, Ionicons, Feather, Fontisto } from '@expo/vector-icons';
+import {
+    AntDesign,
+    Entypo,
+    FontAwesome,
+    Ionicons,
+    Feather,
+    Fontisto,
+    FontAwesome5,
+    MaterialIcons, FontAwesome6, MaterialCommunityIcons
+} from '@expo/vector-icons';
 import axios from "axios";
 import { Linking } from 'react-native';
 
@@ -10,7 +19,6 @@ const ReservationInfo = ({ route }) => {
     const navigation = useNavigation();
 
     const API_KEY = "q9%2BtR1kSmDAYUNoOjKOB3vkl1rLYVTSEVfg4sMDG2UYDAL4KiJo5GaFq9nfn%2FdUnUFjK%2FrOY3UfgJvHtOBAEmQ%3D%3D";
-
 
     // 로그인 정보
     const [userInfo, setUserInfo] = useState(route.params.userInfo);
@@ -21,13 +29,13 @@ const ReservationInfo = ({ route }) => {
     const routeList = route.params.routeList;
     const isLeader = route.params.isLeader;
 
-    const [accommodation,setAccommodation] = useState(null);
-    const [transportaions, setTransportations] = useState(null);
+    const [accommodation, setAccommodation] = useState(null);
+    const [transportations, setTransportations] = useState(null);
     const [reservations, setReservations] = useState(null);
 
     const localhost = "54.180.146.203";
 
-    const options = { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Seoul'};
+    const options = { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Seoul' };
     const [ticketModalVisible, setTicketModalVisible] = useState(false);
     const [scheduleModalVisible, setScheduleModalVisible] = useState(false);
     const [newTicketTitle, setNewTicketTitle] = useState('');
@@ -56,37 +64,37 @@ const ReservationInfo = ({ route }) => {
     const [selectedPlace, setSelectedPlace] = useState(null);
 
     const getReser = async () => {
-        try{
+        try {
             const response = await axios.post(`http://${localhost}:8090/nuvida/getReser`, {
                 plan_seq: plan_seq,
             });
             setReservations(response.data)
 
-        }catch (e) {
+        } catch (e) {
             console.error(e)
         }
     }
 
-    const getAcc = async () =>{
-        try{
+    const getAcc = async () => {
+        try {
             const response = await axios.post(`http://${localhost}:8090/nuvida/getAcc`, {
                 plan_seq: plan_seq,
             });
             setAccommodation(response.data)
 
-        }catch (e) {
+        } catch (e) {
             console.error(e)
         }
     }
 
-    const getTrans = async () =>{
-        try{
+    const getTrans = async () => {
+        try {
             const response = await axios.post(`http://${localhost}:8090/nuvida/getTrans`, {
                 plan_seq: plan_seq,
             });
             setTransportations(response.data)
 
-        }catch (e) {
+        } catch (e) {
             console.error(e)
         }
     }
@@ -112,16 +120,15 @@ const ReservationInfo = ({ route }) => {
             const formattedDate = `${year}-${month}-${day}`;
             const date = `${formattedDate} ${newItemStartTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Seoul' })}`;
 
-
-            try{
+            try {
                 const response = await axios.post(`http://${localhost}:8090/nuvida/setReser`, {
-                    route_seq:selectedPlace.route_seq,
-                    reser_dt:date
+                    route_seq: selectedPlace.route_seq,
+                    reser_dt: date
                 });
                 getReser();
-            }catch (e) {
+            } catch (e) {
                 console.error(e)
-            }finally {
+            } finally {
                 resetScheduleModal();
             }
 
@@ -139,18 +146,17 @@ const ReservationInfo = ({ route }) => {
             const formattedDate = `${year}-${month}-${day}`;
             const date = `${formattedDate} ${newTicketTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Seoul' })}`;
 
-
-            try{
+            try {
                 const response = await axios.post(`http://${localhost}:8090/nuvida/setTrans`, {
                     plan_seq: plan_seq,
-                    tr_name:newTicketTitle,
-                    tr_dt:date
+                    tr_name: newTicketTitle,
+                    tr_dt: date
                 });
                 getTrans();
 
-            }catch (e) {
+            } catch (e) {
                 console.error(e)
-            }finally {
+            } finally {
                 resetTicketModal();
             }
 
@@ -180,10 +186,12 @@ const ReservationInfo = ({ route }) => {
             "삭제하시겠습니까?",
             [
                 { text: "아니요", style: "cancel" },
-                { text: "예", onPress: () => {
+                {
+                    text: "예", onPress: () => {
                         const newItems = items.filter((_, i) => i !== index);
                         setItems(newItems);
-                    }}
+                    }
+                }
             ]
         );
     };
@@ -242,7 +250,7 @@ const ReservationInfo = ({ route }) => {
         return formattedTime;
     }
 
-    const formatReserDt = (reserDt) =>{
+    const formatReserDt = (reserDt) => {
 
         // 문자열을 Date 객체로 변환
         const dateObj = new Date(reserDt);
@@ -264,15 +272,13 @@ const ReservationInfo = ({ route }) => {
 
         try {
 
-            const totalResponso = await axios.get(`http://apis.data.go.kr/B551011/KorService1/searchKeyword1?serviceKey=${API_KEY}&MobileApp=NUVIDA&MobileOS=AND&pageNo=1&numOfRows=10&listYN=N&arrange=A&keyword=${searchQuery}&areaCode=5&contentTypeId=32&_type=JSON`);
-            const totalCount = totalResponso.data.response.body.items.item[0].totalCnt;
+            const totalResponse = await axios.get(`http://apis.data.go.kr/B551011/KorService1/searchKeyword1?serviceKey=${API_KEY}&MobileApp=NUVIDA&MobileOS=AND&pageNo=1&numOfRows=10&listYN=N&arrange=A&keyword=${searchQuery}&areaCode=5&contentTypeId=32&_type=JSON`);
+            const totalCount = totalResponse.data.response.body.items.item[0].totalCnt;
 
 
             const response = await axios.get(`http://apis.data.go.kr/B551011/KorService1/searchKeyword1?serviceKey=${API_KEY}&MobileApp=NUVIDA&MobileOS=AND&pageNo=1&numOfRows=${totalCount}&listYN=Y&arrange=A&keyword=${searchQuery}&areaCode=5&contentTypeId=32&_type=JSON`);
 
-            // const response = await axios.get(`http://apis.data.go.kr/B551011/KorService1/searchKeyword1?serviceKey=${API_KEY}&MobileApp=NUVIDA&MobileOS=AND&pageNo=1&numOfRows=10&listYN=Y&arrange=A&keyword=${searchQuery}&areaCode=5&contentTypeId=32&_type=JSON`);
             const items = response.data?.response?.body?.items?.item;
-            console.log(response);
 
             if (items && items.length > 0) {
                 setPlaceList(items);
@@ -288,6 +294,8 @@ const ReservationInfo = ({ route }) => {
     const formatAddr = (addr1, addr2) => {
         return addr1.concat(' ', addr2);
     }
+
+
 
     const handleTimeSubmit = async () => {
         const timeFormat = /^\d{4}\.\d{2}\.\d{2} \d{2}:\d{2}$/;
@@ -306,22 +314,22 @@ const ReservationInfo = ({ route }) => {
             const contentid = currentPlace.contentid;
             const contenttypeid = currentPlace.contenttypeid;
 
-            try{
+            try {
                 const response = await axios.post(`http://${localhost}:8090/nuvida/setAcc`, {
                     plan_seq: plan_seq,
-                    acc_name:acc_name,
-                    acc_addr:acc_addr,
-                    check_in:check_in,
-                    check_out:check_out,
-                    lat:lat,
-                    lng:lng,
-                    contentid:contentid,
-                    contenttypeid:contenttypeid,
+                    acc_name: acc_name,
+                    acc_addr: acc_addr,
+                    check_in: check_in,
+                    check_out: check_out,
+                    lat: lat,
+                    lng: lng,
+                    contentid: contentid,
+                    contenttypeid: contenttypeid,
 
                 });
                 getAcc();
 
-            }catch (e) {
+            } catch (e) {
                 console.error(e)
             }
         }
@@ -349,38 +357,35 @@ const ReservationInfo = ({ route }) => {
         setShowDropdown(false);
     };
 
-    const delTrans = async (tr_seq) =>{
-        console.log(tr_seq)
-        try{
+    const delTrans = async (tr_seq) => {
+        try {
             const response = await axios.post(`http://${localhost}:8090/nuvida/delTrans`, {
                 tr_seq: tr_seq,
             });
             getTrans();
-        }catch (e) {
+        } catch (e) {
             console.error(e)
         }
     }
 
     const delReser = async (route_seq) => {
-        console.log(route_seq)
-        try{
+        try {
             const response = await axios.post(`http://${localhost}:8090/nuvida/delReser`, {
                 route_seq: route_seq,
             });
             getReser();
-        }catch (e) {
+        } catch (e) {
             console.error(e)
         }
     }
 
-    const delAcc = async (acc_seq) =>{
-        console.log(acc_seq)
-        try{
+    const delAcc = async (acc_seq) => {
+        try {
             const response = await axios.post(`http://${localhost}:8090/nuvida/delAcc`, {
                 acc_seq: acc_seq,
             });
             getAcc();
-        }catch (e) {
+        } catch (e) {
             console.error(e)
         }
     }
@@ -396,7 +401,6 @@ const ReservationInfo = ({ route }) => {
 
         try {
             const canOpen = await Linking.canOpenURL(url);
-            console.log('Can open URL:', canOpen);
 
             if (canOpen) {
                 await Linking.openURL(url);
@@ -416,13 +420,13 @@ const ReservationInfo = ({ route }) => {
         }
     };
 
-    const checkDeletePlan = () =>{
+    const checkDeletePlan = () => {
         Alert.alert(
             "삭제 확인",
             "삭제하시겠습니까?",
             [
                 { text: "아니요", style: "cancel" },
-                { text: "예", onPress: () => deletePlan()}
+                { text: "예", onPress: () => deletePlan() }
             ]
         );
     }
@@ -453,372 +457,596 @@ const ReservationInfo = ({ route }) => {
         }
     }
 
-    return (
-        <View style={styles.container}>
-            <View style={styles.topBar}>
-                <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("TripCalendar", {userInfo})}>
-                    <Text style={styles.backButtonText}>이전</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.deleteButton} onPress={() => checkDeletePlan()}>
-                    <Text style={styles.deleteButtonText}>삭제</Text>
-                </TouchableOpacity>
+    // 상단 바
+    const renderHeader = () => {
+        return (
+            <View style={[styles.center_row, styles.headerContainer]}>
+                <View style={[{width: '30%', height: '100%', justifyContent: 'center', alignItems: 'flex-start'}]}>
+                    <TouchableOpacity style={[styles.center_row, {marginLeft: '12%'}]} onPress={() => navigation.navigate("TripCalendar", {userInfo})}>
+                        <Entypo name="chevron-thin-left" size={14} color="black" />
+                        <Text style={{fontSize: 14, marginLeft: '5%'}}>이전</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={{width: '40%', height: '100%'}}>
+                </View>
+                <View style={[{width: '30%', height: '100%', justifyContent: 'center', alignItems: 'flex-end',}]}>
+                    <TouchableOpacity style={[styles.center_row, {marginRight: '12%'}]} onPress={() => checkDeletePlan()}>
+                        <Text style={{fontSize: 14, marginRight: '5%', color: 'red'}}>삭제</Text>
+                        <Entypo name="chevron-thin-right" size={14} color="red" />
+                    </TouchableOpacity>
+                </View>
             </View>
+        );
+    };
 
-            <View style={styles.header}>
-                {planInfo?(<Text style={styles.location}>{planInfo.plan_name}</Text>):
-                    (<Text style={styles.location}>광주 여행</Text>)}
-
-                {planInfo?(<Text style={styles.date}>{formatDate(planInfo.start_date)} - {formatDate(planInfo.end_date)}</Text>):
-                    (<Text style={styles.date}>2024. 05. 21 (토) - 2024. 05. 23 (월)</Text>)}
-            </View>
-            <View style={styles.tabContainer}>
-                <TouchableOpacity style={styles.tabButton} onPress={()=>navigation.navigate("TripSchedule", {userInfo:userInfo, plan_seq:plan_seq})}>
-                    <Text style={styles.tabText}>여행일정</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabButtonActive} onPress={()=>navigation.navigate("ReservationInfo", {userInfo:userInfo, plan_seq:plan_seq, planInfo:planInfo, routeList:routeList, isLeader:isLeader})}>
-                    <Text style={styles.tabTextActive}>예약정보</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabButton} onPress={()=>navigation.navigate("MemberList", {userInfo:userInfo, plan_seq:plan_seq, planInfo:planInfo, routeList:routeList, isLeader:isLeader})}>
-                    <Text style={styles.tabText}>멤버목록</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabButton} onPress={()=>navigation.navigate("Calculate", {userInfo:userInfo, plan_seq:plan_seq, planInfo:planInfo, routeList:routeList, isLeader:isLeader})}>
-                    <Text style={styles.tabText}>정산하기</Text>
-                </TouchableOpacity>
-            </View>
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <View style={styles.reserContainer}>
-                    <View style={styles.reserButtonContainer}>
-                        {!transportaions || transportaions.length <1?(
-                            <View style={styles.transContainer}>
-                                <TouchableOpacity style={styles.transButton} onPress={() => setTicketModalVisible(true)}>
-                                    <Text style={styles.plusIcon}>+</Text>
-                                    <Text style={styles.reserButtonText}>교통편 등록하기</Text>
-                                </TouchableOpacity>
-                                <View style={styles.margin}></View>
-                                <TouchableOpacity style={styles.transButton} onPress={() => setTicketModalVisible(true)}>
-                                    <Text style={styles.plusIcon}>+</Text>
-                                    <Text style={styles.reserButtonText}>교통편 등록하기</Text>
-                                </TouchableOpacity>
-                            </View>
-                        ):(
-                            transportaions.length <2?(
-                                <View style={styles.transContainer}>
-                                    <View style={styles.transItemButton }>
-                                        <View style={styles.transItem }>
-                                            <Fontisto name="bus-ticket" size={24} color="black" />
-                                            <View style={{paddingHorizontal:8}}></View>
-                                            {transportaions[0]&&<Text style={styles.transText}>{transportaions[0].tr_name}</Text>}
-                                            <TouchableOpacity onPress={()=>delTrans(transportaions[0].tr_seq)}>
-                                                <Entypo name="cross" size={24} color="red" />
-                                            </TouchableOpacity>
-                                        </View>
-                                        {transportaions[0]&&<Text style={styles.transDtText}>{formatReserDt(transportaions[0].tr_dt)} {formatTime(transportaions[0].tr_dt)}</Text>}
-
-                                    </View>
-                                    <View style={styles.margin}></View>
-                                    <TouchableOpacity style={styles.transButton} onPress={() => setTicketModalVisible(true)}>
-                                        <Text style={styles.plusIcon}>+</Text>
-                                        <Text style={styles.reserButtonText}>교통편 등록하기</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            ):(
-                                <View style={styles.transContainer}>
-                                    <View style={styles.transItemButton }>
-
-                                        <View style={styles.transItem }>
-                                            <Fontisto name="bus-ticket" size={24} color="black" />
-                                            <View style={{paddingHorizontal:8}}></View>
-                                            {transportaions[0]&&<Text style={styles.transText}>{transportaions[0].tr_name}</Text>}
-                                            <TouchableOpacity onPress={()=>delTrans(transportaions[0].tr_seq)}>
-                                                <Entypo name="cross" size={24} color="red" />
-                                            </TouchableOpacity>
-                                        </View>
-                                        {transportaions[0]&&<Text style={styles.transDtText}>{formatReserDt(transportaions[0].tr_dt)} {formatTime(transportaions[0].tr_dt)}</Text>}
-                                    </View>
-                                    <View style={styles.margin}></View>
-                                    <View style={styles.transItemButton }>
-                                        <View style={styles.transItem }>
-                                            <Fontisto name="bus-ticket" size={24} color="black" />
-                                            <View style={{paddingHorizontal:8}}></View>
-                                            {transportaions[1]&&<Text style={styles.transText}>{transportaions[1].tr_name}</Text>}
-                                            <TouchableOpacity onPress={()=>delTrans(transportaions[1].tr_seq)}>
-                                                <Entypo name="cross" size={24} color="red" />
-                                            </TouchableOpacity>
-                                        </View>
-                                        {transportaions[1]&&<Text style={styles.transDtText}>{formatReserDt(transportaions[1].tr_dt)} {formatTime(transportaions[1].tr_dt)}</Text>}
-                                    </View>
-                                </View>
-                            )
-
-
+    // 여행 상단바
+    const renderTripHeader = () => {
+        return (
+            <View style={{ width: '100%', height: '10%' }}>
+                <View style={{ width: '100%', height: '50%', flexDirection: 'row', alignItems: 'center' }}>
+                    <View style={{ alignItems: 'center', justifyContent: 'center', width: '10%', height: '100%', marginLeft: '5%' }}>
+                        <Ionicons name="paper-plane-outline" size={28} color="black" />
+                    </View>
+                    <View style={{ width: '80%', height: '100%', marginRight: '5%', justifyContent: 'center' }}>
+                        {planInfo ? (
+                            <Text style={{ fontSize: 19, letterSpacing: 2 }}>{planInfo.plan_name}</Text>
+                        ) : (
+                            <Text style={{ fontSize: 19, letterSpacing: 2 }}>광주 여행</Text>
                         )}
-
-                        {!accommodation || accommodation.length <1 ? (
-                            <TouchableOpacity style={styles.reserButton} onPress={() => setSearchModalVisible(true)}>
-                                <Text style={styles.plusIcon}>+</Text>
-                                <Text style={styles.reserButtonText}>숙소 등록하기</Text>
-                            </TouchableOpacity>
-                        ):(
-                            <View style={styles.accContainer}>
-                                <TouchableOpacity onPress={()=>delAcc(accommodation[0].acc_seq)}>
-                                    <Entypo name="cross" size={24} color="red" />
-                                </TouchableOpacity>
-                                {accommodation[0]&&<Text style={styles.accNameText}>{accommodation[0].acc_name}</Text>}
-                                {accommodation[0]&&<Text style={styles.accAddrText}>{accommodation[0].acc_addr}</Text>}
-                                {accommodation[0]&&<Text style={styles.accCheckText}>{formatReserDt(accommodation[0].check_in)} {formatTime(accommodation[0].check_in)}</Text>}
-                                {accommodation[0]&&<Text style={styles.accCheckText}>{formatReserDt(accommodation[0].check_out)} {formatTime(accommodation[0].check_out)}</Text>}
-                                <TouchableOpacity style={styles.naviButton} onPress={()=>handleNavi(accommodation[0])}>
-                                    <Text style={styles.naviText}>길찾기</Text>
-                                </TouchableOpacity>
-                            </View>
-                        ) }
-
                     </View>
                 </View>
+                <View style={{ width: '100%', height: '50%' }}>
+                    <View style={{ width: '70%', height: '100%', marginLeft: '13%', marginRight: '17%' }}>
+                        {planInfo ? (
+                            <Text style={{ fontSize: 13 }}>
+                                {formatDate(planInfo.start_date)} - {formatDate(planInfo.end_date)}
+                            </Text>
+                        ) : (
+                            <Text style={{ fontSize: 13 }}>2024. 05. 21 (토) - 2024. 05. 23 (월)</Text>
+                        )}
+                    </View>
+                </View>
+            </View>
+        )
+    }
 
+    const goMypage = () =>{
+        if(userInfo){
+            navigation.navigate('Mypage', {userInfo:userInfo})
+        }else{
+            navigation.navigate('Signin')
+        }
+    }
 
+    // 하단 바
+    const renderTabBar = () => {
+        return (
+            <View style={styles.tabBar}>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('Main')}>
+                    <Entypo name="home" size={24} color="black" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem} onPress={handlePlanCalendarIconPress}>
+                    <FontAwesome name="calendar-check-o" size={24} color="black" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('PinBall')}>
+                    <MaterialCommunityIcons name="billiards-rack" size={24} color="black" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('CommunityList', {userInfo:userInfo})}>
+                    <Ionicons name="chatbubbles-outline" size={24} color="black" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.tabItem} onPress={() => goMypage()}>
+                    <Feather name="user" size={24} color="black" />
+                </TouchableOpacity>
+            </View>
+        );
+    };
 
-                <View style={styles.line} />
-                <View style={styles.boxContainer}>
-                    <Text style={styles.subHeader}>예약 목록</Text>
-                    <View style={styles.contentContainer}>
-                        <View style={styles.itemList}>
-                            {reservations&&reservations.map((item, index) => (
-                                <View key={item.route_seq} style={styles.itemBox}>
-                                    <TouchableOpacity onPress={()=>delReser(item.route_seq)}>
-                                        <Entypo name="cross" size={24} color="red" />
-                                    </TouchableOpacity>
-                                    <Text style={styles.itemName}>{item.title}</Text>
-                                    <Text style={styles.itemDate}>{item.addr}</Text>
-                                    <Text style={styles.itemTime}>{formatReserDt(item.reser_dt)} {formatTime(item.reser_dt)}</Text>
+    // 하단바 일정관리 아이콘
+    const handlePlanCalendarIconPress = () => {
+        if (userInfo) {
+            navigation.navigate("TripCalendar", { userInfo: userInfo });
+        } else {
+            navigation.navigate("Signin");
+        }
+    };
+
+    const renderModals = () => {
+        return (
+            <>
+                {/* 티켓 추가 모달 */}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={ticketModalVisible}
+                    onRequestClose={() => setTicketModalVisible(!ticketModalVisible)}
+                >
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+                        <View style={{ width: 300, backgroundColor: 'white', borderRadius: 10, padding: 20, alignItems: 'center' }}>
+                            <Text style={{ fontSize: 18, marginBottom: 15 }}>교통편 추가</Text>
+                            <TextInput
+                                style={{ width: '100%', borderWidth: 1, borderColor: '#959595', borderRadius: 5, padding: 10, marginBottom: 10 }}
+                                placeholder="교통편을 입력하세요"
+                                value={newTicketTitle}
+                                onChangeText={setNewTicketTitle}
+                            />
+                            <TouchableOpacity onPress={() => setShowTicketDatePicker(true)} style={{ width: '100%', borderWidth: 1, borderColor: '#959595', borderRadius: 5, padding: 10, marginBottom: 10 }}>
+                                <Text>{newTicketDate.toLocaleDateString()}</Text>
+                            </TouchableOpacity>
+                            {showTicketDatePicker && (
+                                <DateTimePicker
+                                    value={newTicketDate}
+                                    mode="date"
+                                    display="default"
+                                    onChange={handleTicketDateChange}
+                                />
+                            )}
+                            <TouchableOpacity onPress={() => setShowTicketTimePicker(true)} style={{ width: '100%', borderWidth: 1, borderColor: '#959595', borderRadius: 5, padding: 10, marginBottom: 10 }}>
+                                <Text>{newTicketTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Seoul' })}</Text>
+                            </TouchableOpacity>
+                            {showTicketTimePicker && (
+                                <DateTimePicker
+                                    value={newTicketTime}
+                                    mode="time"
+                                    display="spinner"
+                                    onChange={handleTicketTimeChange}
+                                />
+                            )}
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingHorizontal: 20 }}>
+                                <TouchableOpacity
+                                    style={{ borderRadius: 5, padding: 10, elevation: 2, width: 100, backgroundColor: '#f35353' }}
+                                    onPress={() => setTicketModalVisible(!ticketModalVisible)}
+                                >
+                                    <Text style={{ color: 'white', fontWeight: 'bold', textAlign: 'center' }}>취소</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={{ borderRadius: 5, padding: 10, elevation: 2, width: 100, backgroundColor: '#000000' }}
+                                    onPress={handleAddTicket}
+                                >
+                                    <Text style={{ color: 'white', fontWeight: 'bold', textAlign: 'center' }}>추가</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+                {/* 일정 추가 모달 */}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={scheduleModalVisible}
+                    onRequestClose={() => setScheduleModalVisible(!scheduleModalVisible)}
+                >
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+                        <View style={{ width: 300, backgroundColor: 'white', borderRadius: 10, padding: 20, alignItems: 'center' }}>
+                            <Text style={{ fontSize: 18, marginBottom: 15 }}>일정 추가</Text>
+                            <TouchableOpacity style={{ width: '100%', borderWidth: 1, borderColor: '#959595', borderRadius: 5, padding: 10, marginBottom: 10 }} onPress={() => setShowDropdown(!showDropdown)}>
+                                <Text>{selectedPlace ? selectedPlace.title : "예약할 장소를 선택해 주세요"}</Text>
+                                <AntDesign name="down" size={16} color="black" />
+                            </TouchableOpacity>
+                            {showDropdown && (
+                                <View style={{ width: '100%', backgroundColor: '#fff', borderWidth: 1, borderColor: '#959595', borderRadius: 5, marginBottom: 10 }}>
+                                    {routeList
+                                        .filter(route => !route.reser_dt)
+                                        .map(route => (
+                                            <TouchableOpacity
+                                                key={route.route_seq}
+                                                style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: '#959595' }}
+                                                onPress={() => handleDropdownSelect(route)}
+                                            >
+                                                <Text>{route.title}</Text>
+                                            </TouchableOpacity>
+                                        ))}
+                                </View>
+                            )}
+                            <TouchableOpacity onPress={() => setShowDatePicker(true)} style={{ width: '100%', borderWidth: 1, borderColor: '#959595', borderRadius: 5, padding: 10, marginBottom: 10 }}>
+                                <Text>{newItemDate.toLocaleDateString()}</Text>
+                            </TouchableOpacity>
+                            {showDatePicker && (
+                                <DateTimePicker
+                                    value={newItemDate}
+                                    mode="date"
+                                    display="default"
+                                    onChange={handleDateChange}
+                                />
+                            )}
+                            <TouchableOpacity onPress={() => setShowStartTimePicker(true)} style={{ width: '100%', borderWidth: 1, borderColor: '#959595', borderRadius: 5, padding: 10, marginBottom: 10 }}>
+                                <Text>{newItemStartTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Seoul' })}</Text>
+                            </TouchableOpacity>
+                            {showStartTimePicker && (
+                                <DateTimePicker
+                                    value={newItemStartTime}
+                                    mode="time"
+                                    display="spinner"
+                                    onChange={handleStartTimeChange}
+                                />
+                            )}
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingHorizontal: 20 }}>
+                                <TouchableOpacity
+                                    style={{ borderRadius: 5, padding: 10, elevation: 2, width: 100, backgroundColor: '#f35353' }}
+                                    onPress={() => setScheduleModalVisible(!scheduleModalVisible)}
+                                >
+                                    <Text style={{ color: 'white', fontWeight: 'bold', textAlign: 'center' }}>취소</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={{ borderRadius: 5, padding: 10, elevation: 2, width: 100, backgroundColor: '#000000' }}
+                                    onPress={handleAddItem}
+                                >
+                                    <Text style={{ color: 'white', fontWeight: 'bold', textAlign: 'center' }}>추가</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+                {/* 장소 검색 모달 */}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={searchModalVisible}
+                    onRequestClose={() => setSearchModalVisible(false)}
+                >
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+                        <View style={{ width: '80%', maxHeight: '80%', padding: 20, backgroundColor: 'white', borderRadius: 10, alignItems: 'center' }}>
+                            <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>숙소 검색</Text>
+                            <View style={{ flexDirection: 'row', width: '100%', marginBottom: 20 }}>
+                                <TextInput
+                                    style={{ flex: 1, height: 40, borderColor: 'gray', borderWidth: 1, borderRadius: 5, paddingHorizontal: 10 }}
+                                    placeholder="숙소를 검색하세요..."
+                                    value={searchQuery}
+                                    onChangeText={(text) => setSearchQuery(text)}
+                                />
+                                <TouchableOpacity style={{ backgroundColor: 'blue', borderRadius: 5, padding: 10, justifyContent: 'center', alignItems: 'center', marginLeft: 10 }} onPress={handleSearch}>
+                                    <Text style={{ color: 'white', fontWeight: 'bold' }}>검색</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <ScrollView style={{ width: '100%', maxHeight: 300 }}>
+                                {placeList.length > 0 ? (
+                                    renderPlaceList()
+                                ) : (
+                                    <Text style={{ marginTop: 20 }}>검색 결과 없음</Text>
+                                )}
+                            </ScrollView>
+                            <TouchableOpacity
+                                style={{ backgroundColor: 'red', borderRadius: 5, padding: 10, alignItems: 'center', marginTop: 20 }}
+                                onPress={() => setSearchModalVisible(false)}
+                            >
+                                <Text style={{ color: 'white', fontWeight: 'bold' }}>닫기</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+
+                {/* 시간 입력 모달 */}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={timeModalVisible}
+                    onRequestClose={() => setTimeModalVisible(false)}
+                >
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+                        <View style={{ width: '80%', maxHeight: '80%', padding: 20, backgroundColor: 'white', borderRadius: 10, alignItems: 'center' }}>
+                            <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>시간 입력</Text>
+                            <TextInput
+                                style={{ width: '100%', height: 40, borderColor: 'gray', borderWidth: 1, borderRadius: 5, paddingHorizontal: 10, marginTop: 10 }}
+                                placeholder="입실 시간을 입력하세요. (예: 2024.11.13 10:00)"
+                                value={checkInTime}
+                                onChangeText={(text) => setCheckInTime(text)}
+                            />
+                            <TextInput
+                                style={{ width: '100%', height: 40, borderColor: 'gray', borderWidth: 1, borderRadius: 5, paddingHorizontal: 10, marginTop: 10 }}
+                                placeholder="퇴실 시간을 입력하세요. (예: 2024.11.14 10:00)"
+                                value={checkOutTime}
+                                onChangeText={(text) => setCheckOutTime(text)}
+                            />
+                            <TouchableOpacity
+                                style={{ backgroundColor: 'green', borderRadius: 5, padding: 10, alignItems: 'center', marginTop: 20 }}
+                                onPress={handleTimeSubmit}
+                            >
+                                <Text style={{ color: 'white', fontWeight: 'bold' }}>선택 완료</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+            </>
+        );
+    };
+
+    return (
+        <View style={{ flex: 1, backgroundColor: '#fff' }}>
+            {renderHeader()}
+            {renderTripHeader()}
+            <View style={{ marginBottom: '5%', flexDirection: 'row', justifyContent: 'space-around', borderBottomWidth: 0.7, borderColor: '#EAEAEA' }}>
+                {/* Tab Navigation */}
+                <TouchableOpacity style={{ flex: 1, alignItems: 'center', paddingVertical: 10 }} onPress={() => navigation.navigate("TripSchedule", { userInfo: userInfo, plan_seq: plan_seq })}>
+                    <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#999' }}>여행일정</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={{ flex: 1, alignItems: 'center', paddingVertical: 10, borderBottomWidth: 2, borderColor: '#000' }} onPress={() => navigation.navigate("ReservationInfo", { userInfo: userInfo, plan_seq: plan_seq, planInfo: planInfo, routeList: routeList, isLeader: isLeader })}>
+                    <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#000' }}>예약정보</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={{ flex: 1, alignItems: 'center', paddingVertical: 10 }} onPress={() => navigation.navigate("MemberList", { userInfo: userInfo, plan_seq: plan_seq, planInfo: planInfo, routeList: routeList, isLeader: isLeader })}>
+                    <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#999' }}>멤버목록</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={{ flex: 1, alignItems: 'center', paddingVertical: 10 }} onPress={() => navigation.navigate("Calculate", { userInfo: userInfo, plan_seq: plan_seq, planInfo: planInfo, routeList: routeList, isLeader: isLeader })}>
+                    <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#999' }}>정산하기</Text>
+                </TouchableOpacity>
+            </View>
+            <ScrollView contentContainerStyle={{ paddingBottom: '3%', flexGrow: 1 }}>
+                <View style={{ flexDirection: 'column' }}>
+                    {/* 교통편 섹션 */}
+                    <View style={{
+                        padding: 10,
+                        marginHorizontal: 20,
+                        marginBottom: 20,
+                        backgroundColor: '#f5f5f5',
+                        borderRadius: 10
+                    }}>
+                        <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: '4%', marginTop: '1%'}}>
+                            <FontAwesome5 name="car" size={20} color="#535353" />
+                            <Text style={{
+                                fontSize: 16,
+                                fontWeight: 'bold',
+                                marginLeft: '2%'}}>교통편</Text>
+                        </View>
+                        <View style={{}}>
+                            {transportations && transportations.map((trans, index) => (
+                                <View
+                                    key={index}
+                                    style={{
+                                        backgroundColor: '#aeccf3',
+                                        padding: 15,
+                                        borderRadius: 10,
+                                        shadowColor: '#000',
+                                        shadowOffset: { width: 0, height: 1 },
+                                        shadowOpacity: 0.22,
+                                        shadowRadius: 2.22,
+                                        elevation: 3,
+                                        marginBottom: 15
+                                    }}
+                                >
+                                    <View style={{
+                                        flexDirection: 'row',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center'
+                                    }}>
+                                        <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{trans.tr_name}</Text>
+                                        <TouchableOpacity onPress={() => delTrans(trans.tr_seq)}>
+                                            <FontAwesome6 name="circle-minus" size={20} color="blue" />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <Text style={{ fontSize: 14, color: 'black', marginTop: 10 }}>{trans.tr_dt}</Text>
                                 </View>
                             ))}
                         </View>
-                        <TouchableOpacity style={styles.addItemButton} onPress={() => setScheduleModalVisible(true)}>
-                            <Text style={styles.addItemText}>+</Text>
+                        <TouchableOpacity
+                            style={{
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                padding: 20,
+                                borderWidth: 1,
+                                borderColor: '#838383',
+                                borderRadius: 5,
+                                backgroundColor: '#fff'
+                            }}
+                            onPress={() => setTicketModalVisible(true)}
+                        >
+                            <Text style={{ fontSize: 24, color: '#000' }}>+</Text>
                         </TouchableOpacity>
                     </View>
+
+                    {/* 예약 목록 섹션 */}
+                    <View style={{
+                        padding: 10,
+                        marginHorizontal: 20,
+                        marginBottom: 20,
+                        backgroundColor: '#f5f5f5',
+                        borderRadius: 10
+                    }}>
+                        <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: '4%', marginTop: '1%'}}>
+                            <FontAwesome5 name="credit-card" size={18} color="#535353" />
+                            <Text style={{
+                                fontSize: 16,
+                                fontWeight: 'bold',
+                                marginLeft: '2%'}}>예약 목록</Text>
+                        </View>
+                        <View style={{}}>
+                            {reservations && reservations.map((item, index) => (
+                                <View
+                                    key={item.route_seq}
+                                    style={{
+                                        backgroundColor: '#aeccf3',
+                                        padding: 15,
+                                        borderRadius: 10,
+                                        shadowColor: '#000',
+                                        shadowOffset: { width: 0, height: 1 },
+                                        shadowOpacity: 0.22,
+                                        shadowRadius: 2.22,
+                                        elevation: 3,
+                                        marginBottom: 15
+                                    }}
+                                >
+                                    <View style={{
+                                        flexDirection: 'row',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center'
+                                    }}>
+                                        <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{item.title}</Text>
+                                        <TouchableOpacity onPress={() => delReser(item.route_seq)}>
+                                            <FontAwesome6 name="circle-minus" size={20} color="blue" />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <Text style={{ fontSize: 12, color: '#333', marginTop: 10 }}>{item.addr}</Text>
+                                    <Text style={{  fontSize: 12, color: '#333', marginTop: 10 }}>{formatReserDt(item.reser_dt)} {formatTime(item.reser_dt)}</Text>
+                                </View>
+                            ))}
+                        </View>
+                        <TouchableOpacity
+                            style={{
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                padding: 20,
+                                borderWidth: 1,
+                                borderColor: '#838383',
+                                borderRadius: 5,
+                                backgroundColor: '#fff'
+                            }}
+                            onPress={() => setScheduleModalVisible(true)}
+                        >
+                            <Text style={{ fontSize: 24, color: '#000' }}>+</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* 숙소 목록 섹션 */}
+                    <View style={{
+                        padding: 10,
+                        marginHorizontal: 20,
+                        marginBottom: 20,
+                        backgroundColor: '#f5f5f5',
+                        borderRadius: 10
+                    }}>
+                        <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: '4%', marginTop: '1%'}}>
+                            <FontAwesome5 name="credit-card" size={18} color="#535353" />
+                            <Text style={{
+                                fontSize: 16,
+                                fontWeight: 'bold',
+                                marginLeft: '2%'}}>숙소 목록</Text>
+                        </View>
+                        <View style={{ marginBottom: 20 }}>
+                            {accommodation && accommodation.map((acc, index) => (
+                                <View
+                                    key={index}
+                                    style={{
+                                        marginBottom: 10,
+                                        padding: 15,
+                                        backgroundColor: '#aeccf3',
+                                        borderRadius: 10,
+                                        shadowColor: '#000',
+                                        shadowOffset: { width: 0, height: 1 },
+                                        shadowOpacity: 0.22,
+                                        shadowRadius: 2.22,
+                                        elevation: 3,
+                                    }}
+                                >
+                                    <View style={{
+                                        flexDirection: 'row',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center'
+                                    }}>
+                                        <Text style={{
+                                            fontSize: 16,
+                                            color: '#333',
+                                            fontWeight: "bold"
+                                        }}>
+                                            {acc.acc_name}
+                                        </Text>
+                                        <TouchableOpacity onPress={() => delAcc(acc.acc_seq)}>
+                                            <FontAwesome6 name="circle-minus" size={20} color="blue" />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <Text style={{ fontSize: 16, color: '#333', marginTop: 10 }}>{acc.acc_addr}</Text>
+                                    <Text style={{ fontSize: 12, color: '#333', marginTop: 10 }}>
+                                        {formatReserDt(acc.check_in)} {formatTime(acc.check_in)}
+                                    </Text>
+                                    <Text style={{ fontSize: 12, color: '#333', marginTop: 10 }}>
+                                        {formatReserDt(acc.check_out)} {formatTime(acc.check_out)}
+                                    </Text>
+                                    <TouchableOpacity
+                                        style={{
+                                            position: 'absolute',
+                                            right: 15,
+                                            bottom: 15,
+                                            width: 80,
+                                            height: 35,
+                                            borderRadius: 5,
+                                            backgroundColor: '#000000',
+                                            justifyContent: 'center',
+                                            alignItems: "center"
+                                        }}
+                                        onPress={() => handleNavi(acc)}
+                                    >
+                                        <Text style={{ fontWeight: "bold", color: '#fff' }}>길찾기</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            ))}
+                            <TouchableOpacity
+                                style={{
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    padding: 20,
+                                    borderWidth: 1,
+                                    borderColor: '#838383',
+                                    borderRadius: 5,
+                                    backgroundColor: '#fff'
+                                }}
+                                onPress={() => setSearchModalVisible(true)}
+                            >
+                                <Text style={{ fontSize: 24, color: '#000' }}>+</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
                 </View>
             </ScrollView>
 
-            {/* 티켓 추가 모달 */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={ticketModalVisible}
-                onRequestClose={() => {
-                    setTicketModalVisible(!ticketModalVisible);
-                }}
-            >
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalView}>
-                        <Text style={styles.modalText}>교통편 추가</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="교통편을 입력하세요"
-                            value={newTicketTitle}
-                            onChangeText={setNewTicketTitle}
-                        />
-                        <TouchableOpacity onPress={() => setShowTicketDatePicker(true)} style={styles.input}>
-                            <Text>{newTicketDate.toLocaleDateString()}</Text>
-                        </TouchableOpacity>
-                        {showTicketDatePicker && (
-                            <DateTimePicker
-                                value={newTicketDate}
-                                mode="date"
-                                display="default"
-                                onChange={handleTicketDateChange}
-                            />
-                        )}
-                        <TouchableOpacity onPress={() => setShowTicketTimePicker(true)} style={styles.input}>
-                            <Text>{newTicketTime.toLocaleTimeString([], options)}</Text>
-                        </TouchableOpacity>
-                        {showTicketTimePicker && (
-                            <DateTimePicker
-                                value={newTicketTime}
-                                mode="time"
-                                display="spinner"
-                                onChange={handleTicketTimeChange}
-                            />
-                        )}
-                        <View style={styles.modalButtonContainer}>
-                            <TouchableOpacity
-                                style={[styles.button, styles.buttonClose]}
-                                onPress={() => setTicketModalVisible(!ticketModalVisible)}
-                            >
-                                <Text style={styles.textStyle}>취소</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.button, styles.buttonAdd]}
-                                onPress={handleAddTicket}
-                            >
-                                <Text style={styles.textStyle}>추가</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
-
-            {/* 일정 추가 모달 */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={scheduleModalVisible}
-                onRequestClose={() => {
-                    setScheduleModalVisible(!scheduleModalVisible);
-                }}
-            >
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalView}>
-                        <Text style={styles.modalText}>일정 추가</Text>
-                        <TouchableOpacity style={styles.dropdown} onPress={() => setShowDropdown(!showDropdown)}>
-                            <Text style={styles.dropdownText}>
-                                {selectedPlace ? selectedPlace.title : "예약할 장소를 선택해 주세요"}
-                            </Text>
-                            <AntDesign name="down" size={16} color="black" />
-                        </TouchableOpacity>
-                        {showDropdown && (
-                            <View style={styles.dropdownMenu}>
-                                {routeList
-                                    .filter(route => !route.reser_dt)
-                                    .map(route => (
-                                        <TouchableOpacity
-                                            key={route.route_seq}
-                                            style={styles.dropdownMenuItem}
-                                            onPress={() => handleDropdownSelect(route)}
-                                        >
-                                            <Text>{route.title}</Text>
-                                        </TouchableOpacity>
-                                    ))}
-                            </View>
-                        )}
-                        <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
-                            <Text>{newItemDate.toLocaleDateString()}</Text>
-                        </TouchableOpacity>
-                        {showDatePicker && (
-                            <DateTimePicker
-                                value={newItemDate}
-                                mode="date"
-                                display="default"
-                                onChange={handleDateChange}
-                            />
-                        )}
-                        <TouchableOpacity onPress={() => setShowStartTimePicker(true)} style={styles.input}>
-                            <Text>{newItemStartTime.toLocaleTimeString([], options)}</Text>
-                        </TouchableOpacity>
-                        {showStartTimePicker && (
-                            <DateTimePicker
-                                value={newItemStartTime}
-                                mode="time"
-                                display="spinner"
-                                onChange={handleStartTimeChange}
-                            />
-                        )}
-                        {/*<TouchableOpacity onPress={() => setShowEndTimePicker(true)} style={styles.input}>*/}
-                        {/*    <Text>{newItemEndTime.toLocaleTimeString()}</Text>*/}
-                        {/*</TouchableOpacity>*/}
-                        {/*{showEndTimePicker && (*/}
-                        {/*    <DateTimePicker*/}
-                        {/*        value={newItemEndTime}*/}
-                        {/*        mode="time"*/}
-                        {/*        display="spinner"*/}
-                        {/*        onChange={handleEndTimeChange}*/}
-                        {/*    />*/}
-                        {/*)}*/}
-                        <View style={styles.modalButtonContainer}>
-                            <TouchableOpacity
-                                style={[styles.button, styles.buttonClose]}
-                                onPress={() => setScheduleModalVisible(!scheduleModalVisible)}
-                            >
-                                <Text style={styles.textStyle}>취소</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.button, styles.buttonAdd]}
-                                onPress={handleAddItem}
-                            >
-                                <Text style={styles.textStyle}>추가</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
 
 
-            {/* 장소 검색 모달 */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={searchModalVisible}
-                onRequestClose={() => setSearchModalVisible(false)}
-            >
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>숙소 검색</Text>
-                        <View style={styles.searchContainer}>
-                            <TextInput
-                                style={styles.searchInput}
-                                placeholder="숙소를 검색하세요..."
-                                value={searchQuery}
-                                onChangeText={(text) => setSearchQuery(text)}
-                            />
-                            <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-                                <Text style={styles.searchButtonText}>검색</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <ScrollView style={styles.placeListContainer}>
-                            {placeList.length > 0 ? (
-                                renderPlaceList()
-                            ) : (
-                                <Text style={{ marginTop: 20 }}>검색 결과 없음</Text>
-                            )}
-                        </ScrollView>
-                        <TouchableOpacity
-                            style={styles.closeButton}
-                            onPress={() => setSearchModalVisible(false)}
-                        >
-                            <Text style={styles.closeButtonText}>닫기</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
 
-            {/* 시간 입력 모달 */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={timeModalVisible}
-                onRequestClose={() => setTimeModalVisible(false)}
-            >
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>시간 입력</Text>
-                        <TextInput
-                            style={styles.timeInput}
-                            placeholder="입실 시간을 입력하세요. (예: 2024.11.13 10:00)"
-                            value={checkInTime}
-                            onChangeText={(text) => setCheckInTime(text)}
-                        />
-                        <TextInput
-                            style={styles.timeInput}
-                            placeholder="퇴실 시간을 입력하세요. (예: 2024.11.14 10:00)"
-                            value={checkOutTime}
-                            onChangeText={(text) => setCheckOutTime(text)}
-                        />
-                        <TouchableOpacity
-                            style={styles.selectButton}
-                            onPress={handleTimeSubmit}
-                        >
-                            <Text style={styles.selectButtonText}>선택 완료</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
-
+            {/* 티켓 추가 모달, 일정 추가 모달, 장소 검색 모달, 시간 입력 모달 */}
+            {renderModals()}
+            {renderTabBar()}
         </View>
     );
+
 };
 
 const styles = StyleSheet.create({
+
+    /* 상단바 */
+    headerContainer: {
+        backgroundColor: '#fff',
+        height: 85,
+        paddingTop: '10%',
+        marginBottom: '2%',
+    },
+    headerText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: 'red'
+    },
+    headerIconContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+    },
+    headerIcon: {
+        width: 26,
+        height: 26,
+        marginRight: '12%',
+    },
+
+    /* 하단바 */
+    tabBar: {
+        height: 70,
+        flexDirection: 'row',
+        borderTopColor: '#ccc',
+        borderTopWidth: 1,
+    },
+    tabItem: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        bottom: 10,
+    },
+
+    center: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    center_row: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row',
+    },
     container: {
         flex: 1,
         backgroundColor: '#fff',
@@ -827,7 +1055,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingHorizontal: 20,
-        paddingTop: 60,
     },
     backButton: {
         paddingVertical: 10,
@@ -861,9 +1088,8 @@ const styles = StyleSheet.create({
     tabContainer: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        borderBottomWidth: 1,
-        borderColor: '#ccc',
-        paddingBottom: 10,
+        borderBottomWidth: 0.7,
+        borderColor: '#EAEAEA',
     },
     tabButton: {
         flex: 1,
@@ -878,11 +1104,13 @@ const styles = StyleSheet.create({
         borderColor: '#000',
     },
     tabText: {
-        fontSize: 16,
+        fontSize: 15,
+        fontWeight: 'bold',
         color: '#999',
     },
     tabTextActive: {
-        fontSize: 16,
+        fontSize: 15,
+        fontWeight: 'bold',
         color: '#000',
     },
     reservationInfoContainer: {
@@ -1004,21 +1232,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: '#000',
     },
-    tabBar: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        paddingVertical: 10,
-        borderTopWidth: 1,
-        borderColor: '#ccc',
-        backgroundColor: '#fff',
-        position: 'absolute',
-        bottom: 0,
-        width: '100%',
-        marginBottom: 20,
-    },
-    tabItem: {
-        alignItems: 'center',
-    },
+
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -1092,32 +1306,32 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginTop: 20,
     },
-    transContainer:{
+    transContainer: {
         width: '48%',
     },
-    margin:{
-        padding:10
+    margin: {
+        padding: 10
     },
-    transButton:{
+    transButton: {
         height: 90,
         backgroundColor: '#e0e0e0',
         borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    transItemButton:{
+    transItemButton: {
         height: 90,
         backgroundColor: '#aeccf3',
         borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    transItem:{
+    transItem: {
         flexDirection: 'row', // 자식 요소를 왼쪽에서 오른쪽으로 배치
         alignItems: 'center',
         justifyContent: 'space-between', // 공간을 균등하게 분배하여 배치
-        alignSelf:"flex-start",
-        paddingLeft:"10%"
+        alignSelf: "flex-start",
+        paddingLeft: "10%"
     },
     reserButton: {
         width: '48%',
@@ -1137,14 +1351,14 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#333',
     },
-    transText:{
+    transText: {
         fontSize: 15,
         color: '#333',
-        alignSelf:"flex-end",
-        fontWeight:"bold",
-        paddingRight:"10%"
+        alignSelf: "flex-end",
+        fontWeight: "bold",
+        paddingRight: "10%"
     },
-    transDtText:{
+    transDtText: {
         fontSize: 11,
         color: '#333',
     },
@@ -1226,26 +1440,26 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
     },
-    accContainer: {
-        width: '48%',
-        height: 200,
+    accListContainer: {
+        marginBottom: 20,
+        padding: 15,
         backgroundColor: '#fba1a1',
         borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    accNameText:{
+    accNameText: {
         marginTop: 10,
         fontSize: 16,
         color: '#333',
-        fontWeight:"bold",
+        fontWeight: "bold",
     },
-    accAddrText:{
+    accAddrText: {
         marginTop: 10,
         fontSize: 16,
         color: '#333',
     },
-    accCheckText:{
+    accCheckText: {
         marginTop: 10,
         fontSize: 12,
         color: '#333',
@@ -1277,17 +1491,18 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#959595',
     },
-    naviButton:{
+    naviButton: {
         width: "30%",
         height: "15%",
         borderRadius: 5,
         backgroundColor: '#f35353',
-        alignItems:"center",
+        alignItems: "center",
     },
-    naviText:{
-        fontWeight:"bold"
+    naviText: {
+        fontWeight: "bold"
     },
 
 });
 
 export default ReservationInfo;
+
