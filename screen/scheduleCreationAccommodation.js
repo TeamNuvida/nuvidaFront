@@ -61,8 +61,8 @@ export default function ScheduleCreationAccommodation({ route }) {
         }
 
         if (currentPlace && currentDayRange !== null) {
-            const formattedCheckInTime = `${formatDate(currentDayRange.start)} ${checkInTime}`;
-            const formattedCheckOutTime = `${formatDate(currentDayRange.end)} ${checkOutTime}`;
+            const formattedCheckInTime = `${formatDateSet(currentDayRange.start)} ${checkInTime}`;
+            const formattedCheckOutTime = `${formatDateSet(currentDayRange.end)} ${checkOutTime}`;
             setSelectedPlaces([...selectedPlaces, { ...currentPlace, checkInTime: formattedCheckInTime, checkOutTime: formattedCheckOutTime, dayRange: currentDayRange }]);
         }
         setCurrentPlace(null);
@@ -119,9 +119,10 @@ export default function ScheduleCreationAccommodation({ route }) {
             contentid: place.contentid,
             dayRange: place.dayRange,
         }));
-        console.log(accommodation);
 
         const updateScheduleInfo = { ...scheduleInfo, accommodation: accommodation };
+
+
         navigation.navigate('ScheduleCreation4', { scheduleInfo: updateScheduleInfo, userInfo: userInfo });
     };
 
@@ -209,6 +210,14 @@ export default function ScheduleCreationAccommodation({ route }) {
             day: '2-digit',
             weekday: 'short',
         });
+    };
+
+    const formatDateSet = (date) => {
+        return new Date(date).toLocaleDateString('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        }).replace(/\.\s/g, '.'); // ". "을 "."로 대체
     };
 
     return (

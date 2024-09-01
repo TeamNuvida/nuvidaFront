@@ -506,7 +506,7 @@ const TripSchedule = ({ route }) => {
                 const response = await axios.post(`http://${localhost}:8090/nuvida/delPlanLeader`, {
                     plan_seq: plan_seq
                 });
-                navigation.navigate("Mypage", {userInfo:userInfo});
+                navigation.navigate("TripCalendar", {userInfo:userInfo});
             } catch (e) {
                 console.error(e)
             }
@@ -517,7 +517,7 @@ const TripSchedule = ({ route }) => {
                     plan_seq: plan_seq,
                     user_id:userInfo.user_id
                 });
-                navigation.navigate("Mypage", {userInfo:userInfo});
+                navigation.navigate("TripCalendar", {userInfo:userInfo});
             } catch (e) {
                 console.error(e)
             }

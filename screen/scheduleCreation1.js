@@ -72,7 +72,7 @@ export default function ScheduleCreation1({route}) {
         return (
             <View style={styles.container}>
                 <TouchableOpacity style={[styles.center, styles.fullSize]} onPress={() => handleScheduleInfoPress("1")} >
-                    <Image source={require('../assets/routeTicket.png')} style={styles.ticketImage}/>
+                    <Image source={require('../assets/routeTicket.png')} style={styles.ticketImage} resizeMode="contain"/>
                     <View style={styles.content}>
                         <View style={styles.rowContainer}>
                             <View style={[styles.center_row, {width: '60%', height: '100%'}]}>
@@ -95,7 +95,7 @@ export default function ScheduleCreation1({route}) {
                     </View>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.center, styles.fullSize]} onPress={() => handleScheduleInfoPress("2")} >
-                    <Image source={require('../assets/customTicket.png')} style={styles.ticketImage} />
+                    <Image source={require('../assets/customTicket.png')} style={styles.ticketImage} resizeMode="contain" />
                     <View style={styles.content}>
                         <View style={styles.rowContainer}>
                             <View style={[styles.center_row, {width: '60%', height: '100%'}]}>
@@ -174,8 +174,8 @@ const styles = StyleSheet.create({
         height: '40%',
     },
     ticketImage: {
-        width: '86%',
-        height: '80%'
+        width: '95%',
+        height: '80%',
     },
     content: {
         position: 'absolute',
@@ -185,7 +185,8 @@ const styles = StyleSheet.create({
     rowContainer: {
         width: '76%',
         height: '19%',
-        flexDirection: 'row'
+        flexDirection: 'row',
+        paddingTop:15
     },
     boldText: {
         fontWeight: 'bold',

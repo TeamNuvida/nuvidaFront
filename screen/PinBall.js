@@ -196,10 +196,10 @@ export default function PinBall() {
 
         // 벽을 나중에 정의
         let walls = [
-            createWall(world, 'blue', { x: gameAreaWidth / 2, y: wallThickness / 2 }, { width: gameAreaWidth, height: wallThickness }), // 상단 벽
-            createWall(world, 'blue', { x: gameAreaWidth / 2, y: gameAreaHeight - wallThickness / 2 }, { width: gameAreaWidth, height: wallThickness }), // 하단 벽
-            createWall(world, 'red', { x: wallThickness / 2, y: gameAreaHeight / 2 }, { width: wallThickness, height: gameAreaHeight }), // 왼쪽 벽
-            createWall(world, 'green', { x: gameAreaWidth - wallThickness / 2, y: gameAreaHeight / 2 }, { width: wallThickness, height: gameAreaHeight }), // 오른쪽 벽
+            createWall(world, '#875533', { x: gameAreaWidth / 2, y: wallThickness / 2 }, { width: gameAreaWidth, height: wallThickness }), // 상단 벽
+            createWall(world, '#875533', { x: gameAreaWidth / 2, y: gameAreaHeight - wallThickness / 2 }, { width: gameAreaWidth, height: wallThickness }), // 하단 벽
+            createWall(world, '#875533', { x: wallThickness / 2, y: gameAreaHeight / 2 }, { width: wallThickness, height: gameAreaHeight }), // 왼쪽 벽
+            createWall(world, '#875533', { x: gameAreaWidth - wallThickness / 2, y: gameAreaHeight / 2 }, { width: wallThickness, height: gameAreaHeight }), // 오른쪽 벽
         ];
 
         const newEntities = {
@@ -369,13 +369,13 @@ export default function PinBall() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#000',
+        backgroundColor: '#000000',
     },
     gameContainerWrapper: {
         width: "70%",
         height: height * 0.8, // 게임 영역의 높이를 전체 화면 높이의 50%로 설정
         alignSelf: "center",
-        backgroundColor: '#0f0', // 게임 영역의 배경 색상을 초록색으로 설정
+        backgroundColor: '#3995f4', // 게임 영역의 배경 색상을 초록색으로 설정
         marginVertical:40,
     },
     gameContainer: {

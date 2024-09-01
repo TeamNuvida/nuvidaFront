@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, ScrollView, FlatList, Image, Modal, TextInput, Alert, ActivityIndicator } from "react-native";
+import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, ScrollView, FlatList, Image, Modal, TextInput, Alert, ActivityIndicator, BackHandler } from "react-native";
 import { MaterialCommunityIcons, AntDesign, FontAwesome, Entypo, Ionicons, Feather, Fontisto } from '@expo/vector-icons';
 import axios from 'axios';
 import { Share } from 'react-native';
@@ -17,6 +17,22 @@ export default function ScheduleCreation8({ route }) {
     console.log(plan_seq)
 
     const [notiState, setNotiState] = useState(false);
+
+
+    useEffect(() => {
+        const backAction = () => {
+            // 뒤로 가기 버튼을 막습니다.
+            return true;
+        };
+
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            backAction
+        );
+
+        return () => backHandler.remove();
+    }, []);
+
 
     const getNotiState = async () => {
         try{

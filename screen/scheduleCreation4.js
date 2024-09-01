@@ -104,24 +104,90 @@ export default function ScheduleCreation4({ route }) {
             return;
         }
 
+        console.log(selectedPlaces)
+
         const updateScheduleInfo = { ...scheduleInfo, selectedPlaces: selectedPlaces };
         navigation.navigate('ScheduleCreation5', { scheduleInfo: updateScheduleInfo, userInfo: userInfo });
     };
 
     const formatAddr = (addr1, addr2) => addr1.concat(' ', addr2);
 
+    const getTime = (data, item) =>{
+        switch (item.contenttypeid) {
+            case '39': // 식당
+                return data.opentimefood;
+            case '15': // 축제
+                return data.playtime;
+            case '28': // 스포츠
+                return data.usetimeleports;
+            case '38': // 쇼핑
+                return data.opentime;
+            case '14': // 문화시설
+                return data.usetimeculture;
+            default:
+                return data.usetime; // 기본 아이콘
+        }
+
+    }
+
+    const extractTimes = (timeString) => {
+        // 기본 패턴: "HH:MM~HH:MM" 형식의 시간 추출
+        const timePattern = /(\d{2}:\d{2})\s*~\s*(\d{2}:\d{2})/;
+
+        // 정규식을 이용해 시간 추출
+        const match = timeString.match(timePattern);
+        if (match) {
+            const open_time = match[1];  // 첫 번째 시간 (오픈 시간)
+            const close_time = match[2]; // 두 번째 시간 (종료 시간)
+            return { open_time, close_time };
+        }
+
+        // 패턴이 없을 때 빈 값 반환 (혹은 에러 처리)
+        return { open_time: "09:00", close_time: "20:00" };
+    }
+
+
     const handleSelect = async (item) => {
         try {
-            const response = await axios.get(`http://apis.data.go.kr/B551011/KorService1/detailCommon1?serviceKey=${API_KEY}&numOfRows=1&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&contentId=${item.contentid}&defaultYN=Y&firstImageYN=Y&_type=JSON`);
+            const categoryParam = selectedCategory ? `&contentTypeId=${selectedCategory}` : '';
+            const response = await axios.get(`http://apis.data.go.kr/B551011/KorService1/detailIntro1?serviceKey=${API_KEY}&numOfRows=10&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&contentId=${item.contentid}&contentTypeId=${item.contenttypeid}&_type=JSON`);
             const data = response.data.response.body.items.item[0];
-            const itemWithImage = { ...item, firstimage: data.firstimage };
+
+            // 식당이면 opentimefood
+            // 관광지면 usetime
+            // 문화시설 usetimeculture
+            // 축제공연행사 playtime
+            // 여행코스
+            // 레포츠 usetimeleports
+            // 쇼핑 opentime
+            const time = getTime(data,item)
+
+
+
+            const { open_time, close_time } = extractTimes(time);
+
+            const selectedItem = {
+                id: identifier,
+                name: item.title,
+                addr: formatAddr(item.addr1, item.addr2),
+                firstimage: item.firstimage,
+                contentid: item.contentid,
+                contenttypeid: item.contenttypeid,
+                cat3: item.cat3,
+                open_time: open_time,
+                close_time: close_time,
+                reservation: null,
+                visit_duration: 2,
+                lat: item.mapy,
+                lng: item.mapx
+            };
 
             setSelectedPlaces((prevSelected) => {
-                if (prevSelected.some(place => place.contentid === item.contentid)) {
-                    return prevSelected.filter((place) => place.contentid !== item.contentid);
+                if (prevSelected.some(place => place.contentid === selectedItem.contentid)) {
+                    return prevSelected.filter((place) => place.contentid !== selectedItem.contentid);
                 } else {
                     setIdentifier(prevIdentifier => prevIdentifier + 1);
-                    return [...prevSelected, { ...itemWithImage, id: identifier, name: item.title }];
+                    return [...prevSelected, selectedItem];
                 }
             });
 

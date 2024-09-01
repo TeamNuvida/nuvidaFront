@@ -131,6 +131,9 @@ const TripCalendar = ({ route }) => {
                 const base_date = formatWeatherDate(date);
                 const base_time = (formatWeatherTime(date));
 
+                const base_date_mid = formatWeatherMidDate(date);
+                console.log("base_date_mid",base_date_mid)
+
                 try{
                     const response = await axios.get(`http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey=${API_KEY}&numOfRows=809&pageNo=1&base_date=${base_date}&base_time=${base_time}&nx=59&ny=74&dataType=JSON`);
                     const data = response.data.response.body.items.item;
@@ -139,8 +142,9 @@ const TripCalendar = ({ route }) => {
                     console.error(e)
                 }finally {
                     try {
-                        const responseMid = await axios.get(`http://apis.data.go.kr/1360000/MidFcstInfoService/getMidLandFcst?serviceKey=${API_KEY}&numOfRows=10&pageNo=1&regId=11F20000&tmFc=${base_date}0600&dataType=JSON`);
+                        const responseMid = await axios.get(`http://apis.data.go.kr/1360000/MidFcstInfoService/getMidLandFcst?serviceKey=${API_KEY}&numOfRows=10&pageNo=1&regId=11F20000&tmFc=${base_date_mid}0600&dataType=JSON`);
                         const midData = responseMid.data.response.body.items.item[0];
+
                         processMidWeatherData(midData);
                     } catch (error) {
                         console.error('Error fetching weather data:', error);
@@ -159,8 +163,44 @@ const TripCalendar = ({ route }) => {
     );
 
 
+
     // 날짜 표시 변경 -> 날씨 api
     const formatWeatherDate = (date) => {
+        const hours = ('0' + date.getHours()).slice(-2);
+
+        if(hours < 2){
+            date.setDate(date.getDate() - 1);
+
+            const year = date.getFullYear();
+            const month = ('0' + (date.getMonth() + 1)).slice(-2);
+            const day = ('0' + date.getDate()).slice(-2);
+
+            return (year + month + day).toString();
+        }
+
+
+        const year = date.getFullYear();
+        const month = ('0' + (date.getMonth() + 1)).slice(-2);
+        const day = ('0' + date.getDate()).slice(-2);
+
+        return (year + month + day).toString();
+    };
+
+    // 날짜 표시 변경 -> 날씨 api
+    const formatWeatherMidDate = (date) => {
+        const hours = ('0' + date.getHours()).slice(-2);
+
+        if(hours < 6){
+            date.setDate(date.getDate() - 1);
+
+            const year = date.getFullYear();
+            const month = ('0' + (date.getMonth() + 1)).slice(-2);
+            const day = ('0' + date.getDate()).slice(-2);
+
+            return (year + month + day).toString();
+        }
+
+
         const year = date.getFullYear();
         const month = ('0' + (date.getMonth() + 1)).slice(-2);
         const day = ('0' + date.getDate()).slice(-2);
@@ -173,7 +213,9 @@ const TripCalendar = ({ route }) => {
         const hours = ('0' + date.getHours()).slice(-2);
         const minutes = ('0' + date.getMinutes()).slice(-2);
 
-        if(hours < 5){
+        if(hours < 2){
+            return '2300';
+        } else if(hours < 5){
             return '0200';
         }else if(hours < 8){
             return '0500';
