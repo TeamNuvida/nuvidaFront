@@ -10,9 +10,10 @@ import {
     SafeAreaView,
     TextInput,
     ScrollView,
-    ActivityIndicator
+    ActivityIndicator,
+    Modal
 } from 'react-native';
-import { FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
+import { FontAwesome, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
 import axios from 'axios';
 
 const organizeComments = (comments) => {
@@ -40,6 +41,9 @@ const CommunityInfo = ({route}) => {
     const [comment, setComment] = useState('');
     const [replyTo, setReplyTo] = useState(null);  // 어떤 댓글에 답글을 달지 결정하는 상태
 
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [selectedImageUri, setSelectedImageUri] = useState(null);
+
     const data = route.params.cmtInfo;
     const [cmtInfo, setCmtInfo] = useState({
         ...data,
@@ -49,6 +53,16 @@ const CommunityInfo = ({route}) => {
     const navigation = useNavigation();
     const localhost = "54.180.146.203";
     const userInfo = {user_id:'test', user_nick:'test'}
+
+    const openImageModal = (imageUri) => {
+        setSelectedImageUri(imageUri);
+        setIsModalVisible(true);
+    };
+
+    const closeImageModal = () => {
+        setIsModalVisible(false);
+        setSelectedImageUri(null);
+    };
 
 
     const renderCommentItem = ({ item }) => {
@@ -111,10 +125,24 @@ const CommunityInfo = ({route}) => {
             {cmtInfo.images && cmtInfo.images.length > 0 && (
                 <ScrollView horizontal style={styles.imageContainer}>
                     {cmtInfo.images.map((imageUri, index) => (
-                        <Image key={index} source={{ uri: imageUri.img_filename }} style={styles.image} />
+                        <TouchableOpacity key={index} onPress={() => openImageModal(imageUri.img_filename)}>
+                            <Image key={index} source={{ uri: imageUri.img_filename }} style={styles.image} />
+                        </TouchableOpacity>
+
                     ))}
                 </ScrollView>
             )}
+
+            <Modal visible={isModalVisible} transparent={true}>
+                <View style={styles.modalContainer}>
+                    <View style={styles.fullImageContainer}>
+                    <Image source={{ uri: selectedImageUri }} style={styles.fullscreenImage} />
+                    <TouchableOpacity style={styles.closeButton} onPress={closeImageModal}>
+                        <AntDesign name="closesquare" size={30} color="red" />
+                    </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
             <View style={styles.line} />
         </View>
 
@@ -382,5 +410,25 @@ const styles = StyleSheet.create({
         borderBottomWidth: 0.5,
         borderBottomColor: 'rgba(204,204,204,0.49)',
         borderStyle: 'dashed', // 이 부분은 적용이 안될 수 있습니다.
+    },
+    modalContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.44)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    fullImageContainer: {
+        position: 'relative',
+        width: '90%',
+        height: '70%',
+    },
+    fullscreenImage: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'contain',
+    },
+    closeButton: {
+        position: 'absolute',
+        right:0
     },
 });

@@ -273,6 +273,7 @@ const ScheduleCreation3 = ({ route, navigation }) => {
         return `${year}.${month}.${day}.`;
     };
 
+
     const renderTimeSelectionModal = () => (
         <Modal isVisible={isTimeSelectionModalVisible}>
             <View style={styles.modalContent}>
@@ -280,21 +281,44 @@ const ScheduleCreation3 = ({ route, navigation }) => {
                     <Text style={styles.timeText}>여행 시작 시간</Text>
                     <Text style={styles.timeText}>여행 종료 시간</Text>
                 </View>
-                {Array.from({ length: Math.floor((dateRange.endDate - dateRange.startDate) / (1000 * 60 * 60 * 24)) + 1 }, (_, i) => (
-                    <View key={i} style={styles.timeRow}>
-                        <Text style={styles.dateText}>{formatDate(new Date(dateRange.startDate.getTime() + i * 24 * 60 * 60 * 1000))}</Text>
-                        <View style={styles.fixedButtonContainer}>
-                            <TouchableOpacity style={styles.customButton} onPress={() => toggleTimePicker(i, 'start')}>
-                                <Text style={styles.buttonText2}>{formatTime(times.startTimes[i])}</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.fixedButtonContainer}>
-                            <TouchableOpacity style={styles.customButton} onPress={() => toggleTimePicker(i, 'end')}>
-                                <Text style={styles.buttonText2}>{formatTime(times.endTimes[i])}</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                ))}
+                { Math.floor((dateRange.endDate - dateRange.startDate) / (1000 * 60 * 60 * 24)) + 1  < 7 ? (
+                    <ScrollView>
+                        {Array.from({ length: Math.floor((dateRange.endDate - dateRange.startDate) / (1000 * 60 * 60 * 24)) + 1 }, (_, i) => (
+                            <View key={i} style={styles.timeRow}>
+                                <Text style={styles.dateText}>{formatDate(new Date(dateRange.startDate.getTime() + i * 24 * 60 * 60 * 1000))}</Text>
+                                <View style={styles.fixedButtonContainer}>
+                                    <TouchableOpacity style={styles.customButton} onPress={() => toggleTimePicker(i, 'start')}>
+                                        <Text style={styles.buttonText2}>{formatTime(times.startTimes[i])}</Text>
+                                    </TouchableOpacity>
+                                </View>
+                                <View style={styles.fixedButtonContainer}>
+                                    <TouchableOpacity style={styles.customButton} onPress={() => toggleTimePicker(i, 'end')}>
+                                        <Text style={styles.buttonText2}>{formatTime(times.endTimes[i])}</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        ))}
+                    </ScrollView>
+                ):(
+                    <ScrollView style={styles.scrollContain}>
+                        {Array.from({ length: Math.floor((dateRange.endDate - dateRange.startDate) / (1000 * 60 * 60 * 24)) + 1 }, (_, i) => (
+                            <View key={i} style={styles.timeRow}>
+                                <Text style={styles.dateText}>{formatDate(new Date(dateRange.startDate.getTime() + i * 24 * 60 * 60 * 1000))}</Text>
+                                <View style={styles.fixedButtonContainer}>
+                                    <TouchableOpacity style={styles.customButton} onPress={() => toggleTimePicker(i, 'start')}>
+                                        <Text style={styles.buttonText2}>{formatTime(times.startTimes[i])}</Text>
+                                    </TouchableOpacity>
+                                </View>
+                                <View style={styles.fixedButtonContainer}>
+                                    <TouchableOpacity style={styles.customButton} onPress={() => toggleTimePicker(i, 'end')}>
+                                        <Text style={styles.buttonText2}>{formatTime(times.endTimes[i])}</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        ))}
+                    </ScrollView>
+                    )}
+
                 <View style={styles.buttonRow}>
                     <TouchableOpacity style={styles.customButton2} onPress={() => {
                         toggleTimeSelectionModal();
@@ -641,6 +665,9 @@ const styles = StyleSheet.create({
         paddingVertical:3,
         paddingBottom:5
     },
+    scrollContain:{
+        height:"38%",
+    }
 });
 
 export default ScheduleCreation3;

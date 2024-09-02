@@ -1,6 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, TextInput, Alert, Platform } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    ScrollView,
+    Modal,
+    TextInput,
+    Alert,
+    Platform,
+    Keyboard
+} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {
     AntDesign,
@@ -341,6 +352,7 @@ const ReservationInfo = ({ route }) => {
     };
 
     const handleSearch = () => {
+        Keyboard.dismiss();
         fetchPlace();
     };
 

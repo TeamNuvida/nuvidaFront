@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Modal, SafeAreaView, ScrollView, Alert } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Modal, SafeAreaView, ScrollView, Alert, Keyboard  } from 'react-native';
 import { Entypo, Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
@@ -22,7 +22,10 @@ export default function ScheduleCreationAccommodation({ route }) {
     const scheduleInfo = route.params.scheduleInfo;
 
     const fetchPlace = async () => {
+        Keyboard.dismiss();
+
         if (searchQuery.trim() === '') return;
+
 
         try {
             const totalResponso = await axios.get(`http://apis.data.go.kr/B551011/KorService1/searchKeyword1?serviceKey=${API_KEY}&MobileApp=NUVIDA&MobileOS=AND&pageNo=1&numOfRows=10&listYN=N&arrange=A&keyword=${searchQuery}&areaCode=5&contentTypeId=32&_type=JSON`);

@@ -10,7 +10,7 @@ import {
     Modal,
     Alert,
     Image,
-    ScrollView
+    ScrollView, Keyboard
 } from 'react-native';
 import { FontAwesome, Entypo, Ionicons, Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -243,6 +243,7 @@ export default function ScheduleCreation4({ route }) {
     );
 
     const handleSearch = () => {
+        Keyboard.dismiss();
         setQueryToSearch(searchQuery);
     };
 
