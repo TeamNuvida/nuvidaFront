@@ -32,7 +32,8 @@ const Signin = () => {
 
     useEffect(() => {
         const backAction = () => {
-            // 뒤로 가기 버튼을 막습니다.
+            // Main 페이지로 이동합니다.
+            navigation.navigate('Main');
             return true;
         };
 
@@ -42,7 +43,7 @@ const Signin = () => {
         );
 
         return () => backHandler.remove();
-    }, []);
+    }, [navigation]);
 
 
     const handleLoginChange = (name, value) => {
