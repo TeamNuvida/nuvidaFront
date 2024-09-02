@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "nuvida",
+    "name": "NUVIDA",
     "slug": "nuvida",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -16,7 +16,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/nuvidaIcon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.nuvida.nuvida"
