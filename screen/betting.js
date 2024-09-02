@@ -307,6 +307,7 @@ const Betting = ({route}) => {
                         <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
                     <Text style={styles.headerTitle}>NUVIDA</Text>
+                    <View style={{ width: 24 }} />
                 </View>
                 <View style={styles.tabContainer}>
                     <TouchableOpacity
@@ -477,11 +478,11 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
-        marginTop: 20,
+        marginTop: 30,
         marginBottom: 10,
     },
     headerTitle: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 'bold',
         color: 'red',
         textAlign: 'center',

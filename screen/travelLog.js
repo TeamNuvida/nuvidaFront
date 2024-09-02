@@ -47,6 +47,7 @@ const TravelLog = ({route}) => {
                         <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
                     <Text style={styles.headerText}>NUVIDA</Text>
+                    <View style={{ width: 24 }} />
                 </View>
             </View>
         );

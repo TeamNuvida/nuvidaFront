@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     },
     /* 하단바 */
     tabBar: {
-        height: 50,
+        height: 60,
         flexDirection: 'row',
         borderTopColor: '#ccc',
         borderTopWidth: 1,
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 10,
-        paddingTop: 20,
+        paddingTop: 5,
         marginBottom: 10,
     },
     flexRow: {

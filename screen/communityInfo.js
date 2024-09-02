@@ -202,6 +202,7 @@ const CommunityInfo = ({route}) => {
                     <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>NUVIDA</Text>
+                <View style={{ width: 24 }} />
             </View>
             <FlatList
                 data={cmtInfo.comments}
@@ -254,10 +255,10 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
-        marginTop: 20,
+        marginTop: 30,
     },
     headerTitle: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 'bold',
         color: 'red',
         textAlign: 'center',

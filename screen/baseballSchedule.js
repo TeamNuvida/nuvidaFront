@@ -260,7 +260,6 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        bottom: 10,
     },
     arrowContainer: {
         padding: 10,

@@ -267,7 +267,7 @@ export default function ScheduleCreation5({ route }) {
         <SafeAreaView style={styles.container}>
             {renderHeader()}
             {reservation()}
-            {renderTabBar()}
+
         </SafeAreaView>
     );
 }

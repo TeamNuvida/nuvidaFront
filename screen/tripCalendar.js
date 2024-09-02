@@ -873,17 +873,20 @@ const styles = StyleSheet.create({
     tabBar: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        paddingVertical: 10,
+        // paddingVertical: 10,
         borderTopWidth: 1,
         borderColor: '#ccc',
         backgroundColor: '#fff',
         position: 'absolute',
         bottom: 0,
         width: '100%',
-        marginBottom:20
+        height: 60,
+
     },
     tabItem: {
+        flex: 1,
         alignItems: 'center',
+        justifyContent: 'center'
     },
     modalContainer: {
         flex: 1,

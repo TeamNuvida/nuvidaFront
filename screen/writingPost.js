@@ -120,6 +120,7 @@ export default function WritingPost({route}) {
                     <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>NUVIDA</Text>
+                <View style={{ width: 24 }} />
             </View>
             <TextInput
                 style={[styles.input, { height: Math.max(50, contentHeight) }]} // 최소 높이를 100으로 설정

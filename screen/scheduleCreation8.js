@@ -340,7 +340,6 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        bottom: 10,
     },
     textContainer:{
         paddingVertical:20,

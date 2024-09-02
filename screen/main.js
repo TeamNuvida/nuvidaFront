@@ -2124,7 +2124,7 @@ const styles = StyleSheet.create({
 
     /* 하단바 */
     tabBar: {
-        height: 70,
+        height: 60,
         flexDirection: 'row',
         borderTopColor: '#ccc',
         borderTopWidth: 1,
@@ -2133,7 +2133,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        bottom: 10,
+
     },
 
     locationContainer:{
