@@ -339,7 +339,11 @@ export default function ScheduleCreation4({ route }) {
                 keyExtractor={(item) => item.contentid}
                 renderItem={({ item }) => (
                     <View style={styles.itemContainer}>
-                        <Image source={{ uri: item.firstimage }} style={styles.resultImage} />
+                        {item.firstimage ? (<Image source={{ uri: item.firstimage }} style={styles.resultImage} />):(
+                            // 나중에 이미지 바꾸기
+                            <Image source={require("../assets/logo.png")} style={styles.resultImage} />
+                        )}
+
                         <View style={styles.itemContent}>
                             <Text style={{ fontSize: 18 }}>{item.title}</Text>
                             <View style={{ flexDirection: 'row', marginTop: 10 }}>

@@ -26,7 +26,6 @@ const generateCalendar = (year, month) => {
     const firstDay = moment(`${year}-${formattedMonth}-01`).startOf('month').day();
     const daysInMonth = moment(`${year}-${formattedMonth}`, "YYYY-MM").daysInMonth();
 
-
     const calendar = [];
     let week = [];
 
