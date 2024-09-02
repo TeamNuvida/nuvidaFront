@@ -351,25 +351,39 @@ const TripSchedule = ({ route }) => {
         const installUrl = 'https://play.google.com/store/apps/details?id=net.daum.android.map';  // 카카오맵 설치 페이지 URL
 
         try {
-            const canOpen = await Linking.canOpenURL(url);
-            console.log('Can open URL:', canOpen);
-
-            if (canOpen) {
-                await Linking.openURL(url);
-            } else {
-                Alert.alert(
-                    '카카오맵 설치되어 있지 않습니다.',
-                    '카카오맵 설치 페이지로 이동하시겠습니까?',
-                    [
-                        { text: '취소', style: 'cancel' },
-                        { text: '확인', onPress: () => Linking.openURL(installUrl) },
-                    ]
-                );
-            }
+            await Linking.openURL(url);
         } catch (error) {
-            console.error('Error launching KakaoNavi:', error);
-            Alert.alert('오류 발생', '카카오내비 실행 중 오류가 발생했습니다. 다시 시도해 주세요.');
+            console.error('Error launching KakaoMap:', error);
+            Alert.alert(
+                '카카오맵을 실행할 수 없습니다.',
+                '카카오맵 설치 페이지로 이동하시겠습니까?',
+                [
+                    { text: '취소', style: 'cancel' },
+                    { text: '확인', onPress: () => Linking.openURL(installUrl) },
+                ]
+            );
         }
+
+        // try {
+        //     const canOpen = await Linking.canOpenURL(url);
+        //     console.log('Can open URL:', canOpen);
+        //
+        //     if (canOpen) {
+        //         await Linking.openURL(url);
+        //     } else {
+        //         Alert.alert(
+        //             '카카오맵 설치되어 있지 않습니다.',
+        //             '카카오맵 설치 페이지로 이동하시겠습니까?',
+        //             [
+        //                 { text: '취소', style: 'cancel' },
+        //                 { text: '확인', onPress: () => Linking.openURL(installUrl) },
+        //             ]
+        //         );
+        //     }
+        // } catch (error) {
+        //     console.error('Error launching KakaoNavi:', error);
+        //     Alert.alert('오류 발생', '카카오내비 실행 중 오류가 발생했습니다. 다시 시도해 주세요.');
+        // }
     };
 
     const renderDaySchedule = (day) => {
