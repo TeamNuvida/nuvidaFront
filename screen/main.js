@@ -918,16 +918,17 @@ export default function Main({ weather, particulateMatter, store, location }) {
                 if(matches.state=='1'){
                     if (userBetData.result=='1' || userBetData.result=='4' ){
                         getPoint = userBetData.bt_point/betData.kiaBtPoint*totalPoint;
+                        getPoint = Math.ceil(getPoint);
                     }
 
                 }else if (matches.state=='2'){
                     if (userBetData.result=='1'|| userBetData.result=='4'){
                         getPoint = userBetData.bt_point/betData.opBtPoint*totalPoint;
+                        getPoint = Math.ceil(getPoint);
                     }
                 } else{
                     getPoint = userBetData.bt_point;
                 }
-
 
 
                 if(userBetData.result=='4'){

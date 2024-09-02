@@ -185,6 +185,31 @@ const Betting = ({route}) => {
         }
     };
 
+    const pointSet = (item) => {
+        const totalPoint = item.kiaBtPoint+item.opBtPoint;
+        let getPoint = 0;
+
+        if(item.op_seq===1){
+            if (item.result=='1' || item.result=='4' ){
+                getPoint = item.bt_point/item.kiaBtPoint*totalPoint;
+                getPoint = Math.ceil(getPoint);
+            }else {
+                getPoint = item.bt_point;
+            }
+
+        }else {
+            if (item.result == '1' || item.result == '4') {
+                getPoint = item.bt_point / item.opBtPoint * totalPoint;
+                getPoint = Math.ceil(getPoint);
+            } else {
+                getPoint = item.bt_point;
+            }
+        }
+
+
+        return getPoint;
+    }
+
     const renderItem = ({ item }) => {
         const { kiaRate, opRate } = calculateWinRate(item.kiaBtPoint, item.opBtPoint);
 
@@ -204,20 +229,29 @@ const Betting = ({route}) => {
                 </View>
                 <Text style={styles.matchDate}>{item.match_date.split(' ')[0]}</Text>
                 <Text>현재 보유한 포인트 : {userInfo.user_point}</Text>
-                {item.op_seq > 0 && (<Text>배팅한 포인트 : {item.bt_point}</Text>)}
+                {item.bt_point > 0 && (<Text>배팅한 포인트 : {item.bt_point}</Text>)}
+                {item.result != 2 &&(item.result != 0 &&(<Text>획득 포인트: {pointSet(item)}</Text>))}
 
                 {item.result == '4' ?
                     (
-                        <Text>포인트 회수 완료</Text>
+                        <View >
+                            <View style={styles.noPoint}>
+                                <Text style={styles.getpointText}>포인트 회수 완료</Text>
+                            </View>
+                        </View>
                     ):
                     item.result == '2' || item.result == '3' ?
                         (
-                            <Text>예측 실패</Text>
+                            <View >
+                                <View style={styles.noPoint}>
+                                    <Text style={styles.getpointText}>예측 실패</Text>
+                                </View>
+                            </View>
                         ) :
                         item.result == '1' ?
                             (
 
-                                <TouchableOpacity onPress={() => getPoint(item.bs_seq, item.bt_point)}>
+                                <TouchableOpacity onPress={() => getPoint(item.bs_seq, pointSet(item))}>
                                     <View style={styles.getpoint}>
                                     <Text style={styles.getpointText}>포인트 받기</Text>
                                     </View>
@@ -455,6 +489,14 @@ const styles = StyleSheet.create({
     },
     getpoint:{
         backgroundColor: '#000000',
+        marginTop: 10,
+        padding: 10,
+        borderRadius: 4,
+        minWidth: '40%',
+        alignItems: 'center',
+    },
+    noPoint:{
+        backgroundColor: '#b1b1b1',
         marginTop: 10,
         padding: 10,
         borderRadius: 4,
