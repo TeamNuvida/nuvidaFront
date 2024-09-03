@@ -1719,7 +1719,10 @@ export default function Main({ weather, particulateMatter, store, location }) {
                 <View style={[styles.line]} />
                 <View style={{flexDirection: 'row'}}>
                     <Ionicons name="baseball-outline" size={24} color="black" style={{marginLeft: '5%'}}/>
+                    <TouchableOpacity style={{flexDirection: 'row'}} onPress={()=>navigation.navigate("AroundView")}>
                     <Text style={{marginLeft: '2%', fontSize: 16, fontWeight: 'bold'}}>경기장 근처 관광지</Text>
+                    <MaterialCommunityIcons name="arrow-right" size={24} color="black" />
+                    </TouchableOpacity>
                 </View>
                 <ScrollView
                     horizontal

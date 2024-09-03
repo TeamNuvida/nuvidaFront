@@ -35,6 +35,7 @@ import Betting from "./screen/betting"
 import ScheduleCreation7 from "./screen/scheduleCreation7"
 import ScheduleCreation8 from "./screen/scheduleCreation8"
 import NoticeList from "./screen/noticeList";
+import AroundView from "./screen/aroundView"
 import axios from "axios";
 
 const Stack = createStackNavigator();
@@ -217,6 +218,7 @@ export default function App() {
                 <Stack.Screen name="ScheduleCreation7" component={ScheduleCreation7} options={{ headerShown: false }}/>
                 <Stack.Screen name="ScheduleCreation8" component={ScheduleCreation8} options={{ headerShown: false }}/>
                 <Stack.Screen name="NoticeList" component={NoticeList} options={{ headerShown: false }}/>
+                <Stack.Screen name="AroundView" component={AroundView} options={{ headerShown: false }}/>
             </Stack.Navigator>
             <StatusBar style="auto" />
         </NavigationContainer>
