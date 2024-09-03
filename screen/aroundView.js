@@ -11,7 +11,7 @@ const Userprofile = ({route}) => {
 
     const [selectedCategory, setSelectedCategory] = useState(12);
     const [place, setPlace] = useState(null);
-    const [loading, setLoading] = useState(true); // 로딩 상태 추가
+
 
 
     // {item.firstimage ? <Image source={{ uri: item.firstimage }} style={styles.image} /> : <Image source={require('../assets/logo.png')} style={styles.nullImage} />}
@@ -36,8 +36,6 @@ const Userprofile = ({route}) => {
 
         }catch (e){
             console.error(e)
-        }finally {
-            setLoading(false); // 데이터 로드 완료 후 로딩 상태 false로 변경
         }
     }
 
@@ -55,8 +53,6 @@ const Userprofile = ({route}) => {
 
         }catch (e){
             console.error(e)
-        }finally {
-            setLoading(false); // 데이터 로드 완료 후 로딩 상태 false로 변경
         }
     }
 
@@ -202,7 +198,6 @@ const Userprofile = ({route}) => {
             return;
         }
         setSelectedCategory(category);
-        setLoading(true);
         getAround(category);
     };
 
@@ -219,15 +214,6 @@ const Userprofile = ({route}) => {
         );
     };
 
-
-    if (loading) {
-        return (
-            <SafeAreaView style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#0000ff" />
-                <Text>Loading...</Text>
-            </SafeAreaView>
-        );
-    }
 
     return (
         <View style={styles.container}>
