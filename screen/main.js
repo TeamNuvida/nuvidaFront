@@ -638,7 +638,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
     // 오늘의 경기 (베팅)
     const renderTodayBet = () => {
         const currentTime = new Date();
-        currentTime.setHours(currentTime.getHours() + 9);
+        // currentTime.setHours(currentTime.getHours() + 9);
         const dateFromString = new Date(matches.match_date);
 
 
@@ -808,9 +808,9 @@ export default function Main({ weather, particulateMatter, store, location }) {
                                     <View style={{width: '80%', height: '100%', marginLeft: '3%'}}>
                                         <Text style={{fontSize: 17, fontWeight: 'bold'}}>{betData.kiaBtPoint}</Text>
                                         {userBetData.team_name==="KIA"?(
-                                            <Text style={styles.batText}>배팅 포인트 : {userBetData.bt_point}</Text>
+                                            <Text style={styles.batText}>베팅 포인트 : {userBetData.bt_point}</Text>
                                         ):(
-                                            <Text style={styles.batText}>배팅 포인트 : 0</Text>
+                                            <Text style={styles.batText}>베팅 포인트 : 0</Text>
                                         )}
                                     </View>
                                 </View>
@@ -828,9 +828,9 @@ export default function Main({ weather, particulateMatter, store, location }) {
                                     <View style={{width: '80%', height: '100%', marginRight: '3%', alignItems:'flex-end'}}>
                                         <Text style={{fontSize: 17, fontWeight: 'bold'}}>{betData.opBtPoint}</Text>
                                         {userBetData.team_name==="KIA"?(
-                                            <Text style={styles.batText}>배팅 포인트 : 0</Text>
+                                            <Text style={styles.batText}>베팅 포인트 : 0</Text>
                                         ):(
-                                            <Text style={styles.batText}>배팅 포인트 : {userBetData.bt_point}</Text>
+                                            <Text style={styles.batText}>베팅 포인트 : {userBetData.bt_point}</Text>
                                         )}
                                     </View>
                                     <View style={{width: '12%', height: '100%', marginRight: '5%'}}>
@@ -1233,9 +1233,9 @@ export default function Main({ weather, particulateMatter, store, location }) {
                             <View style={{width: '80%', height: '100%', marginLeft: '3%'}}>
                                 <Text style={{fontSize: 17, fontWeight: 'bold'}}>{betData.kiaBtPoint}</Text>
                                 {userBetData.team_name==="KIA"?(
-                                    <Text style={styles.batText}>배팅 포인트 : {userBetData.bt_point}</Text>
+                                    <Text style={styles.batText}>베팅 포인트 : {userBetData.bt_point}</Text>
                                 ):(
-                                    <Text style={styles.batText}>배팅 포인트 : 0</Text>
+                                    <Text style={styles.batText}>베팅 포인트 : 0</Text>
                                     )}
 
                             </View>
@@ -1254,9 +1254,9 @@ export default function Main({ weather, particulateMatter, store, location }) {
                             <View style={{width: '80%', height: '100%', marginRight: '3%', alignItems:'flex-end'}}>
                                 <Text style={{fontSize: 17, fontWeight: 'bold'}}>{betData.opBtPoint}</Text>
                                 {userBetData.team_name==="KIA"?(
-                                    <Text style={styles.batText}>배팅 포인트 : 0</Text>
+                                    <Text style={styles.batText}>베팅 포인트 : 0</Text>
                                 ):(
-                                    <Text style={styles.batText}>배팅 포인트 : {userBetData.bt_point}</Text>
+                                    <Text style={styles.batText}>베팅 포인트 : {userBetData.bt_point}</Text>
                                 )}
                             </View>
                             <View style={{width: '12%', height: '100%', marginRight: '5%'}}>
@@ -1414,6 +1414,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                                 <Entypo name="water" size={30} color="black" style={{zIndex: 6,}}/>
                             </View>
                             <Text style={styles.weatherText}>{weatherData["RN1"]}</Text>
+                            <Text style={styles.weatherText}>{weatherData["RN1"]}</Text>
                         </View>
                         <View style={[styles.center, {width: '30%',}]}>
                             <View style={[styles.center, styles.weatherIcon]}>
@@ -1429,6 +1430,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                         </View>
 
                     </View>
+
                 </View>
             );
         };
@@ -1613,7 +1615,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                             </View>
                             <View style={{width: '35%',}}>
                                 <TouchableOpacity style={[styles.center, styles.betButton]} onPress={() => goBetting()}>
-                                    <Text style={styles.betButtonText}>배팅하기</Text>
+                                    <Text style={styles.betButtonText}>베팅하기</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>

@@ -55,8 +55,11 @@ export default function App() {
     useEffect(() => {
         const prepareResources = async () => {
             const date = new Date();
+
             const base_date = formatWeatherDate(date);
             const base_time = formatWeatherTime(date);
+
+            console.log(base_date, base_time)
 
             try {
                 const response = await axios.get(`http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst?serviceKey=${API_KEY}&numOfRows=60&pageNo=1&base_date=${base_date}&base_time=${base_time}&nx=59&ny=74&dataType=JSON`);

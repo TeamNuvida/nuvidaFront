@@ -229,7 +229,7 @@ const Betting = ({route}) => {
                 </View>
                 <Text style={styles.matchDate}>{item.match_date.split(' ')[0]}</Text>
                 <Text>현재 보유한 포인트 : {userInfo.user_point}</Text>
-                {item.bt_point > 0 && (<Text>배팅한 포인트 : {item.bt_point}</Text>)}
+                {item.bt_point > 0 && (<Text>베팅 포인트 : {item.bt_point}</Text>)}
                 {item.result != 2 &&(item.result != 0 &&(<Text>획득 포인트: {pointSet(item)}</Text>))}
 
                 {item.result == '4' ?
@@ -281,7 +281,7 @@ const Betting = ({route}) => {
                                     />
                                     <View style={styles.buttonContainer}>
                                         <TouchableOpacity onPress={() => handleBet(item.bs_seq, item.op_seq, item.bt_point)} style={styles.betButton}>
-                                            <Text style={styles.buttonText}>{item.team_name === null ? '배팅하기' : '추가 베팅하기'}</Text>
+                                            <Text style={styles.buttonText}>{item.team_name === null ? '베팅하기' : '추가 베팅하기'}</Text>
                                         </TouchableOpacity>
                                     </View>
                                 </View>
@@ -318,7 +318,7 @@ const Betting = ({route}) => {
                         ]}
                     >
                         <Text style={currentTab === 'list' ? styles.activeTabText : styles.inactiveTabText}>
-                            배팅목록
+                            베팅목록
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -329,7 +329,7 @@ const Betting = ({route}) => {
                         ]}
                     >
                         <Text style={currentTab === 'myBets' ? styles.activeTabText : styles.inactiveTabText}>
-                            내가 한 배팅
+                            내가 한 베팅
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -343,7 +343,7 @@ const Betting = ({route}) => {
                         />
                     ) : (
                         <View style={styles.nullItem}>
-                            <Text >배팅 목록이 없습니다.</Text>
+                            <Text >베팅 목록이 없습니다.</Text>
                         </View>
 
                     )

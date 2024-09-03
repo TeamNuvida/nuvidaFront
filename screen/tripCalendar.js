@@ -126,15 +126,14 @@ const TripCalendar = ({ route }) => {
     useFocusEffect(
         useCallback(() => {
             const fetchWeatherData = async () => {
-                const date = new Date();  // 현재 UTC 시간을 가져옴
-                const koreaOffset = 9 * 60 * 60 * 1000;  // 한국 시간 (KST) 오프셋: UTC+9
-                const koreaDate = new Date(date.getTime() + koreaOffset)  // UTC 시간에 한국 시간 오프셋을 더함
+                const date = new Date();
+                // date.setHours(date.getHours() + 9)
+                // console.log(date)
 
                 const base_date = formatWeatherDate(date);
                 const base_time = (formatWeatherTime(date));
 
-                const base_date_mid = formatWeatherMidDate(koreaDate);
-
+                const base_date_mid = formatWeatherMidDate(date);
 
                 try{
                     const response = await axios.get(`http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey=${API_KEY}&numOfRows=809&pageNo=1&base_date=${base_date}&base_time=${base_time}&nx=59&ny=74&dataType=JSON`);
