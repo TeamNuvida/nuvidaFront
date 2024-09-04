@@ -1414,7 +1414,6 @@ export default function Main({ weather, particulateMatter, store, location }) {
                                 <Entypo name="water" size={30} color="black" style={{zIndex: 6,}}/>
                             </View>
                             <Text style={styles.weatherText}>{weatherData["RN1"]}</Text>
-                            <Text style={styles.weatherText}>{weatherData["RN1"]}</Text>
                         </View>
                         <View style={[styles.center, {width: '30%',}]}>
                             <View style={[styles.center, styles.weatherIcon]}>
