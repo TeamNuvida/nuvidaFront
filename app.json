@@ -19,7 +19,8 @@
         "foregroundImage": "./assets/nuvidaIcon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.nuvida.nuvida"
+      "package": "com.nuvida.nuvida",
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/favicon.png"
