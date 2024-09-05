@@ -203,7 +203,7 @@ const Userprofile = ({route}) => {
 
     const RenderList = ({item}) => {
         return (
-            <TouchableOpacity style={styles.renderContainer}>
+            <TouchableOpacity style={styles.renderContainer} onPress={()=>viewInfo(item)}>
                 {item.firstimage ? <Image source={{ uri: item.firstimage }} style={styles.image} /> : <Image source={require('../assets/logo.png')} style={styles.nullImage} />}
                 <View style={styles.textContainer}>
                     <Text>{item.title}</Text>
@@ -213,6 +213,18 @@ const Userprofile = ({route}) => {
             </TouchableOpacity>
         );
     };
+
+
+    const viewInfo = async (item) =>{
+        try {
+            const response = await axios.get(`http://apis.data.go.kr/B551011/KorService1/detailCommon1?serviceKey=${API_KEY}&numOfRows=10&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&contentId=${item.contentid}&defaultYN=Y&_type=JSON&firstImageYN=Y&addrinfoYN=Y&overviewYN=Y&mapinfoYN=Y`);
+            const data = response.data.response.body.items.item[0];
+            console.log(data)
+        } catch (e) {
+            console.error(e);
+        }
+
+    }
 
 
     return (
