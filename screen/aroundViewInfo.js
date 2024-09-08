@@ -14,7 +14,6 @@ const AroundViewInfo = () => {
 
     const [selectedCategory, setSelectedCategory] = useState("AT4");
 
-    const apiKey = '9d8d1da9d46b7a0f17fa3c65c7654597'; // 실제 발급받은 API 키로 대체
 
     const categories = [
         { id: "AT4", name: '관광지' },
