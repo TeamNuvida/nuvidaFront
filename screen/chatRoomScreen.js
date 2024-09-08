@@ -87,6 +87,7 @@ const ChatRoomScreen = ({ route }) => {
                     imageUrls: imageUrls.length > 0 ? imageUrls : null,
                     createdAt: new Date(),
                     userId: userInfo.user_id, // 메시지 작성자의 ID
+                    userNick: userInfo.user_nick
                 });
 
                 setMessage('');  // 메시지 초기화
@@ -127,11 +128,14 @@ const ChatRoomScreen = ({ route }) => {
         const isCurrentUser = item.userId === userInfo.user_id;
 
         return (
+            <View style={{marginBottom:20}}>
+                <Text style={[isCurrentUser ? styles.myNick : styles.theirNick]}>{item.userNick}</Text>
             <View style={[styles.messageContainer, isCurrentUser ? styles.myMessage : styles.theirMessage]}>
                 {item.text ? <Text style={styles.messageText}>{item.text}</Text> : null}
                 {item.imageUrls && item.imageUrls.map((url, index) => (
                     <Image key={index} source={{ uri: url }} style={styles.image} />
                 ))}
+            </View>
             </View>
         );
     };
@@ -248,6 +252,12 @@ const styles = StyleSheet.create({
         padding: 10,
         marginVertical: 5,
         maxWidth: '80%',
+    },
+    myNick:{
+        alignSelf: 'flex-end',
+    },
+    theirNick: {
+        alignSelf: 'flex-start',
     },
     myMessage: {
         backgroundColor: 'blue',
