@@ -1664,6 +1664,14 @@ export default function Main({ weather, particulateMatter, store, location }) {
         ));
     };
 
+    const goChat = () =>{
+        if(isLoggedIn){
+            navigation.navigate('ChatRoomList', {userInfo:userInfo})
+        }else{
+            navigation.navigate("Signin");
+        }
+    }
+
 
     // 하단 바
     const renderTabBar = () => {
@@ -1675,8 +1683,8 @@ export default function Main({ weather, particulateMatter, store, location }) {
                 <TouchableOpacity style={styles.tabItem} onPress={handlePlanCalendarIconPress}>
                     <FontAwesome name="calendar-check-o" size={24} color="black" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('PinBall')}>
-                    <MaterialCommunityIcons name="billiards-rack" size={24} color="black" />
+                <TouchableOpacity style={styles.tabItem} onPress={goChat}>
+                    <MaterialCommunityIcons name="chat" size={24} color="black" />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate('CommunityList', {userInfo:userInfo})}>
                     <Ionicons name="chatbubbles-outline" size={24} color="black" />

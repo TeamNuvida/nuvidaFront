@@ -37,6 +37,9 @@ import ScheduleCreation8 from "./screen/scheduleCreation8"
 import NoticeList from "./screen/noticeList";
 import AroundView from "./screen/aroundView"
 import AroundViewInfo from "./screen/aroundViewInfo"
+import ChatRoomListScreen from "./screen/chatRoomListScreen";
+import CreateChatRoomScreen from "./screen/createChatRoomScreen";
+import ChatRoomScreen from "./screen/chatRoomScreen";
 import axios from "axios";
 
 const Stack = createStackNavigator();
@@ -221,6 +224,9 @@ export default function App() {
                 <Stack.Screen name="NoticeList" component={NoticeList} options={{ headerShown: false }}/>
                 <Stack.Screen name="AroundView" component={AroundView} options={{ headerShown: false }}/>
                 <Stack.Screen name="AroundViewInfo" component={AroundViewInfo} options={{ headerShown: false }}/>
+                <Stack.Screen name="ChatRoomList" component={ChatRoomListScreen} options={{ headerShown: false }}/>
+                <Stack.Screen name="CreateChatRoomScreen" component={CreateChatRoomScreen} options={{ headerShown: false }}/>
+                <Stack.Screen name="ChatRoomScreen" component={ChatRoomScreen} options={{ headerShown: false }}/>
             </Stack.Navigator>
             <StatusBar style="auto" />
         </NavigationContainer>
