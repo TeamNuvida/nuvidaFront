@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, FlatList, Image, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, FlatList, Image, StyleSheet, TouchableOpacity, ScrollView, Alert, Modal } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { firestore, storage } from './firebase';
 import { collection, orderBy, query, onSnapshot, addDoc, doc, deleteDoc } from 'firebase/firestore';
@@ -14,6 +14,8 @@ const ChatRoomScreen = ({ route }) => {
     const [messages, setMessages] = useState([]);
     const [message, setMessage] = useState('');
     const [selectedImages, setSelectedImages] = useState([]); // 여러 이미지 저장
+    const [modalVisible, setModalVisible] = useState(false); // 모달 표시 여부
+    const [modalImage, setModalImage] = useState(null); // 모달에 표시할 이미지
     const navigation = useNavigation();
 
     // 메시지 가져오기
@@ -29,9 +31,8 @@ const ChatRoomScreen = ({ route }) => {
     // 채팅방 삭제 함수
     const deleteChatRoom = async () => {
         try {
-            // Firestore에서 채팅방 삭제
             await deleteDoc(doc(firestore, 'chatRooms', roomId));
-            navigation.navigate('ChatRoomList', {userInfo:userInfo}); // 삭제 후 목록으로 이동
+            navigation.navigate('ChatRoomList', { userInfo: userInfo }); // 삭제 후 목록으로 이동
         } catch (error) {
             console.error("채팅방 삭제 중 오류 발생: ", error);
         }
@@ -43,15 +44,8 @@ const ChatRoomScreen = ({ route }) => {
             '채팅방 삭제',
             '채팅방을 삭제하시겠습니까?',
             [
-                {
-                    text: '취소',
-                    onPress: () => console.log('취소됨'),
-                    style: 'cancel',
-                },
-                {
-                    text: '확인',
-                    onPress: deleteChatRoom, // 삭제 진행
-                },
+                { text: '취소', style: 'cancel' },
+                { text: '확인', onPress: deleteChatRoom },
             ],
             { cancelable: false }
         );
@@ -62,15 +56,14 @@ const ChatRoomScreen = ({ route }) => {
         if (message.trim() || selectedImages.length > 0) {
             let imageUrls = [];
 
-            // 이미지가 선택되었을 때 이미지 업로드
             if (selectedImages.length > 0) {
                 try {
                     for (const uri of selectedImages) {
-                        const response = await fetch(uri); // 이미지 파일 가져오기
-                        const blob = await response.blob(); // Blob으로 변환
-                        const imageRef = ref(storage, `images/${new Date().toISOString()}`); // Firebase Storage 경로 지정
-                        await uploadBytes(imageRef, blob); // Storage에 업로드
-                        const imageUrl = await getDownloadURL(imageRef); // 업로드된 이미지의 URL 가져오기
+                        const response = await fetch(uri);
+                        const blob = await response.blob();
+                        const imageRef = ref(storage, `images/${new Date().toISOString()}`);
+                        await uploadBytes(imageRef, blob);
+                        const imageUrl = await getDownloadURL(imageRef);
                         imageUrls.push(imageUrl);
                     }
                 } catch (error) {
@@ -79,19 +72,18 @@ const ChatRoomScreen = ({ route }) => {
                 }
             }
 
-            // Firestore에 메시지와 이미지 URL 추가
             try {
                 const messagesRef = collection(firestore, 'chatRooms', roomId, 'messages');
                 await addDoc(messagesRef, {
                     text: message || null,
                     imageUrls: imageUrls.length > 0 ? imageUrls : null,
                     createdAt: new Date(),
-                    userId: userInfo.user_id, // 메시지 작성자의 ID
-                    userNick: userInfo.user_nick
+                    userId: userInfo.user_id,
+                    userNick: userInfo.user_nick,
                 });
 
-                setMessage('');  // 메시지 초기화
-                setSelectedImages([]);  // 선택된 이미지 초기화
+                setMessage('');
+                setSelectedImages([]);
             } catch (error) {
                 console.error("메시지 전송 중 오류 발생: ", error);
             }
@@ -102,21 +94,27 @@ const ChatRoomScreen = ({ route }) => {
     const pickImage = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsMultipleSelection: true, // 다중 이미지 선택
+            allowsMultipleSelection: true,
             aspect: [4, 3],
             quality: 1,
         });
 
         if (!result.canceled && result.assets && result.assets.length > 0) {
-            const uris = result.assets.map(asset => asset.uri); // 선택된 여러 이미지의 URI 추출
-            setSelectedImages([...selectedImages, ...uris]); // 선택된 이미지들을 추가
+            const uris = result.assets.map(asset => asset.uri);
+            setSelectedImages([...selectedImages, ...uris]);
         }
     };
 
     // 이미지 삭제 함수
     const removeImage = (uri) => {
-        const filteredImages = selectedImages.filter(imageUri => imageUri !== uri); // 선택된 이미지에서 해당 이미지를 제외
+        const filteredImages = selectedImages.filter(imageUri => imageUri !== uri);
         setSelectedImages(filteredImages);
+    };
+
+    // 이미지 확대 모달 열기
+    const openImageModal = (imageUri) => {
+        setModalImage(imageUri);
+        setModalVisible(true);
     };
 
     useEffect(() => {
@@ -128,14 +126,16 @@ const ChatRoomScreen = ({ route }) => {
         const isCurrentUser = item.userId === userInfo.user_id;
 
         return (
-            <View style={{marginBottom:20}}>
+            <View style={{ marginBottom: 20 }}>
                 <Text style={[isCurrentUser ? styles.myNick : styles.theirNick]}>{item.userNick}</Text>
-            <View style={[styles.messageContainer, isCurrentUser ? styles.myMessage : styles.theirMessage]}>
-                {item.text ? <Text style={styles.messageText}>{item.text}</Text> : null}
-                {item.imageUrls && item.imageUrls.map((url, index) => (
-                    <Image key={index} source={{ uri: url }} style={styles.image} />
-                ))}
-            </View>
+                <View style={[styles.messageContainer, isCurrentUser ? styles.myMessage : styles.theirMessage]}>
+                    {item.text ? <Text style={styles.messageText}>{item.text}</Text> : null}
+                    {item.imageUrls && item.imageUrls.map((url, index) => (
+                        <TouchableOpacity key={index} onPress={() => openImageModal(url)}>
+                            <Image source={{ uri: url }} style={styles.image} />
+                        </TouchableOpacity>
+                    ))}
+                </View>
             </View>
         );
     };
@@ -204,6 +204,18 @@ const ChatRoomScreen = ({ route }) => {
                     <Text style={styles.buttonText}>전송</Text>
                 </TouchableOpacity>
             </View>
+
+            {/* 이미지 확대 모달 */}
+            {modalImage && (
+                <Modal visible={modalVisible} transparent={true} onRequestClose={() => setModalVisible(false)}>
+                    <View style={styles.modalContainer}>
+                        <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+                            <AntDesign name="close" size={30} color="white" />
+                        </TouchableOpacity>
+                        <Image source={{ uri: modalImage }} style={styles.modalImage} />
+                    </View>
+                </Modal>
+            )}
         </View>
     );
 };
@@ -253,7 +265,7 @@ const styles = StyleSheet.create({
         marginVertical: 5,
         maxWidth: '80%',
     },
-    myNick:{
+    myNick: {
         alignSelf: 'flex-end',
     },
     theirNick: {
@@ -296,6 +308,23 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderColor: '#ccc',
         backgroundColor: '#f9f9f9',
+    },
+    modalContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalImage: {
+        width: '90%',
+        height: '80%',
+        resizeMode: 'contain',
+    },
+    closeButton: {
+        position: 'absolute',
+        top: 50,
+        right: 20,
+        zIndex: 1,
     },
     headerContainer: {
         flexDirection: 'row',
