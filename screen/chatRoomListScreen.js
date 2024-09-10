@@ -34,12 +34,12 @@ const ChatRoomListScreen = ({ route }) => {
         setFilteredChatRooms(filtered);
     }, [searchQuery, chatRooms]);
 
-    const handleEnterChatRoom = async (roomId, password, createUser) => {
+    const handleEnterChatRoom = async (roomId, password, createUser, name) => {
         if (password) {
             setSelectedRoomId(roomId);
             setModalVisible(true);
         } else {
-            navigation.navigate('ChatRoomScreen', { roomId, userInfo, createUser });
+            navigation.navigate('ChatRoomScreen', { roomId, userInfo, createUser, name});
         }
     };
 
@@ -53,7 +53,7 @@ const ChatRoomListScreen = ({ route }) => {
                 setModalVisible(false);
                 setInputPassword('');
                 // createUser 정보를 함께 전달
-                navigation.navigate('ChatRoomScreen', { roomId: selectedRoomId, userInfo, createUser: roomData.createUser });
+                navigation.navigate('ChatRoomScreen', { roomId: selectedRoomId, userInfo, createUser: roomData.createUser, name:roomData.name });
             } else {
                 Alert.alert('오류', '비밀번호가 틀렸습니다.');
             }
@@ -88,7 +88,7 @@ const ChatRoomListScreen = ({ route }) => {
                 data={filteredChatRooms}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
-                    <TouchableOpacity style={styles.chatRoomItem} onPress={() => handleEnterChatRoom(item.id, item.password, item.createUser)}>
+                    <TouchableOpacity style={styles.chatRoomItem} onPress={() => handleEnterChatRoom(item.id, item.password, item.createUser, item.name)}>
                         <View style={styles.row}>
                             {item.password && (<Entypo name="lock" size={24} color="black" />)}
                             <Text style={styles.chatRoomText}>{item.name}</Text>
