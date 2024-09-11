@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Button, StyleSheet, Alert, TextInput, TouchableOpacity, Modal } from 'react-native';
-import { collection, query, orderBy, doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { collection, query, orderBy, doc, getDoc, onSnapshot, updateDoc, arrayUnion  } from 'firebase/firestore';
 import { firestore } from './firebase';
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons, Entypo } from '@expo/vector-icons';
+
 
 const ChatRoomListScreen = ({ route }) => {
     const [chatRooms, setChatRooms] = useState([]);
@@ -35,11 +36,24 @@ const ChatRoomListScreen = ({ route }) => {
     }, [searchQuery, chatRooms]);
 
     const handleEnterChatRoom = async (roomId, password, createUser, name) => {
-        if (password) {
-            setSelectedRoomId(roomId);
-            setModalVisible(true);
-        } else {
-            navigation.navigate('ChatRoomScreen', { roomId, userInfo, createUser, name});
+        const roomRef = doc(firestore, 'chatRooms', roomId);
+        const roomDoc = await getDoc(roomRef);
+
+        if (roomDoc.exists()) {
+            const roomData = roomDoc.data();
+
+            if (password) {
+                setSelectedRoomId(roomId);
+                setModalVisible(true);
+            } else {
+                // 현재 유저가 멤버 리스트에 없으면 추가
+                if (!roomData.members || !roomData.members.includes(userInfo.user_id)) {
+                    await updateDoc(roomRef, {
+                        members: arrayUnion(userInfo.user_id)  // Firestore 배열에 유저 추가
+                    });
+                }
+                navigation.navigate('ChatRoomScreen', { roomId, userInfo, createUser, name });
+            }
         }
     };
 
@@ -52,6 +66,14 @@ const ChatRoomListScreen = ({ route }) => {
             if (roomData.password === inputPassword) {
                 setModalVisible(false);
                 setInputPassword('');
+
+                // 현재 유저가 멤버 리스트에 없으면 추가
+                if (!roomData.members || !roomData.members.includes(userInfo.user_id)) {
+                    await updateDoc(roomRef, {
+                        members: arrayUnion(userInfo.user_id)  // Firestore 배열에 유저 추가
+                    });
+                }
+
                 // createUser 정보를 함께 전달
                 navigation.navigate('ChatRoomScreen', { roomId: selectedRoomId, userInfo, createUser: roomData.createUser, name:roomData.name });
             } else {

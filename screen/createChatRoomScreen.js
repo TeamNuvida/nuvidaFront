@@ -24,7 +24,8 @@ const CreateChatRoomScreen = ({ route }) => {
                 name: roomName,
                 password: password || null,
                 createdAt: new Date(),
-                createUser: userInfo.user_id
+                createUser: userInfo.user_id,
+                members: [userInfo.user_id]  // 멤버 목록에 유저 아이디 추가
             });
 
             console.log("채팅방 생성됨: ", docRef.id);  // Firestore에 문서가 생성된 것을 확인

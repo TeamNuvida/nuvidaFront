@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, FlatList, Image, StyleSheet, TouchableOpacity, ScrollView, Alert, Modal, Keyboard  } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { firestore, storage } from './firebase';
-import { collection, orderBy, query, onSnapshot, addDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, orderBy, query, onSnapshot, addDoc, doc, deleteDoc,  updateDoc, arrayRemove, getDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons, AntDesign , SimpleLineIcons, MaterialIcons, FontAwesome} from '@expo/vector-icons';
@@ -58,18 +58,40 @@ const ChatRoomScreen = ({ route }) => {
     // 채팅방 삭제 함수
     const deleteChatRoom = async () => {
         try {
-            await deleteDoc(doc(firestore, 'chatRooms', roomId));
-            navigation.navigate('ChatRoomList', { userInfo: userInfo }); // 삭제 후 목록으로 이동
+            const roomRef = doc(firestore, 'chatRooms', roomId);
+            const roomDoc = await getDoc(roomRef);
+
+            if (roomDoc.exists()) {
+                const roomData = roomDoc.data();
+
+                // 현재 유저의 user_id를 멤버 리스트에서 제거
+                await updateDoc(roomRef, {
+                    members: arrayRemove(userInfo.user_id) // 멤버 리스트에서 user_id 제거
+                });
+
+                // 멤버 리스트를 다시 가져와서 0명이면 채팅방을 삭제
+                const updatedRoomDoc = await getDoc(roomRef);
+                const updatedRoomData = updatedRoomDoc.data();
+
+                if (updatedRoomData.members.length === 0) {
+                    // 멤버가 없으면 채팅방 삭제
+                    await deleteDoc(roomRef);
+                    console.log('채팅방 삭제됨');
+                }
+
+                // 채팅방 목록으로 이동
+                navigation.navigate('ChatRoomList', { userInfo: userInfo });
+            }
         } catch (error) {
-            console.error("채팅방 삭제 중 오류 발생: ", error);
+            console.error("채팅방 나가기 또는 삭제 중 오류 발생: ", error);
         }
     };
 
     // 삭제 확인 Alert 함수
     const confirmDelete = () => {
         Alert.alert(
-            '채팅방 삭제',
-            '채팅방을 삭제하시겠습니까?',
+            '채팅방 나가기',
+            '채팅은 복구되지 않습니다.',
             [
                 { text: '취소', style: 'cancel' },
                 { text: '확인', onPress: deleteChatRoom },
@@ -192,13 +214,11 @@ const ChatRoomScreen = ({ route }) => {
                         <MaterialIcons name="arrow-back-ios" size={24} color="black" />
                     </TouchableOpacity>
                     <Text style={styles.headerText}>{roomName}</Text>
-                    {createUser === userInfo.user_id ? (
+
                         <TouchableOpacity onPress={confirmDelete}>
-                            <Text style={{ fontWeight: "bold", color: 'red' }}>삭제</Text>
+                            <Text style={{ fontWeight: "bold", color: 'red' }}>나가기</Text>
                         </TouchableOpacity>
-                    ) : (
-                        <View style={{ width: 24 }} />
-                    )}
+
                 </View>
             </View>
         );
