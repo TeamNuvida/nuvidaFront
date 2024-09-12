@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Button, StyleSheet, Alert, TextInput, TouchableOpacity, Modal } from 'react-native';
-import { collection, query, orderBy, doc, getDoc, onSnapshot, updateDoc, arrayUnion } from 'firebase/firestore';
+import { collection, query, orderBy, doc, getDoc, onSnapshot, updateDoc, arrayUnion, arrayRemove, deleteDoc } from 'firebase/firestore';
 import { firestore } from './firebase';
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons, Entypo } from '@expo/vector-icons';
@@ -14,6 +14,8 @@ const ChatRoomListScreen = ({ route }) => {
     const [selectedRoomId, setSelectedRoomId] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [isMemberList, setIsMemberList] = useState(true); // 유저가 속한 채팅방 목록인지 여부
+    const [selectedRoomName, setSelectedRoomName] = useState(''); // 선택된 채팅방 이름 저장
+    const [leaveModalVisible, setLeaveModalVisible] = useState(false); // 나가기 모달 표시 여부
     const navigation = useNavigation();
     const [userInfo, setUserInfo] = useState(route.params.userInfo);
 
@@ -88,6 +90,36 @@ const ChatRoomListScreen = ({ route }) => {
         }
     };
 
+    // 채팅방 나가기 기능
+    const handleLeaveRoom = async () => {
+        try {
+            const roomRef = doc(firestore, 'chatRooms', selectedRoomId);
+            await updateDoc(roomRef, {
+                members: arrayRemove(userInfo.user_id) // 멤버 리스트에서 유저 제거
+            });
+
+            // 멤버 리스트를 다시 가져와서 0명이면 채팅방을 삭제
+            const updatedRoomDoc = await getDoc(roomRef);
+            const updatedRoomData = updatedRoomDoc.data();
+
+            if (updatedRoomData.members.length === 0) {
+                // 멤버가 없으면 채팅방 삭제
+                await deleteDoc(roomRef);
+                console.log('채팅방 삭제됨');
+            }
+
+            setLeaveModalVisible(false);
+        } catch (error) {
+            console.error('채팅방 나가기 오류:', error);
+        }
+    };
+
+    const handleLongPressRoom = (roomId, roomName) => {
+        setSelectedRoomId(roomId);
+        setSelectedRoomName(roomName);
+        setLeaveModalVisible(true);
+    };
+
     const topHeader = () => {
         return (
             <View style={styles.headerContainer}>
@@ -138,7 +170,11 @@ const ChatRoomListScreen = ({ route }) => {
                 data={filteredChatRooms}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
-                    <TouchableOpacity style={styles.chatRoomItem} onPress={() => handleEnterChatRoom(item.id, item.password, item.createUser, item.name)}>
+                    <TouchableOpacity
+                        style={styles.chatRoomItem}
+                        onPress={() => handleEnterChatRoom(item.id, item.password, item.createUser, item.name)}
+                        onLongPress={isMemberList ? () => handleLongPressRoom(item.id, item.name) : null}  // isMemberList일 때만 모달 띄우기
+                    >
                         <View style={styles.row}>
                             {item.password && (<Entypo name="lock" size={24} color="black" />)}
                             <Text style={styles.chatRoomText}>{item.name}</Text>
@@ -147,6 +183,7 @@ const ChatRoomListScreen = ({ route }) => {
                 )}
             />
 
+            {/* 비밀번호 입력 모달 */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -181,10 +218,39 @@ const ChatRoomListScreen = ({ route }) => {
                 </View>
             </Modal>
 
+            {/* 나가기 모달 */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={leaveModalVisible}
+                onRequestClose={() => setLeaveModalVisible(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalView}>
+                        <Text style={styles.modalText}>채팅방: {selectedRoomName}</Text>
+                        <Text style={styles.modalText}>채팅방에서 나가시겠습니까?</Text>
+                        <View style={styles.buttonRow}>
+                            <TouchableOpacity
+                                style={[styles.button, styles.cancelButton]}
+                                onPress={() => setLeaveModalVisible(false)}
+                            >
+                                <Text style={styles.buttonText}>취소</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.button, styles.leaveButton]}
+                                onPress={handleLeaveRoom}
+                            >
+                                <Text style={styles.buttonText}>나가기</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
             <View style={styles.createButtonContainer}>
                 <Button
                     title="채팅방 생성"
-                    onPress={() => navigation.navigate('CreateChatRoomScreen', {userInfo})}
+                    onPress={() => navigation.navigate('CreateChatRoomScreen', { userInfo })}
                 />
             </View>
         </View>
@@ -221,10 +287,6 @@ const styles = StyleSheet.create({
     },
     inactiveTab: {
         backgroundColor: '#ddd',
-    },
-    tabText: {
-        fontSize: 16,
-        fontWeight: 'bold',
     },
     activeTabText: {
         color: '#fff',
@@ -310,6 +372,9 @@ const styles = StyleSheet.create({
     },
     enterButton: {
         backgroundColor: 'green',
+    },
+    leaveButton: {
+        backgroundColor: 'red',
     },
     buttonText: {
         color: 'white',

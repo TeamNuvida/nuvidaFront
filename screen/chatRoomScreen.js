@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, FlatList, Image, StyleSheet, TouchableOpacity, ScrollView, Alert, Modal, Keyboard  } from 'react-native';
+import { View, Text, TextInput, FlatList, Image, StyleSheet, TouchableOpacity, ScrollView, Alert, Modal, Keyboard, Linking  } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { firestore, storage } from './firebase';
 import { collection, orderBy, query, onSnapshot, addDoc, doc, deleteDoc,  updateDoc, arrayRemove, getDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useNavigation } from "@react-navigation/native";
-import { MaterialCommunityIcons, AntDesign , SimpleLineIcons, MaterialIcons, FontAwesome} from '@expo/vector-icons';
+import { MaterialCommunityIcons, AntDesign , SimpleLineIcons, MaterialIcons, FontAwesome, Entypo} from '@expo/vector-icons';
 import axios from "axios";
 
 const ChatRoomScreen = ({ route }) => {
@@ -171,6 +171,28 @@ const ChatRoomScreen = ({ route }) => {
         return fetchMessages();
     }, []);
 
+
+    // 메시지 렌더링 함수
+    const renderMessageText = (text) => {
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const parts = text.split(urlRegex);
+
+        return parts.map((part, index) => {
+            if (urlRegex.test(part)) {
+                return (
+                    <Text
+                        key={index}
+                        style={styles.link}
+                        onPress={() => Linking.openURL(part)}
+                    >
+                        {part}
+                    </Text>
+                );
+            }
+            return <Text key={index}>{part}</Text>;
+        });
+    };
+
     // 메시지 렌더링 함수
     const renderItem = ({ item }) => {
         const isCurrentUser = item.userId === userInfo.user_id;
@@ -193,8 +215,8 @@ const ChatRoomScreen = ({ route }) => {
 
 
                     {item.text&&<View style={[styles.messageContainer, isCurrentUser ? styles.myMessage : styles.theirMessage]}>
-                    {item.text ? <Text style={isCurrentUser ? styles.messageText : styles.theirmessageText}>{item.text}</Text> : null}
-                </View>}
+                        {renderMessageText(item.text)}
+                    </View>}
                     {item.imageUrls && item.imageUrls.map((url, index) => (
                         <TouchableOpacity key={index} onPress={() => openImageModal(url)} style={isCurrentUser ? styles.myImage : styles.theirImage}>
                             <Image source={{ uri: url }} style={styles.image} />
@@ -215,9 +237,10 @@ const ChatRoomScreen = ({ route }) => {
                     </TouchableOpacity>
                     <Text style={styles.headerText}>{roomName}</Text>
 
-                        <TouchableOpacity onPress={confirmDelete}>
-                            <Text style={{ fontWeight: "bold", color: 'red' }}>나가기</Text>
-                        </TouchableOpacity>
+
+                    <TouchableOpacity onPress={confirmDelete}>
+                        <Text style={{ fontWeight: "bold", color: 'red' }}>나가기</Text>
+                    </TouchableOpacity>
 
                 </View>
             </View>
@@ -349,8 +372,8 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start',        // 텍스트가 좌우로 꽉 차지 않도록 설정
         justifyContent: 'center',       // 컨테이너 안에서 수직 중앙 정렬
         flexDirection: 'row',           // 텍스트가 수평으로 정렬되도록 설정
-        marginTop:10,
-
+        marginTop: 10,
+        flexWrap: 'wrap',               // 텍스트가 줄을 넘을 경우 자동으로 줄바꿈
     },
     myNick: {
         alignSelf: 'flex-end',
@@ -362,8 +385,9 @@ const styles = StyleSheet.create({
     myMessage: {
         backgroundColor: '#ff5a5a',
         alignSelf: 'flex-end',
-        borderTopRightRadius:0,
-        marginRight:10
+        borderTopRightRadius: 0,
+        marginRight: 10,
+        flexWrap: 'wrap',              // 텍스트가 줄을 넘을 경우 자동으로 줄바꿈
     },
     myImage: {
         alignSelf: 'flex-end',
@@ -371,9 +395,10 @@ const styles = StyleSheet.create({
     theirMessage: {
         backgroundColor: '#FBFBFB',
         alignSelf: 'flex-start',
-        borderTopLeftRadius:0,
-        borderColor:"#E8E8E8",
-        borderWidth:1,
+        borderTopLeftRadius: 0,
+        borderColor: "#E8E8E8",
+        borderWidth: 1,
+        flexWrap: 'wrap',              // 텍스트가 줄을 넘을 경우 자동으로 줄바꿈
     },
     theirImage: {
         alignSelf: 'flex-start',
@@ -381,6 +406,10 @@ const styles = StyleSheet.create({
     messageText: {
         color: 'white',
         alignSelf: 'center',
+    },
+    link: {
+        color: '#0645AD',
+        textDecorationLine: 'underline',
     },
     theirmessageText: {
         color: '#7E7E7E',
