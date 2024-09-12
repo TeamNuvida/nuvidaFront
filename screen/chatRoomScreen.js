@@ -192,14 +192,14 @@ const ChatRoomScreen = ({ route }) => {
                 )}
 
 
-                <View style={[styles.messageContainer, isCurrentUser ? styles.myMessage : styles.theirMessage]}>
+                    {item.text&&<View style={[styles.messageContainer, isCurrentUser ? styles.myMessage : styles.theirMessage]}>
                     {item.text ? <Text style={isCurrentUser ? styles.messageText : styles.theirmessageText}>{item.text}</Text> : null}
+                </View>}
                     {item.imageUrls && item.imageUrls.map((url, index) => (
-                        <TouchableOpacity key={index} onPress={() => openImageModal(url)}>
+                        <TouchableOpacity key={index} onPress={() => openImageModal(url)} style={isCurrentUser ? styles.myImage : styles.theirImage}>
                             <Image source={{ uri: url }} style={styles.image} />
                         </TouchableOpacity>
                     ))}
-                </View>
                 </View>
             </View>
         );
@@ -350,6 +350,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',       // 컨테이너 안에서 수직 중앙 정렬
         flexDirection: 'row',           // 텍스트가 수평으로 정렬되도록 설정
         marginTop:10,
+
     },
     myNick: {
         alignSelf: 'flex-end',
@@ -364,12 +365,18 @@ const styles = StyleSheet.create({
         borderTopRightRadius:0,
         marginRight:10
     },
+    myImage: {
+        alignSelf: 'flex-end',
+    },
     theirMessage: {
         backgroundColor: '#FBFBFB',
         alignSelf: 'flex-start',
         borderTopLeftRadius:0,
         borderColor:"#E8E8E8",
-        borderWidth:1
+        borderWidth:1,
+    },
+    theirImage: {
+        alignSelf: 'flex-start',
     },
     messageText: {
         color: 'white',

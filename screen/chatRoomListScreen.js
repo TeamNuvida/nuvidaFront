@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Button, StyleSheet, Alert, TextInput, TouchableOpacity, Modal } from 'react-native';
-import { collection, query, orderBy, doc, getDoc, onSnapshot, updateDoc, arrayUnion  } from 'firebase/firestore';
+import { collection, query, orderBy, doc, getDoc, onSnapshot, updateDoc, arrayUnion } from 'firebase/firestore';
 import { firestore } from './firebase';
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons, Entypo } from '@expo/vector-icons';
-
 
 const ChatRoomListScreen = ({ route }) => {
     const [chatRooms, setChatRooms] = useState([]);
@@ -14,6 +13,7 @@ const ChatRoomListScreen = ({ route }) => {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [selectedRoomId, setSelectedRoomId] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
+    const [isMemberList, setIsMemberList] = useState(true); // 유저가 속한 채팅방 목록인지 여부
     const navigation = useNavigation();
     const [userInfo, setUserInfo] = useState(route.params.userInfo);
 
@@ -22,18 +22,25 @@ const ChatRoomListScreen = ({ route }) => {
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const rooms = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             setChatRooms(rooms);
-            setFilteredChatRooms(rooms);
+            filterChatRooms(rooms, searchQuery, isMemberList); // 필터링된 데이터를 설정
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [isMemberList]);
+
+    const filterChatRooms = (rooms, query, isMemberList) => {
+        let filtered = rooms.filter(room => room.name.toLowerCase().includes(query.toLowerCase()));
+
+        if (isMemberList) {
+            filtered = filtered.filter(room => room.members && room.members.includes(userInfo.user_id));
+        }
+
+        setFilteredChatRooms(filtered);
+    };
 
     useEffect(() => {
-        const filtered = chatRooms.filter(room =>
-            room.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        setFilteredChatRooms(filtered);
-    }, [searchQuery, chatRooms]);
+        filterChatRooms(chatRooms, searchQuery, isMemberList);
+    }, [searchQuery, chatRooms, isMemberList]);
 
     const handleEnterChatRoom = async (roomId, password, createUser, name) => {
         const roomRef = doc(firestore, 'chatRooms', roomId);
@@ -74,8 +81,7 @@ const ChatRoomListScreen = ({ route }) => {
                     });
                 }
 
-                // createUser 정보를 함께 전달
-                navigation.navigate('ChatRoomScreen', { roomId: selectedRoomId, userInfo, createUser: roomData.createUser, name:roomData.name });
+                navigation.navigate('ChatRoomScreen', { roomId: selectedRoomId, userInfo, createUser: roomData.createUser, name: roomData.name });
             } else {
                 Alert.alert('오류', '비밀번호가 틀렸습니다.');
             }
@@ -96,9 +102,31 @@ const ChatRoomListScreen = ({ route }) => {
         );
     };
 
+    const setState = (state) =>{
+        setIsMemberList(state);
+        setSearchQuery('');
+    }
+
     return (
         <View style={styles.container}>
             {topHeader()}
+
+            {/* 버튼 추가 - 채팅 목록과 전체 채팅방 사이 전환 */}
+            <View style={styles.tabContainer}>
+                <TouchableOpacity
+                    style={[styles.tabButton,styles.tabTrueButton, isMemberList ? styles.activeTab : styles.inactiveTab]}
+                    onPress={() => setState(true)}
+                >
+                    <Text style={isMemberList ? styles.activeTabText : styles.inactiveTabText}>채팅 목록</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.tabButton,styles.tabFalseButton, !isMemberList ? styles.activeTab : styles.inactiveTab]}
+                    onPress={() => setState(false)}
+                >
+                    <Text style={!isMemberList ? styles.activeTabText : styles.inactiveTabText}>전체 채팅방</Text>
+                </TouchableOpacity>
+            </View>
+
             <TextInput
                 style={styles.searchInput}
                 placeholder="채팅방 검색"
@@ -135,7 +163,6 @@ const ChatRoomListScreen = ({ route }) => {
                             onChangeText={setInputPassword}
                             secureTextEntry
                         />
-                        {/* 취소와 입장 버튼을 나란히 배치 */}
                         <View style={styles.buttonRow}>
                             <TouchableOpacity
                                 style={[styles.button, styles.cancelButton]}
@@ -169,6 +196,43 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 16,
         backgroundColor: "#fff",
+    },
+    tabContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 10,
+    },
+    tabButton: {
+        flex: 1,
+        padding: 10,
+        alignItems: 'center',
+        borderRadius: 5,
+    },
+    tabTrueButton:{
+        borderTopRightRadius:0,
+        borderBottomRightRadius:0,
+    },
+    tabFalseButton:{
+        borderTopLeftRadius:0,
+        borderBottomLeftRadius:0,
+    },
+    activeTab: {
+        backgroundColor: '#f00',
+    },
+    inactiveTab: {
+        backgroundColor: '#ddd',
+    },
+    tabText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    activeTabText: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
+    inactiveTabText: {
+        color: '#000',
+        fontWeight: 'bold',
     },
     searchInput: {
         borderColor: '#ccc',
@@ -230,7 +294,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
     },
     buttonRow: {
-        flexDirection: 'row', // 버튼을 가로로 배치
+        flexDirection: 'row',
         justifyContent: 'space-between',
         width: '100%',
     },
@@ -239,7 +303,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         borderRadius: 5,
         flex: 1,
-        marginHorizontal: 5, // 버튼 사이에 여백 추가
+        marginHorizontal: 5,
     },
     cancelButton: {
         backgroundColor: 'gray',

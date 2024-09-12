@@ -376,23 +376,28 @@ const ScheduleCreation3 = ({ route, navigation }) => {
 
             <Modal isVisible={isFriendsModalVisible}>
                 <View style={styles.modalContent}>
-                    {friendsList.map(friend => (
-                        <View key={friend.user_id} style={styles.friendItem2}>
-                            <View style={styles.friendIconContainer}>
-                                <Entypo name="user" size={24} color="gray" />
-                            </View>
-                            <Text style={styles.friendName}>{friend.user_nick}</Text>
-                            {selectedFriends.find(selectedFriend => selectedFriend.user_id === friend.user_id) ? (
-                                <View style={styles.inviteButton3}>
-                                    <Text style={styles.invitedText}>초대완료</Text>
+                    {friendsList&&friendsList.length>0?(
+                        friendsList.map(friend => (
+                                <View key={friend.user_id} style={styles.friendItem2}>
+                                    <View style={styles.friendIconContainer}>
+                                        <Entypo name="user" size={24} color="gray" />
+                                    </View>
+                                    <Text style={styles.friendName}>{friend.user_nick}</Text>
+                                    {selectedFriends.find(selectedFriend => selectedFriend.user_id === friend.user_id) ? (
+                                        <View style={styles.inviteButton3}>
+                                            <Text style={styles.invitedText}>초대완료</Text>
+                                        </View>
+                                    ) : (
+                                        <TouchableOpacity style={styles.inviteButton2} onPress={() => selectFriend(friend)}>
+                                            <Text style={styles.inviteButtonText2}>초대</Text>
+                                        </TouchableOpacity>
+                                    )}
                                 </View>
-                            ) : (
-                                <TouchableOpacity style={styles.inviteButton2} onPress={() => selectFriend(friend)}>
-                                    <Text style={styles.inviteButtonText2}>초대</Text>
-                                </TouchableOpacity>
-                            )}
-                        </View>
-                    ))}
+                            ))
+                    ):(
+                        <Text>초대 가능한 친구 목록이 없습니다.</Text>
+                        )}
+
                     <TouchableOpacity style={styles.modalButton} onPress={toggleFriendsModal}>
                         <Text style={styles.modalButtonText}>닫기</Text>
                     </TouchableOpacity>
