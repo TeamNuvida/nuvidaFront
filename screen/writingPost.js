@@ -9,7 +9,12 @@ import axios from "axios";
 
 // Firebase 프로젝트에서 가져온 구성 객체
 const firebaseConfig = {
-
+    apiKey: "AIzaSyDZuZsmJDYEWp5arnfRc6pSqMd0WAt01kU",
+    authDomain: "high-service-431903-t6.firebaseapp.com",
+    projectId: "high-service-431903-t6",
+    storageBucket: "high-service-431903-t6.appspot.com",
+    messagingSenderId: "797041135189",
+    appId: "1:797041135189:android:bfe45b46755c233195cedc"
 };
 
 // Firebase 초기화
