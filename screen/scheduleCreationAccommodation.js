@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
         shadowRadius: 3.84,
         elevation: 5,
         marginLeft:20,
-        width:'120%'
+        width:'80%'
     },
     addButtonText: {
         color: 'black',
