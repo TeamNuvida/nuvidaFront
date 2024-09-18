@@ -96,7 +96,8 @@ const Calculate = ({ route }) => {
 
     useFocusEffect(
         useCallback(() => {
-            setPrice(totalPrice/memCount);
+            const pricePerPerson = Math.round(totalPrice / memCount);
+            setPrice(pricePerPerson);
 
             return () => {
                 // Cleanup 함수: 이 페이지를 떠날 때 실행됩니다.
