@@ -167,11 +167,11 @@ const TripCalendar = ({ route }) => {
 
 
         const targetWeather = {
-            [targetDates[0]]: weatherIcon[3].weather[0].icon,
-            [targetDates[1]]: weatherIcon[11].weather[0].icon,
-            [targetDates[2]]: weatherIcon[19].weather[0].icon,
-            [targetDates[3]]: weatherIcon[27].weather[0].icon,
-            [targetDates[4]]: weatherIcon[35].weather[0].icon,
+            [targetDates[0]]: weatherIcon[2].weather[0].icon,
+            [targetDates[1]]: weatherIcon[10].weather[0].icon,
+            [targetDates[2]]: weatherIcon[18].weather[0].icon,
+            [targetDates[3]]: weatherIcon[26].weather[0].icon,
+            [targetDates[4]]: weatherIcon[34].weather[0].icon,
         };
         console.log(targetWeather)
         setMidWeatherData(targetWeather)

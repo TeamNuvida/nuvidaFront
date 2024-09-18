@@ -1905,7 +1905,7 @@ const styles = StyleSheet.create({
     },
 
     teamLogo: {
-        width: '75%',
+        width: '87%',
         height: '60%',
         marginTop: '10%',
     },
