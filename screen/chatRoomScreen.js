@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
     },
     sendButton: {
         backgroundColor: '#FF5A5A',
-        padding: 15,
+        padding: 12,
         borderRadius: 50,
         justifyContent: 'center', // 세로 정렬
         alignItems: 'center', // 가로 정렬
