@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 10,
-        paddingTop: 20,
+        paddingTop: 40,
     },
     flexRow: {
         flexDirection: 'row',

@@ -149,7 +149,7 @@ const ChatRoomListScreen = ({ route }) => {
                     style={[styles.tabButton,styles.tabTrueButton, isMemberList ? styles.activeTab : styles.inactiveTab]}
                     onPress={() => setState(true)}
                 >
-                    <Text style={isMemberList ? styles.activeTabText : styles.inactiveTabText}>채팅 목록</Text>
+                    <Text style={isMemberList ? styles.activeTabText : styles.inactiveTabText}>참여중인 채팅방</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[styles.tabButton,styles.tabFalseButton, !isMemberList ? styles.activeTab : styles.inactiveTab]}
@@ -176,7 +176,10 @@ const ChatRoomListScreen = ({ route }) => {
                         onLongPress={isMemberList ? () => handleLongPressRoom(item.id, item.name) : null}  // isMemberList일 때만 모달 띄우기
                     >
                         <View style={styles.row}>
+                            {/* 왼쪽에 사람 모양 아이콘 */}
+                            <MaterialCommunityIcons name="account" size={24} color="black" style={styles.icon} />
                             {item.password && (<Entypo name="lock" size={24} color="black" />)}
+
                             <Text style={styles.chatRoomText}>{item.name}</Text>
                         </View>
                     </TouchableOpacity>
@@ -219,6 +222,15 @@ const ChatRoomListScreen = ({ route }) => {
             </Modal>
 
             {/* 나가기 모달 */}
+            <View style={styles.createButtonContainer}>
+                <TouchableOpacity
+                    style={styles.createButton}
+                    onPress={() => navigation.navigate('CreateChatRoomScreen', { userInfo })}
+                >
+                    <Text style={styles.createButtonText}>채팅방 생성</Text>
+                </TouchableOpacity>
+            </View>
+
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -246,13 +258,6 @@ const ChatRoomListScreen = ({ route }) => {
                     </View>
                 </View>
             </Modal>
-
-            <View style={styles.createButtonContainer}>
-                <Button
-                    title="채팅방 생성"
-                    onPress={() => navigation.navigate('CreateChatRoomScreen', { userInfo })}
-                />
-            </View>
         </View>
     );
 };
@@ -317,6 +322,9 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 20,
         marginLeft: 10,
+    },
+    icon: {
+        marginRight: 10, // 아이콘과 텍스트 사이 여백
     },
     createButtonContainer: {
         marginTop: 20,
@@ -402,6 +410,19 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         flex: 2,
     },
+    createButton: {
+        backgroundColor: 'black', // 버튼 색상 설정
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    createButtonText: {
+        color: 'white', // 텍스트 색상 설정
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+
 });
 
 export default ChatRoomListScreen;

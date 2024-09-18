@@ -104,11 +104,13 @@ const CreateChatRoomScreen = ({ route }) => {
         <View style={styles.container}>
             {topHeader()}
             <TextInput
+                style={styles.input}
                 placeholder="채팅방 이름"
                 value={roomName}
                 onChangeText={setRoomName}
             />
             <TextInput
+                style={styles.input2}
                 placeholder="비밀번호 (선택)"
                 value={password}
                 onChangeText={setPassword}
@@ -152,7 +154,12 @@ const CreateChatRoomScreen = ({ route }) => {
                     </TouchableOpacity>
                 </View>
             </Modal>
-            <Button title="채팅방 생성" onPress={createChatRoom} />
+            <TouchableOpacity
+                style={styles.createButton}
+                onPress={createChatRoom}
+            >
+                <Text style={styles.createButtonText}>채팅방 생성</Text>
+            </TouchableOpacity>
         </View>
     );
 };
@@ -162,6 +169,7 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 10,
         backgroundColor: '#fff',
+        paddingVertical : 50
     },
 
     /* 상단바 */
@@ -204,7 +212,7 @@ const styles = StyleSheet.create({
         marginHorizontal:20,
         alignItems: 'center',
         paddingHorizontal:20,
-        paddingVertical:15,
+        paddingVertical:10,
         marginBottom:5
     },
     inviteButtonText: {
@@ -309,6 +317,30 @@ const styles = StyleSheet.create({
         elevation: 5, // Android에서의 그림자 효과
 
     },
+
+    createButton: {
+        backgroundColor: 'black', // 버튼 색상 설정
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    createButtonText: {
+        color: 'white', // 텍스트 색상 설정
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    input: {
+        marginBottom: 20, // 입력창 사이의 간격
+        borderRadius: 5, // 모서리 둥글게
+        paddingHorizontal:25
+    },
+    input2: {
+        paddingHorizontal:25,
+        marginBottom: 20,
+        borderRadius: 5, // 모서리 둥글게
+    },
+
 });
 
 export default CreateChatRoomScreen;
