@@ -1,7 +1,15 @@
 import React, { useState, useEffect, useCallback  } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import {Entypo, FontAwesome, Ionicons, Feather, MaterialIcons, MaterialCommunityIcons} from '@expo/vector-icons';
+import {
+    Entypo,
+    FontAwesome,
+    Ionicons,
+    Feather,
+    MaterialIcons,
+    MaterialCommunityIcons,
+    FontAwesome5
+} from '@expo/vector-icons';
 import MapView, { Marker } from 'react-native-maps';
 import axios from "axios";
 import { WebView } from 'react-native-webview';
@@ -12,12 +20,10 @@ const TripSchedule = ({ route }) => {
 
     // 로그인 정보
     const [userInfo, setUserInfo] = useState(route.params.userInfo);
-
     const [mapFoldTF, setMapFoldTF] = useState(true);
 
     // 일정 식별자
     const plan_seq = route.params.plan_seq;
-
     const [accommodation,setAccommodation] = useState(null);
     const [planInfo, setPlanInfo] = useState(null);
     const [isLeader, setIsLeader] = useState(false);
@@ -31,6 +37,8 @@ const TripSchedule = ({ route }) => {
 
     const [schedule, setSchedule] = useState({});
     const [routeList, setRouteList] = useState(null);
+    const [selectedPlace, setSelectedPlace] = useState(null);
+
 
     useEffect(() => {
         // 기존 API 호출 코드가 있다고 가정하고, 여기서 데이터를 가져옵니다.
@@ -179,7 +187,7 @@ const TripSchedule = ({ route }) => {
         <style>
           #map {
             width: 100%;
-            height: 100vh;
+            height: 120vh;
           }
           .markerLabel {
             color: white;
@@ -201,70 +209,76 @@ const TripSchedule = ({ route }) => {
       <body>
         <div id="map"></div>
         <script>
-          document.addEventListener("DOMContentLoaded", function() {
-            var container = document.getElementById('map');
-            var options = {
-              center: new kakao.maps.LatLng(35.1595454, 126.8526012), // 초기 중심 좌표 설정
-              level: 7 // 지도 레벨 설정 (확대 정도)
-            };
-            var map = new kakao.maps.Map(container, options); // 지도 생성
-    
-            var schedule = ${JSON.stringify(schedule)}; // 일정 정보
-            var selectedDay = "${selectedDay}"; // 선택된 날짜
-            var colors = {
-              '1일차': '#FF0000', // 빨간색
-              '2일차': '#0000FF', // 파란색
-              '3일차': '#008000'  // 초록색
-            };
-    
-            var daysToShow = selectedDay === '전체' ? Object.keys(schedule) : [selectedDay]; // 표시할 일차 결정
-    
-            // 마커를 지도에 추가하는 함수
-            function addMarker(position, imageSrc, size, title, address, label, color) {
-              var imageSize = new kakao.maps.Size(size.width, size.height); // 마커 크기 설정
-              var markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize); // 마커 이미지 생성
-              var marker = new kakao.maps.Marker({
-                position: position, // 마커 위치
-                image: markerImage // 마커 이미지 설정
+            document.addEventListener("DOMContentLoaded", function() {
+                var container = document.getElementById('map');
+                var options = {
+                    center: new kakao.maps.LatLng(35.1595454, 126.8526012), // 임시 초기 중심 좌표
+                    level: 7 // 기본 줌 레벨 설정
+                };
+                var map = new kakao.maps.Map(container, options); // 지도 생성
+        
+                var bounds = new kakao.maps.LatLngBounds(); // LatLngBounds 객체 생성
+        
+                var schedule = ${JSON.stringify(schedule)}; // 일정 정보
+                var accommodation = ${JSON.stringify(accommodation)}; // 숙소 정보
+                var selectedDay = "${selectedDay}"; // 선택된 날짜
+                var colors = {
+                    '1일차': '#FF0000', // 빨간색
+                    '2일차': '#0000FF', // 파란색
+                    '3일차': '#008000'  // 초록색
+                };
+        
+                var daysToShow = selectedDay === '전체' ? Object.keys(schedule) : [selectedDay]; // 표시할 일차 결정
+                var hasMarkers = false; // 마커가 있는지 여부 확인
+        
+                // 마커를 지도에 추가하는 함수 (이동 순서 표시 포함)
+                function addMarker(position, imageSrc, size, title, address, label, color) {
+                    var imageSize = new kakao.maps.Size(size.width, size.height); // 마커 크기 설정
+                    var markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize); // 마커 이미지 생성
+                    var markerPosition = new kakao.maps.LatLng(position.lat, position.lng); // 마커 위치 설정
+                    var marker = new kakao.maps.Marker({
+                        position: markerPosition, // 마커 위치
+                        image: markerImage // 마커 이미지 설정
+                    });
+                    marker.setMap(map); // 지도에 마커 추가
+        
+                    // 각 마커의 위치를 LatLngBounds에 추가
+                    bounds.extend(markerPosition);
+                    hasMarkers = true; // 마커가 있음을 표시
+        
+                    // 이동 순서를 표시하는 라벨 추가
+                    var labelContent = '<div style="background-color:black; color:white; border-radius:50%; padding:5px; text-align:center; width:30px; height:30px; line-height:30px; font-size:23px; font-weight:bold;">' + label + '</div>';
+                    var labelOverlay = new kakao.maps.CustomOverlay({
+                        content: labelContent,
+                        position: markerPosition,
+                        yAnchor: 1.5, // 라벨이 마커 위에 위치하도록 조정
+                        xAnchor: 0.5,
+                        zIndex: 3
+                    });
+                    labelOverlay.setMap(map); // 지도에 라벨 추가
+                }
+        
+                // 폴리라인을 그리는 함수
+                function drawPolyline(pathCoordinates, color) {
+                    var polyline = new kakao.maps.Polyline({
+                        path: pathCoordinates, // 폴리라인 경로 설정
+                        strokeWeight: 8, // 선 두께
+                        strokeColor: color, // 선 색상
+                        strokeOpacity: 0.7, // 선 투명도
+                        strokeStyle: 'solid' // 선 스타일
+                    });
+                    polyline.setMap(map); // 지도에 폴리라인 추가
+                    
+                    // 클릭 이벤트 추가 (거리 표시)
+              kakao.maps.event.addListener(polyline, 'click', function(mouseEvent) {
+                var clickPosition = mouseEvent.latLng; // 클릭한 위치 좌표
+                displayDistance(polyline, clickPosition); // 클릭 시 거리 표시 함수 호출
               });
-              marker.setMap(map); // 지도에 마커 추가
-
-              // 마커에 순서 번호 라벨 추가
-              var labelContent = '<div class="markerLabel" style="background-color:' + color + ';">' + label + '</div>';
-              var labelOverlay = new kakao.maps.CustomOverlay({
-                content: labelContent,
-                position: position,
-                yAnchor: 1.5, // 라벨이 마커 위에 위치하도록 yAnchor 조정
-                xAnchor: 0.5,
-                zIndex: 3
-              });
-              labelOverlay.setMap(map);
-
-              // 마커 클릭 시 커스텀 오버레이 표시
-              kakao.maps.event.addListener(marker, 'click', function() {
-                var overlayContent = '<div style="padding:10px;background:white;border:1px solid black;">' +
-                                     '<strong>' + title + '</strong><br>' + 
-                                     '<span>' + address + '</span>' +
-                                     '</div>';
-
-                var overlay = new kakao.maps.CustomOverlay({
-                  content: overlayContent,
-                  position: position,
-                  yAnchor: 1
-                });
-
-                overlay.setMap(map);
-
-                // 3초 후 오버레이 제거
-                setTimeout(function() {
-                  overlay.setMap(null);
-                }, 3000);
-              });
-
-              return marker;
-            }
-            
-            // 폴리라인의 거리를 표시하는 함수
+                    
+                      
+                }
+                
+                // 폴리라인의 거리를 표시하는 함수
             function displayDistance(polyline, position) {
               var length = polyline.getLength(); // 폴리라인의 길이(미터) 계산
               var message = '거리: ' + (length / 1000).toFixed(2) + ' km'; // 길이를 킬로미터로 변환하여 메시지 생성
@@ -285,42 +299,63 @@ const TripSchedule = ({ route }) => {
                 overlay.setMap(null);
               }, 3000);
             }
-
-            // 일반 장소 마커와 폴리라인 추가
-            daysToShow.forEach(function(day) {
-              var positions = schedule[day]; // 각 날짜의 위치 정보
-              var linePath = [];
-    
-              positions.forEach(function(position, index) {
-                var markerPosition = new kakao.maps.LatLng(position.lat, position.lng); // 마커 위치 설정
-                addMarker(markerPosition, 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png', {width: 34, height: 45}, position.title, position.address, index + 1, colors[day]); // 마커 추가
-                linePath.push(markerPosition); // 폴리라인 경로에 위치 추가
-              });
-    
-              var polyline = new kakao.maps.Polyline({
-                path: linePath, // 폴리라인 경로 설정
-                strokeWeight: 8, // 선 두께
-                strokeColor: colors[day], // 선 색상
-                strokeOpacity: 0.7, // 선 투명도
-                strokeStyle: 'solid' // 선 스타일
-              });
-    
-              polyline.setMap(map); // 지도에 폴리라인 추가
-              
-              // 클릭 이벤트 추가 (거리 표시)
-              kakao.maps.event.addListener(polyline, 'click', function(mouseEvent) {
-                var clickPosition = mouseEvent.latLng; // 클릭한 위치 좌표
-                displayDistance(polyline, clickPosition); // 클릭 시 거리 표시 함수 호출
-              });
+        
+                daysToShow.forEach(function(day) {
+                    var positions = schedule[day]; // 각 날짜의 위치 정보
+                    var linePath = []; // 폴리라인 경로를 저장할 배열
+        
+                    positions.forEach(function(position, index) {
+                        var markerPosition = new kakao.maps.LatLng(position.lat, position.lng); // 마커 위치 설정
+        
+                        // 마커 추가 (이동 순서 표시)
+                        addMarker(
+                            position, 
+                            'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png', 
+                            {width: 34, height: 45}, 
+                            position.title, 
+                            position.address, 
+                            index + 1, // 이동 순서 (1부터 시작)
+                            colors[day] // 날짜별 색상 적용
+                        );
+        
+                        // 폴리라인 경로에 마커 위치 추가
+                        linePath.push(markerPosition);
+                        
+                    });
+        
+                    // 폴리라인 그리기
+                    if (linePath.length > 1) { // 경로가 두 지점 이상이어야 폴리라인을 그릴 수 있음
+                        drawPolyline(linePath, colors[day]); // 날짜별 색상 적용
+                    }
+                    
+                    
+                });
+        
+                // 숙소 추가 부분
+                accommodation.forEach(function(hotel, index) {
+                    var markerPosition = new kakao.maps.LatLng(hotel.lat, hotel.lng); // 숙소 위치 설정
+        
+                    // 숙소 마커 추가
+                    addMarker(
+                        { lat: hotel.lat, lng: hotel.lng },
+                        'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
+                        {width: 44, height: 55},
+                        hotel.acc_name,
+                        hotel.addr,
+                        'H', // 숙소는 "H"로 표시
+                        '#FFD700' // 금색
+                    );
+                });
+        
+                // 모든 마커와 경로를 포함하는 범위에 맞게 지도를 조정
+                if (hasMarkers) {
+                    map.setBounds(bounds);
+                } else {
+                    // 마커가 없을 경우 기본 줌 레벨과 위치 설정
+                    map.setCenter(new kakao.maps.LatLng(35.1595454, 126.8526012)); // 기본 중심 좌표
+                    map.setLevel(7); // 기본 줌 레벨
+                }
             });
-    
-            // 숙소 마커 추가
-            var accommodation = ${JSON.stringify(accommodation)};
-            accommodation.forEach(function(hotel, index) {
-              var markerPosition = new kakao.maps.LatLng(hotel.lat, hotel.lng ); // 숙소 위치 설정
-              addMarker(markerPosition, 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png', {width: 44, height: 55}, hotel.acc_name, hotel.addr, 'H', '#FFD700'); // 숙소 마커 추가 (금색)
-            });
-          });
         </script>
       </body>
     </html>
@@ -401,18 +436,24 @@ const TripSchedule = ({ route }) => {
             }, {});
 
             return Object.keys(groupedByDay).map((dayKey, index) => (
-                <View key={index} style={styles.dayGroup}>
-                    <Text style={styles.dayHeader}>{dayKey}</Text>
+                <View key={index} style={{width: '100%', flex: 1}}>
+                    <View style={{justifyContent: 'center', width: '100%', height: '6%', marginBottom: '3%'}}>
+                        <Text style={{fontWeight: 'bold'}}>{dayKey}</Text>
+                    </View>
                     {groupedByDay[dayKey].map((item, itemIndex) => (
                         <View key={itemIndex} style={styles.scheduleItem}>
                             <View style={styles.timeLine}>
-                                <View style={styles.circle} />
+                                {/* 동그라미 안에 순서를 표시 */}
+                                <View style={styles.circle}>
+                                    <Text style={styles.numberInsideCircle}>{itemIndex + 1}</Text>
+                                </View>
                                 {itemIndex !== groupedByDay[dayKey].length - 1 && <View style={styles.line} />}
                             </View>
                             <View style={styles.scheduleItemContent}>
                                 <View style={styles.scheduleItemHeader}>
-                                    <View style={styles.iconTitleContainer}>
-                                        <MaterialIcons name={item.icon} size={24} color="black" />
+                                    <View style={[styles.iconTitleContainer]}>
+                                        {/* 원래 아이콘 복구 */}
+                                        <MaterialIcons name={item.icon} size={21} color="black" style={{marginTop: '3%'}} />
                                         <Text style={styles.titleText}>{item.title}</Text>
                                     </View>
                                     {showDeleteIcons && (
@@ -421,41 +462,44 @@ const TripSchedule = ({ route }) => {
                                         </TouchableOpacity>
                                     )}
                                 </View>
-                                <Text style={styles.categoryText}>{item.category}</Text>
+                                <Text style={[styles.categoryText, {marginBottom: '1%', color: '#41ABB2'}]}>{item.category}</Text>
                                 {item.address && <Text style={styles.addressText}>{item.address}</Text>}
                                 {item.reservation && <Text style={styles.detailsText}>{formatReserDt(item.reservation)} {formatTime(item.reservation)}</Text>}
-                                <TouchableOpacity style={styles.naviButton} onPress={()=>handleNavi(item)}>
-                                    <Text style={styles.naviText}>길찾기</Text>
+                                <TouchableOpacity style={styles.naviButton} onPress={() => handleNavi(item)}>
+                                    <Text style={{fontSize: 12, color: 'white', fontWeight: 'bold'}}>길찾기</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
                     ))}
                 </View>
             ));
-        }else {
+        } else {
             return schedule[day]?.map((item, index) => (
                 <View key={index} style={styles.scheduleItem}>
                     <View style={styles.timeLine}>
-                        <View style={styles.circle}/>
-                        {index !== schedule[day].length - 1 && <View style={styles.line}/>}
+                        {/* 동그라미 안에 순서를 표시 */}
+                        <View style={styles.circle}>
+                            <Text style={styles.numberInsideCircle}>{index + 1}</Text>
+                        </View>
+                        {index !== schedule[day].length - 1 && <View style={styles.line} />}
                     </View>
                     <View style={styles.scheduleItemContent}>
                         <View style={styles.scheduleItemHeader}>
                             <View style={styles.iconTitleContainer}>
-                                <MaterialIcons name={item.icon} size={24} color="black"/>
+                                {/* 원래 아이콘 복구 */}
+                                <MaterialIcons name={item.icon} size={24} color="black" style={{marginTop: '2%'}}/>
                                 <Text style={styles.titleText}>{item.title}</Text>
                             </View>
                             {showDeleteIcons && (
-                                <TouchableOpacity style={styles.deleteIcon}
-                                                  onPress={() => handleDeleteItem(day, index)}>
-                                    <Entypo name="cross" size={24} color="red"/>
+                                <TouchableOpacity style={styles.deleteIcon} onPress={() => handleDeleteItem(day, index)}>
+                                    <Entypo name="cross" size={24} color="red" />
                                 </TouchableOpacity>
                             )}
                         </View>
-                        <Text style={styles.categoryText}>{item.category}</Text>
+                        <Text style={[styles.categoryText, {marginBottom: '1%', color: '#41ABB2'}]}>{item.category}</Text>
                         {item.address && <Text style={styles.addressText}>{item.address}</Text>}
                         {item.reservation && <Text style={styles.detailsText}>{formatReserDt(item.reservation)} {formatTime(item.reservation)}</Text>}
-                        <TouchableOpacity style={styles.naviButton} onPress={()=>handleNavi(item)}>
+                        <TouchableOpacity style={styles.naviButton} onPress={() => handleNavi(item)}>
                             <Text style={styles.naviText}>길찾기</Text>
                         </TouchableOpacity>
                     </View>
@@ -464,23 +508,31 @@ const TripSchedule = ({ route }) => {
         }
     };
 
+
+
     const renderDayTabs = () => {
-        const days = Object.keys(schedule) // "전체"를 제
+        const days = Object.keys(schedule); // "전체"를 제외한 날들
+
         return (
-            <View style={styles.dayTabs}>
-                <TouchableOpacity
-                    style={selectedDay === '전체' ? styles.dayTabActive : styles.dayTab}
-                    onPress={() => setSelectedDay('전체')}>
-                    <Text style={selectedDay === '전체' ? styles.dayTabTextActive : styles.dayTabText}>전체</Text>
-                </TouchableOpacity>
-                {days.map((day, index) => (
+            <View style={styles.dayTabsContainer}>
+                <ScrollView
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.dayTabsScroll}>
                     <TouchableOpacity
-                        key={index}
-                        style={selectedDay === day ? styles.dayTabActive : styles.dayTab}
-                        onPress={() => setSelectedDay(day)}>
-                        <Text style={selectedDay === day ? styles.dayTabTextActive : styles.dayTabText}>{day}</Text>
+                        style={[styles.dayTab, selectedDay === '전체' && styles.dayTabActive]}
+                        onPress={() => setSelectedDay('전체')}>
+                        <Text style={selectedDay === '전체' ? styles.dayTabTextActive : styles.dayTabText}>전체</Text>
                     </TouchableOpacity>
-                ))}
+                    {days.map((day, index) => (
+                        <TouchableOpacity
+                            key={index}
+                            style={[styles.dayTab, selectedDay === day && styles.dayTabActive]}
+                            onPress={() => setSelectedDay(day)}>
+                            <Text style={selectedDay === day ? styles.dayTabTextActive : styles.dayTabText}>{day}</Text>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
             </View>
         );
     };
@@ -493,7 +545,7 @@ const TripSchedule = ({ route }) => {
         const date = new Date(dateString);
         const options = { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' };
         const formattedDate = new Intl.DateTimeFormat('ko-KR', options).format(date);
-        return formattedDate.replace(/\./g, '. ');
+        return formattedDate.replace(/\./, '.');
     };
 
     const checkDeletePlan = () =>{
@@ -561,13 +613,13 @@ const TripSchedule = ({ route }) => {
             <View style={[{width: '100%', height: '10%'}]}>
                 <View style={{width: '100%', height: '50%', flexDirection: 'row', alignItems: 'center'}}>
                     <View style={[styles.center, {width: '10%', height: '100%', marginLeft: '5%'}]}>
-                        <Ionicons name="paper-plane-outline" size={28} color="black" />
+                        <Ionicons name="paper-plane-outline" size={20} color="black" />
                     </View>
                     <View style={[{width: '80%', height: '100%', marginRight: '5%', justifyContent: 'center'}]}>
                         {planInfo ? (
-                            <Text style={{fontSize: 19, letterSpacing: 2}}>{planInfo.plan_name}</Text>
+                            <Text style={{fontSize: 18, letterSpacing: 2}}>{planInfo.plan_name}</Text>
                         ) : (
-                            <Text style={{fontSize: 19, letterSpacing: 2}}>광주 여행</Text>
+                            <Text style={{fontSize: 18, letterSpacing: 2}}>광주 여행</Text>
                         )}
                     </View>
                 </View>
@@ -575,7 +627,7 @@ const TripSchedule = ({ route }) => {
                     <View style={{width: '70%', height: '100%', marginLeft: '13%', marginRight: '17%', }}>
                         {planInfo ? (
                             <Text style={{fontSize: 13}}>
-                                {formatDate(planInfo.start_date)} - {formatDate(planInfo.end_date)}
+                                {formatDate(planInfo.start_date)}{"  -  "}{formatDate(planInfo.end_date)}
                             </Text>
                         ) : (
                             <Text style={{fontSize: 13}}>2024. 05. 21 (토) - 2024. 05. 23 (월)</Text>
@@ -654,7 +706,7 @@ const TripSchedule = ({ route }) => {
             </View>
 
             {mapFoldTF&&(
-                <View style={{ height: 300 }}>
+                <View style={{ height: 320 }}>
                     <WebView
                         originWhitelist={['*']}
                         source={{ html }}
@@ -674,7 +726,7 @@ const TripSchedule = ({ route }) => {
             )}
             <TouchableOpacity style={styles.mapFold} onPress={()=>mapFold()}>
                 {mapFoldTF?
-                    (<Text style={styles.mapFoldText}>지도접기</Text>) : (<Text style={styles.mapFoldText}>지도열기</Text>)
+                    (<FontAwesome name="caret-up" size={24} color="black" />) : (<FontAwesome5 name="caret-down" size={24} color="black" />)
                 }
             </TouchableOpacity>
             {renderDayTabs()}
@@ -760,7 +812,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     scrollContainer: {
-        paddingBottom: 80,
+        marginBottom: 80,
     },
     header: {
         alignItems: 'center',
@@ -813,76 +865,62 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
     },
     dayTab: {
+        flex: 1, // 각 탭이 균등한 너비를 차지하도록 설정
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 10,
         backgroundColor: 'white',
+        alignItems: 'center', // 텍스트를 중앙 정렬
     },
     dayTabActive: {
+        flex: 1, // 활성화된 탭도 균등한 너비를 유지
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 10,
-        backgroundColor: '#f35353',
-    },
-    dayTabText: {
-        color: '#000',
-        fontSize: 14,
-        textAlign: 'center',
-    },
-    dayTabTextActive: {
-        color: '#fff',
-        fontSize: 14,
-        textAlign: 'center',
+        // backgroundColor: '#477ADE',
+        alignItems: 'center',
     },
     scheduleContainer: {
-        padding: 20,
+        paddingLeft: 20,  // 왼쪽에만 20px 여백
+        paddingRight: 20,  // 오른쪽에만 20px 여백
     },
     scheduleItem: {
         flexDirection: 'row',
-        marginBottom: 20,
+        marginBottom: 5,
     },
     timeLine: {
         alignItems: 'center',
         width: 40,
     },
     circle: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: '#f35353',
+        width: 35, // 동그라미 크기
+        height: 35, // 동그라미 크기
+        borderRadius: 35, // 반지름을 설정하여 동그라미 모양으로
+        backgroundColor: '#F3F4F6', // 동그라미 배경색
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    numberInsideCircle: {
+        color: '#6B7280', // 순서 텍스트 색상 (하얀색)
+        fontWeight: 'bold', // 순서 텍스트 굵기
+        fontSize: 16, // 순서 텍스트 크기
     },
     line: {
-        width: 2,
+        width: 1,
         flex: 1,
-        backgroundColor: '#f35353',
+        backgroundColor: '#6B7280',
+        marginTop: 5,  // 위쪽 간격 설정
     },
     scheduleItemContent: {
         flex: 1,
-        backgroundColor: 'white',
-        padding: 15,
+        paddingLeft: 10,
         borderRadius: 10,
-        height: 150,
-        elevation: 5,
-    },
-    scheduleItemHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    iconTitleContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        height: "auto",
+        marginBottom: '8%'
     },
     timeText: {
         fontSize: 16,
         fontWeight: 'bold',
-    },
-
-    titleText: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginVertical: 5,
-        marginLeft: 10,
     },
     detailsText: {
         fontSize: 13,
@@ -909,26 +947,77 @@ const styles = StyleSheet.create({
     },
     mapFold:{
         alignItems: 'center',
-        paddingVertical: 5,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
+        borderBottomWidth: 0.7,
+        borderTopRightRadius: 20,
+        borderTopLeftRadius: 20,
+        borderBottomColor: '#EAEAEA',
     },
     mapFoldText: {
         fontSize: 14, // 지도 접기/열기 텍스트 크기 조정
         color: '#000',
     },
-    naviButton:{
-        width: "30%",
-        height: "30%",
-        borderRadius: 5,
-        backgroundColor: '#f35353',
-        alignItems: "center",
-        justifyContent: "center",
+
+    dayTabText: {
+        color: '#000',
+        fontSize: 14,
+        textAlign: 'center',
     },
-    naviText:{
-        fontWeight:"bold",
-        fontSize: 14, // 길찾기 버튼 텍스트 크기 조정
+    dayTabTextActive: {
+        color: '#1e60e8',
+        fontSize: 14,
+        textAlign: 'center',
+        fontWeight: 'bold',
+    },
+
+    dayTabsContainer: {
+        height: 50, // 날짜 탭의 높이 설정
+        backgroundColor: 'white',
+    },
+    dayTabsScroll: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+    },
+
+    scheduleItemHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        position: 'relative', // naviButton을 절대 위치로 배치할 수 있게 합니다.
+    },
+    naviText: {
+        fontWeight: 'bold',
+        fontSize: 13,
         color: '#fff',
+    },
+
+
+    iconTitleContainer: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        flex: 1, // 텍스트가 공간을 차지할 수 있도록 설정
+    },
+
+    titleText: {
+        fontSize: 15,
+        fontWeight: 'bold',
+        marginVertical: 5,
+        marginLeft: 10,
+        flexShrink: 1, // 텍스트가 공간을 차지할 수 있도록 설정
+        flexWrap: 'wrap', // 줄이 넘어갈 때 줄바꿈
+        lineHeight: 30,
+    },
+
+    naviButton: {
+        position: 'absolute', // 절대 위치 설정
+        right: 0, // 오른쪽 끝에 배치
+        top: 7,
+        width: 50, // 버튼 너비 설정
+        height: 30, // 버튼 높이 설정
+        borderRadius: 5,
+        backgroundColor: '#1349b5',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });
 

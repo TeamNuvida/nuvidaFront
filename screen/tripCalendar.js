@@ -167,11 +167,11 @@ const TripCalendar = ({ route }) => {
 
 
         const targetWeather = {
-            [targetDates[0]]: weatherIcon[0].weather[0].icon,
-            [targetDates[1]]: weatherIcon[0].weather[0].icon,
-            [targetDates[2]]: weatherIcon[0].weather[0].icon,
-            [targetDates[3]]: weatherIcon[0].weather[0].icon,
-            [targetDates[4]]: weatherIcon[0].weather[0].icon,
+            [targetDates[0]]: weatherIcon[3].weather[0].icon,
+            [targetDates[1]]: weatherIcon[11].weather[0].icon,
+            [targetDates[2]]: weatherIcon[19].weather[0].icon,
+            [targetDates[3]]: weatherIcon[27].weather[0].icon,
+            [targetDates[4]]: weatherIcon[35].weather[0].icon,
         };
         console.log(targetWeather)
         setMidWeatherData(targetWeather)
@@ -697,7 +697,7 @@ const styles = StyleSheet.create({
         alignItems: 'center', // 아이콘과 텍스트의 수직 정렬을 맞춤
     },
     weatherIcon: {
-        marginLeft: 4, // 날짜와 아이콘 사이의 간격을 추가,
+        marginVertical: 4, // 날짜와 아이콘 사이의 간격을 추가,
         width:30,
         height:30,
     },

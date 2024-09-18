@@ -148,7 +148,7 @@ const MemberList = ({ route }) => {
         const date = new Date(dateString);
         const options = { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' };
         const formattedDate = new Intl.DateTimeFormat('ko-KR', options).format(date);
-        return formattedDate.replace(/\./g, '. ');
+        return formattedDate.replace(/\./, '.');
     };
 
     const checkDeletePlan = () =>{
@@ -216,13 +216,13 @@ const MemberList = ({ route }) => {
             <View style={[{width: '100%', height: '10%'}]}>
                 <View style={{width: '100%', height: '50%', flexDirection: 'row', alignItems: 'center'}}>
                     <View style={[styles.center, {width: '10%', height: '100%', marginLeft: '5%'}]}>
-                        <Ionicons name="paper-plane-outline" size={28} color="black" />
+                        <Ionicons name="paper-plane-outline" size={20} color="black" />
                     </View>
                     <View style={[{width: '80%', height: '100%', marginRight: '5%', justifyContent: 'center'}]}>
                         {planInfo ? (
-                            <Text style={{fontSize: 19, letterSpacing: 2}}>{planInfo.plan_name}</Text>
+                            <Text style={{fontSize: 18, letterSpacing: 2}}>{planInfo.plan_name}</Text>
                         ) : (
-                            <Text style={{fontSize: 19, letterSpacing: 2}}>광주 여행</Text>
+                            <Text style={{fontSize: 18, letterSpacing: 2}}>광주 여행</Text>
                         )}
                     </View>
                 </View>
@@ -230,7 +230,7 @@ const MemberList = ({ route }) => {
                     <View style={{width: '70%', height: '100%', marginLeft: '13%', marginRight: '17%', }}>
                         {planInfo ? (
                             <Text style={{fontSize: 13}}>
-                                {formatDate(planInfo.start_date)} - {formatDate(planInfo.end_date)}
+                                {formatDate(planInfo.start_date)}{"  -  "}{formatDate(planInfo.end_date)}
                             </Text>
                         ) : (
                             <Text style={{fontSize: 13}}>2024. 05. 21 (토) - 2024. 05. 23 (월)</Text>
@@ -326,7 +326,7 @@ const MemberList = ({ route }) => {
                                         style={[styles.deleteIcon, {position: 'absolute', top: 5, right: 5, zIndex: 1}]}
                                         onPress={() => handleDeleteMember(member.mem_seq)}
                                     >
-                                        <FontAwesome6 name="circle-minus" size={20} color="#FF7373" />
+                                        <FontAwesome6 name="circle-minus" size={20} color="#FF4C4C" />
                                     </TouchableOpacity>
                                 )}
                                 <View style={[styles.center, {flex: 1}]}>

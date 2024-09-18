@@ -215,85 +215,90 @@ const Betting = ({route}) => {
 
 
         return (
-            <View style={[styles.gameContainer, item.result ? (item.result == 1 ? styles.bettingPointGet : item.result==0?null:styles.bettingResult) : null]}>
-                <View style={styles.teamRow}>
-                    <Image source={require('../assets/KIA.png')} style={{ width: 38, height: 28, marginTop: 5 }} />
-                    <Text style={[styles.teamName, item.op_seq ? (item.op_seq === 1 ? styles.kiaName : null) : null]}>KIA</Text>
-
-                    <Text style={styles.percentageText}>{item.kiaBtPoint}p ({kiaRate}%)</Text>
-                    <Text style={styles.versus}>VS</Text>
-                    <Text style={styles.percentageText}>{item.opBtPoint}p ({opRate}%)</Text>
-
-                    <Image source={logo[Number(item.logo_img)]} style={{ width: 38, height: 28, marginTop: 5 }} />
-                    {currentTab=='list'?(
-                        <Text style={[styles.teamName, item.op_seq ? (item.op_seq === 1 ? null : styles.opName) : null]}>{item.op_team}</Text>
-                    ):(
-                        <Text style={[styles.teamName, item.op_seq ? (item.op_seq === 1 ? null : styles.opName) : null]}>{item.team_name}</Text>
-                        )}
-
-                </View>
-                <Text style={styles.matchDate}>{item.match_date.split(' ')[0]}</Text>
-                <Text>현재 보유한 포인트 : {userInfo.user_point}</Text>
-                {item.bt_point > 0 && (<Text>베팅 포인트 : {item.bt_point}</Text>)}
-                {item.result != 2 &&(item.result != 0 &&(<Text>획득 포인트: {pointSet(item)}</Text>))}
-
-                {item.result == '4' ?
-                    (
-                        <View >
-                            <View style={styles.noPoint}>
-                                <Text style={styles.getpointText}>포인트 회수 완료</Text>
+            <View style={{alignItems: 'center'}}>
+                <View style={[styles.gameContainer, item.result ? (item.result == 1 ? styles.bettingPointGet : item.result==0?null:styles.bettingResult) : null]}>
+                    <View style={{}}>
+                        <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+                            <Image source={require('../assets/KIA.png')} style={{ width: 48, height: 38, marginRight: '5%'}} />
+                            <Text style={[{fontSize: 20, fontWeight: 'bold'}, item.op_seq ? (item.op_seq === 1 ? styles.kiaName : null) : null]}>KIA</Text>
+                            <Text style={{fontSize: 17, fontWeight: 'bold', marginHorizontal: '15%'}}>VS</Text>
+                            {currentTab=='list'?(
+                                <Text style={[{fontSize: 20, fontWeight: 'bold'}, item.op_seq ? (item.op_seq === 1 ? null : styles.opName) : null]}>{item.op_team}</Text>
+                            ):(
+                                <Text style={[{fontSize: 20, fontWeight: 'bold'}, item.op_seq ? (item.op_seq === 1 ? null : styles.opName) : null]}>{item.team_name}</Text>
+                            )}
+                            <Image source={logo[Number(item.logo_img)]} style={{ width: 48, height: 38, marginLeft: '5%' }} />
+                        </View>
+                        <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingBottom: '3%', borderBottomWidth: 0.5, borderColor: '#c5c5c5'}}>
+                            <View style={{width: '50%', alignItems: 'center'}}>
+                                <Text style={styles.percentageText}>{item.kiaBtPoint}p ({kiaRate}%)</Text>
+                            </View>
+                            <View style={{width: '50%', alignItems: 'center'}}>
+                                <Text style={styles.percentageText}>{item.opBtPoint}p ({opRate}%)</Text>
                             </View>
                         </View>
-                    ):
-                    item.result == '2' || item.result == '3' ?
+                    </View>
+                    <Text style={styles.matchDate}>{item.match_date.split(' ')[0]}</Text>
+                    <Text>현재 보유한 포인트 : {userInfo.user_point}</Text>
+                    {item.bt_point > 0 && (<Text>베팅 포인트 : {item.bt_point}</Text>)}
+                    {item.result != 2 &&(item.result != 0 &&(<Text>획득 포인트: {pointSet(item)}</Text>))}
+
+                    {item.result == '4' ?
                         (
                             <View >
                                 <View style={styles.noPoint}>
-                                    <Text style={styles.getpointText}>예측 실패</Text>
+                                    <Text style={styles.getpointText}>포인트 회수 완료</Text>
                                 </View>
                             </View>
-                        ) :
-                        item.result == '1' ?
+                        ):
+                        item.result == '2' || item.result == '3' ?
                             (
-
-                                <TouchableOpacity onPress={() => getPoint(item.bs_seq, pointSet(item))}>
-                                    <View style={styles.getpoint}>
-                                    <Text style={styles.getpointText}>포인트 받기</Text>
-                                    </View>
-                                </TouchableOpacity>
-                            ):
-                            (
-                                <View style={styles.bettingArea}>
-                                    {item.op_seq === 0 && (
-                                        <View>
-                                            <Text style={styles.selectTeamText}>팀을 선택하세요:</Text>
-                                            <View style={styles.teamSelection}>
-                                                <TouchableOpacity onPress={() => selectTeam(item.bs_seq, 'KIA')} style={[styles.teamButton, selectedTeams[item.bs_seq] === 'KIA' ? styles.selected : null]}>
-                                                    <Text style={styles.buttonText}>KIA</Text>
-                                                </TouchableOpacity>
-                                                <TouchableOpacity onPress={() => selectTeam(item.bs_seq, item.op_team)} style={[styles.teamButton, selectedTeams[item.bs_seq] === item.op_team ? styles.selected : null]}>
-                                                    <Text style={styles.buttonText}>{item.op_team}</Text>
-                                                </TouchableOpacity>
-                                            </View>
-                                        </View>
-                                    )}
-                                    <TextInput
-                                        placeholder="포인트 입력"
-                                        value={bettingPoints[item.bs_seq] || ''}
-                                        onChangeText={(value) => handleInputChange(item.bs_seq, value)}
-                                        keyboardType="numeric"
-                                        style={styles.input}
-                                    />
-                                    <View style={styles.buttonContainer}>
-                                        <TouchableOpacity onPress={() => handleBet(item.bs_seq, item.op_seq, item.bt_point)} style={styles.betButton}>
-                                            <Text style={styles.buttonText}>{item.team_name === null ? '베팅하기' : '추가 베팅하기'}</Text>
-                                        </TouchableOpacity>
+                                <View >
+                                    <View style={styles.noPoint}>
+                                        <Text style={styles.getpointText}>예측 실패</Text>
                                     </View>
                                 </View>
-                            )
-                }
+                            ) :
+                            item.result == '1' ?
+                                (
 
-
+                                    <TouchableOpacity onPress={() => getPoint(item.bs_seq, pointSet(item))}>
+                                        <View style={styles.getpoint}>
+                                            <Text style={styles.getpointText}>포인트 받기</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                ):
+                                (
+                                    <View style={styles.bettingArea}>
+                                        {item.op_seq === 0 && (
+                                            <View>
+                                                <Text style={[styles.selectTeamText,]}>팀을 선택하세요:</Text>
+                                                <View style={styles.teamSelection}>
+                                                    <TouchableOpacity onPress={() => selectTeam(item.bs_seq, 'KIA')} style={[styles.teamButton, selectedTeams[item.bs_seq] === 'KIA' ? styles.selected : null]}>
+                                                        <Text style={styles.buttonText}>KIA</Text>
+                                                    </TouchableOpacity>
+                                                    <TouchableOpacity onPress={() => selectTeam(item.bs_seq, item.op_team)} style={[styles.teamButton, selectedTeams[item.bs_seq] === item.op_team ? styles.selected : null]}>
+                                                        <Text style={styles.buttonText}>{item.op_team}</Text>
+                                                    </TouchableOpacity>
+                                                </View>
+                                            </View>
+                                        )}
+                                        <TextInput
+                                            placeholder="포인트 입력"
+                                            value={bettingPoints[item.bs_seq] || ''}
+                                            onChangeText={(value) => handleInputChange(item.bs_seq, value)}
+                                            keyboardType="numeric"
+                                            style={styles.input}
+                                        />
+                                        <View style={styles.buttonContainer}>
+                                            <TouchableOpacity onPress={() => handleBet(item.bs_seq, item.op_seq, item.bt_point)} style={styles.betButton}>
+                                                <Text style={styles.buttonText}>{item.team_name === null ? '베팅하기' : '추가 베팅하기'}</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                )
+                    }
+                </View>
             </View>
         );
     };
@@ -314,29 +319,33 @@ const Betting = ({route}) => {
                     <Text style={styles.headerTitle}>NUVIDA</Text>
                     <View style={{ width: 24 }} />
                 </View>
-                <View style={styles.tabContainer}>
-                    <TouchableOpacity
-                        onPress={() => toggleTab('list')}
-                        style={[
-                            styles.tabButton,
-                            currentTab === 'list' ? styles.activeTabButton : styles.inactiveTabButton
-                        ]}
-                    >
-                        <Text style={currentTab === 'list' ? styles.activeTabText : styles.inactiveTabText}>
-                            베팅목록
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        onPress={() => toggleTab('myBets')}
-                        style={[
-                            styles.tabButton,
-                            currentTab === 'myBets' ? styles.activeTabButton : styles.inactiveTabButton
-                        ]}
-                    >
-                        <Text style={currentTab === 'myBets' ? styles.activeTabText : styles.inactiveTabText}>
-                            내가 한 베팅
-                        </Text>
-                    </TouchableOpacity>
+                <View style={[styles.tabContainer, {width: '100%', height: '5%'}]}>
+                    <View style={{width: '46%', height: '100%', marginLeft: '3%', marginRight: '1%'}}>
+                        <TouchableOpacity
+                            onPress={() => toggleTab('list')}
+                            style={[
+                                styles.tabButton,
+                                currentTab === 'list' ? styles.activeTabButton : styles.inactiveTabButton
+                            ]}
+                        >
+                            <Text style={currentTab === 'list' ? styles.activeTabText : styles.inactiveTabText}>
+                                베팅 목록
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={{width: '46%', height: '100%', marginLeft: '1%', marginRight: '3%'}}>
+                        <TouchableOpacity
+                            onPress={() => toggleTab('myBets')}
+                            style={[
+                                styles.tabButton,
+                                currentTab === 'myBets' ? styles.activeTabButton : styles.inactiveTabButton
+                            ]}
+                        >
+                            <Text style={currentTab === 'myBets' ? styles.activeTabText : styles.inactiveTabText}>
+                                내가 한 베팅
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
                 {filteredList?
                     (
@@ -366,19 +375,20 @@ const styles = StyleSheet.create({
     tabContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 10,
+        marginBottom: '5%',
     },
     tabButton: {
         flex: 1,
         padding: 10,
         alignItems: 'center',
-        borderRadius: 5,
     },
     activeTabButton: {
-        backgroundColor: '#f00',
+        backgroundColor: 'black',
+        borderRadius: 10,
     },
     inactiveTabButton: {
-        backgroundColor: '#ddd',
+        backgroundColor: 'white',
+        borderRadius: 10,
     },
     activeTabText: {
         color: '#fff',
@@ -389,15 +399,17 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     gameContainer: {
+        width: '94%',
+        height: 'auto',
         backgroundColor: '#fff',
         padding: 16,
-        marginBottom: 10,
+        marginBottom: '3%',
         borderRadius: 8,
         shadowColor: '#000',
         shadowOpacity: 0.1,
         shadowOffset: { width: 0, height: 2 },
         shadowRadius: 8,
-        elevation: 5,
+        elevation: 4,
     },
     bettingResult: {
         backgroundColor: '#e3e3e3',
@@ -421,7 +433,7 @@ const styles = StyleSheet.create({
         color: 'red',
     },
     percentageText: {
-        fontSize: 18,
+        fontSize: 15,
         fontWeight: 'bold',
     },
     versus: {
@@ -430,9 +442,11 @@ const styles = StyleSheet.create({
         color: '#555',
     },
     matchDate: {
-        fontSize: 14,
-        color: '#888',
-        marginTop: 10,
+        fontSize: 16,
+        color: '#707070',
+        marginTop: '2%',
+        marginBottom: '2%',
+        fontWeight: 'bold',
         alignSelf: 'center',
     },
     bettingArea: {
@@ -451,8 +465,9 @@ const styles = StyleSheet.create({
     teamButton: {
         backgroundColor: '#ccc',
         padding: 10,
-        borderRadius: 4,
-        minWidth: '40%',
+        marginHorizontal: '3%',
+        borderRadius: 30,
+        minWidth: '45%',
         alignItems: 'center',
     },
     selected: {
@@ -472,10 +487,12 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     betButton: {
-        backgroundColor: '#f00',
+        backgroundColor: '#ff0000',
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 4,
+        width: '100%',
+        alignItems: 'center'
     },
     buttonText: {
         color: '#fff',
@@ -487,10 +504,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 15,
         paddingVertical: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
-        marginTop: 30,
-        marginBottom: 10,
+        paddingTop: '10%',
+        marginBottom: '5%',
     },
     headerTitle: {
         fontSize: 16,
@@ -516,8 +531,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     getpointText:{
-        color:'white'
-
+        color:'white',
+        fontWeight: 'bold'
     },
     nullItem:{
         alignItems: 'center',

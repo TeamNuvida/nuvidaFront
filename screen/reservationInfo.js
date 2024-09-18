@@ -241,7 +241,7 @@ const ReservationInfo = ({ route }) => {
         const date = new Date(dateString);
         const options = { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' };
         const formattedDate = new Intl.DateTimeFormat('ko-KR', options).format(date);
-        return formattedDate.replace(/\./g, '. ');
+        return formattedDate.replace(/\./, '.');
     };
 
     const formatTime = (reserDt) => {
@@ -511,13 +511,13 @@ const ReservationInfo = ({ route }) => {
             <View style={{ width: '100%', height: '10%' }}>
                 <View style={{ width: '100%', height: '50%', flexDirection: 'row', alignItems: 'center' }}>
                     <View style={{ alignItems: 'center', justifyContent: 'center', width: '10%', height: '100%', marginLeft: '5%' }}>
-                        <Ionicons name="paper-plane-outline" size={28} color="black" />
+                        <Ionicons name="paper-plane-outline" size={20} color="black" />
                     </View>
                     <View style={{ width: '80%', height: '100%', marginRight: '5%', justifyContent: 'center' }}>
                         {planInfo ? (
-                            <Text style={{ fontSize: 19, letterSpacing: 2 }}>{planInfo.plan_name}</Text>
+                            <Text style={{ fontSize: 18, letterSpacing: 2 }}>{planInfo.plan_name}</Text>
                         ) : (
-                            <Text style={{ fontSize: 19, letterSpacing: 2 }}>광주 여행</Text>
+                            <Text style={{ fontSize: 18, letterSpacing: 2 }}>광주 여행</Text>
                         )}
                     </View>
                 </View>
@@ -525,7 +525,7 @@ const ReservationInfo = ({ route }) => {
                     <View style={{ width: '70%', height: '100%', marginLeft: '13%', marginRight: '17%' }}>
                         {planInfo ? (
                             <Text style={{ fontSize: 13 }}>
-                                {formatDate(planInfo.start_date)} - {formatDate(planInfo.end_date)}
+                                {formatDate(planInfo.start_date)}{"  -  "}{formatDate(planInfo.end_date)}
                             </Text>
                         ) : (
                             <Text style={{ fontSize: 13 }}>2024. 05. 21 (토) - 2024. 05. 23 (월)</Text>
@@ -826,14 +826,14 @@ const ReservationInfo = ({ route }) => {
                                 <View
                                     key={index}
                                     style={{
-                                        backgroundColor: '#aeccf3',
+                                        backgroundColor: 'white',
                                         padding: 15,
                                         borderRadius: 10,
                                         shadowColor: '#000',
                                         shadowOffset: { width: 0, height: 1 },
                                         shadowOpacity: 0.22,
                                         shadowRadius: 2.22,
-                                        elevation: 3,
+                                        elevation: 2,
                                         marginBottom: 15
                                     }}
                                 >
@@ -842,12 +842,12 @@ const ReservationInfo = ({ route }) => {
                                         justifyContent: 'space-between',
                                         alignItems: 'center'
                                     }}>
-                                        <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{trans.tr_name}</Text>
+                                        <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{trans.tr_name}</Text>
                                         <TouchableOpacity onPress={() => delTrans(trans.tr_seq)}>
-                                            <FontAwesome6 name="circle-minus" size={20} color="blue" />
+                                            <FontAwesome6 name="circle-minus" size={20} color="#FF4C4C" />
                                         </TouchableOpacity>
                                     </View>
-                                    <Text style={{ fontSize: 14, color: 'black', marginTop: 10 }}>{trans.tr_dt}</Text>
+                                    <Text style={{ fontSize: 16, color: 'black', marginTop: 10 }}>{trans.tr_dt}</Text>
                                 </View>
                             ))}
                         </View>
@@ -856,14 +856,12 @@ const ReservationInfo = ({ route }) => {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 padding: 20,
-                                borderWidth: 1,
-                                borderColor: '#838383',
-                                borderRadius: 5,
-                                backgroundColor: '#fff'
+                                borderRadius: 10,
+                                backgroundColor: '#626a7a'
                             }}
                             onPress={() => setTicketModalVisible(true)}
                         >
-                            <Text style={{ fontSize: 24, color: '#000' }}>+</Text>
+                            <Text style={{ fontSize: 24, color: 'white' }}>+</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -887,14 +885,14 @@ const ReservationInfo = ({ route }) => {
                                 <View
                                     key={item.route_seq}
                                     style={{
-                                        backgroundColor: '#aeccf3',
+                                        backgroundColor: 'white',
                                         padding: 15,
                                         borderRadius: 10,
                                         shadowColor: '#000',
                                         shadowOffset: { width: 0, height: 1 },
                                         shadowOpacity: 0.22,
                                         shadowRadius: 2.22,
-                                        elevation: 3,
+                                        elevation: 2,
                                         marginBottom: 15
                                     }}
                                 >
@@ -905,10 +903,10 @@ const ReservationInfo = ({ route }) => {
                                     }}>
                                         <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{item.title}</Text>
                                         <TouchableOpacity onPress={() => delReser(item.route_seq)}>
-                                            <FontAwesome6 name="circle-minus" size={20} color="blue" />
+                                            <FontAwesome6 name="circle-minus" size={20} color="#FF4C4C" />
                                         </TouchableOpacity>
                                     </View>
-                                    <Text style={{ fontSize: 12, color: '#333', marginTop: 10 }}>{item.addr}</Text>
+                                    <Text style={{ fontSize: 16, color: '#333', marginTop: 10 }}>{item.addr}</Text>
                                     <Text style={{  fontSize: 12, color: '#333', marginTop: 10 }}>{formatReserDt(item.reser_dt)} {formatTime(item.reser_dt)}</Text>
                                 </View>
                             ))}
@@ -918,14 +916,12 @@ const ReservationInfo = ({ route }) => {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 padding: 20,
-                                borderWidth: 1,
-                                borderColor: '#838383',
-                                borderRadius: 5,
-                                backgroundColor: '#fff'
+                                borderRadius: 10,
+                                backgroundColor: '#626a7a'
                             }}
                             onPress={() => setScheduleModalVisible(true)}
                         >
-                            <Text style={{ fontSize: 24, color: '#000' }}>+</Text>
+                            <Text style={{ fontSize: 24, color: 'white' }}>+</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -951,13 +947,13 @@ const ReservationInfo = ({ route }) => {
                                     style={{
                                         marginBottom: 10,
                                         padding: 15,
-                                        backgroundColor: '#aeccf3',
+                                        backgroundColor: '#ffffff',
                                         borderRadius: 10,
                                         shadowColor: '#000',
                                         shadowOffset: { width: 0, height: 1 },
                                         shadowOpacity: 0.22,
                                         shadowRadius: 2.22,
-                                        elevation: 3,
+                                        elevation: 2,
                                     }}
                                 >
                                     <View style={{
@@ -973,7 +969,7 @@ const ReservationInfo = ({ route }) => {
                                             {acc.acc_name}
                                         </Text>
                                         <TouchableOpacity onPress={() => delAcc(acc.acc_seq)}>
-                                            <FontAwesome6 name="circle-minus" size={20} color="blue" />
+                                            <FontAwesome6 name="circle-minus" size={20} color="#FF4C4C" />
                                         </TouchableOpacity>
                                     </View>
                                     <Text style={{ fontSize: 16, color: '#333', marginTop: 10 }}>{acc.acc_addr}</Text>
@@ -988,7 +984,7 @@ const ReservationInfo = ({ route }) => {
                                             position: 'absolute',
                                             right: 15,
                                             bottom: 15,
-                                            width: 80,
+                                            width: 60,
                                             height: 35,
                                             borderRadius: 5,
                                             backgroundColor: '#000000',
@@ -997,7 +993,7 @@ const ReservationInfo = ({ route }) => {
                                         }}
                                         onPress={() => handleNavi(acc)}
                                     >
-                                        <Text style={{ fontWeight: "bold", color: '#fff' }}>길찾기</Text>
+                                        <Text style={{ fontWeight: "bold", color: '#fff', fontSize: 13 }}>길찾기</Text>
                                     </TouchableOpacity>
                                 </View>
                             ))}
@@ -1006,14 +1002,12 @@ const ReservationInfo = ({ route }) => {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     padding: 20,
-                                    borderWidth: 1,
-                                    borderColor: '#838383',
-                                    borderRadius: 5,
-                                    backgroundColor: '#fff'
+                                    borderRadius: 10,
+                                    backgroundColor: '#626a7a'
                                 }}
                                 onPress={() => setSearchModalVisible(true)}
                             >
-                                <Text style={{ fontSize: 24, color: '#000' }}>+</Text>
+                                <Text style={{ fontSize: 24, color: 'white' }}>+</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

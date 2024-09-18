@@ -1398,7 +1398,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                     <View style={[styles.center_row, {height: '50%', paddingBottom: '5%'}]}>
                         <View style={[styles.center_row, styles.tempContainer]}>
                             <View style={[styles.center, {width: '50%', height: '100%', marginLeft: '10%'}]}>
-                                <Image source={{uri:`http://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png`}} style={{width:70, height:70}}></Image>
+                                <Image source={{uri:`http://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png`}} style={{width:100, height:100}}></Image>
                             </View>
                             <View style={[styles.center, { width: '40%', height: '100%'}]}>
                                 <Text style={{color: '#fff', fontSize: 15,}}>{weatherData.weather[0].description}</Text>
