@@ -487,6 +487,7 @@ export default function ScheduleCreation6({ route }) {
         const days = Object.keys(schedule);
         return (
             <View style={styles.dayTabs}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <TouchableOpacity
                     style={selectedDay === '전체' ? styles.dayTabActive : styles.dayTab}
                     onPress={() => setSelectedDay('전체')}>
@@ -500,6 +501,7 @@ export default function ScheduleCreation6({ route }) {
                         <Text style={selectedDay === day ? styles.dayTabTextActive : styles.dayTabText}>{day}</Text>
                     </TouchableOpacity>
                 ))}
+                </ScrollView>
             </View>
         );
     };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert, FlatList, Modal } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert, FlatList, Modal , ScrollView} from 'react-native';
 import {Entypo, Ionicons, Feather, MaterialIcons, FontAwesome} from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { WebView } from 'react-native-webview';
@@ -144,16 +144,18 @@ export default function ScheduleCreation7({ route }) {
 
     const renderDayTabs = () => {
         return (
-            <View style={styles.dayTabs}>
-                {Object.keys(schedule).map((day, index) => (
-                    <TouchableOpacity
-                        key={index}
-                        style={selectedDay === day ? styles.dayTabActive : styles.dayTab}
-                        onPress={() => setSelectedDay(day)}
-                    >
-                        <Text style={selectedDay === day ? styles.dayTabTextActive : styles.dayTabText}>{day}</Text>
-                    </TouchableOpacity>
-                ))}
+            <View style={styles.dayTabsContainer}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {Object.keys(schedule).map((day, index) => (
+                        <TouchableOpacity
+                            key={index}
+                            style={selectedDay === day ? styles.dayTabActive : styles.dayTab}
+                            onPress={() => setSelectedDay(day)}
+                        >
+                            <Text style={selectedDay === day ? styles.dayTabTextActive : styles.dayTabText}>{day}</Text>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
             </View>
         );
     };
