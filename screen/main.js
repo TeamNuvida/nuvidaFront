@@ -1391,16 +1391,18 @@ export default function Main({ weather, particulateMatter, store, location }) {
                 IconComponent = Fontisto;
             }
 
+            const rain = weatherData.rain ? weatherData.rain["1h"] : "강수없음";
+
             return (
                 <View style={[styles.center, {height: '100%'}]}>
                     <View style={[styles.center_row, {height: '50%', paddingBottom: '5%'}]}>
                         <View style={[styles.center_row, styles.tempContainer]}>
                             <View style={[styles.center, {width: '50%', height: '100%', marginLeft: '10%'}]}>
-                                <IconComponent name={iconName} size={70} color= {'#fff'}/>
+                                <Image source={{uri:`http://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png`}} style={{width:70, height:70}}></Image>
                             </View>
                             <View style={[styles.center, { width: '40%', height: '100%'}]}>
-                                <Text style={{color: '#fff', fontSize: 15,}}>{weatherName}</Text>
-                                <Text style={{color: '#fff', fontSize: 17, fontWeight: 'bold', marginTop: 5}}>{weatherData["T1H"]}℃</Text>
+                                <Text style={{color: '#fff', fontSize: 15,}}>{weatherData.weather[0].description}</Text>
+                                <Text style={{color: '#fff', fontSize: 17, fontWeight: 'bold', marginTop: 5}}>{weatherData.main.temp}℃</Text>
                             </View>
                         </View>
                         <View style={[styles.center, styles.dustContainer]}>
@@ -1413,19 +1415,20 @@ export default function Main({ weather, particulateMatter, store, location }) {
                             <View style={[styles.center, styles.weatherIcon]}>
                                 <Entypo name="water" size={30} color="black" style={{zIndex: 6,}}/>
                             </View>
-                            <Text style={styles.weatherText}>{weatherData["RN1"]}</Text>
+                            <Text style={styles.weatherText}>{rain}</Text>
                         </View>
                         <View style={[styles.center, {width: '30%',}]}>
                             <View style={[styles.center, styles.weatherIcon]}>
                                 <MaterialCommunityIcons name="water-percent" size={40} color="black" style={{zIndex: 6,}}/>
                             </View>
-                            <Text style={styles.weatherText}>{weatherData["REH"]}%</Text>
+                            <Text style={styles.weatherText}>{weatherData.main.humidity}%</Text>
                         </View>
                         <View style={[styles.center, {width: '30%', marginRight:'5%'}]}>
                             <View style={[styles.center, styles.weatherIcon]}>
                                 <MaterialCommunityIcons name="navigation-variant" size={30} color="black" style={{zIndex: 6, }}/>
                             </View>
-                            <Text style={styles.weatherText}>{weatherData["WSD"]}m/s</Text>
+                            <Text style={styles.weatherText}>{weatherData.wind.speed}m/s</Text>
+
                         </View>
 
                     </View>

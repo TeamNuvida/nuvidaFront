@@ -67,19 +67,13 @@ export default function App() {
             console.log(base_date, base_time)
 
             try {
-                const response = await axios.get(`http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst?serviceKey=${API_KEY}&numOfRows=60&pageNo=1&base_date=${base_date}&base_time=${base_time}&nx=59&ny=74&dataType=JSON`);
+               const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=35.1682414234&lon=126.8890596255&appid=d2a5f95e3472b4ebac1cd08e6268c4f6&lang=kr&units=metric`);
 
-                const items = response.data.response.body.items.item;
+                console.log("날씨", response.data)
+                const items = response.data;
 
-                const fcstTime = formatFcstTime(base_time);
+                setWeatherData(items);
 
-                const filteredItems = items.filter(item => item.fcstTime === fcstTime)
-                    .reduce((acc, item) => {
-                        acc[item.category] = item.fcstValue;
-                        return acc;
-                    }, {});
-
-                setWeatherData(filteredItems);
             }catch (e) {
                 console.error(e)
             }finally {

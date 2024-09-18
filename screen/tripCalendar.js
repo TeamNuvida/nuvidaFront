@@ -8,7 +8,7 @@ import {
     Dimensions,
     Alert,
     Modal,
-    SafeAreaView, ActivityIndicator
+    SafeAreaView, ActivityIndicator, Image
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { AntDesign, MaterialCommunityIcons, Entypo, FontAwesome, Ionicons, Feather, Fontisto } from '@expo/vector-icons';
@@ -126,32 +126,17 @@ const TripCalendar = ({ route }) => {
     useFocusEffect(
         useCallback(() => {
             const fetchWeatherData = async () => {
-                const date = new Date();
-                // date.setHours(date.getHours() + 9)
-                // console.log(date)
 
-                const base_date = formatWeatherDate(date);
-                const base_time = (formatWeatherTime(date));
+                try {
+                    const response = await axios.get(`https://api.openweathermap.org/data/2.5/forecast?lat=35.1682414234&lon=126.8890596255&appid=d2a5f95e3472b4ebac1cd08e6268c4f6&lang=kr&units=metric`);
+                    const midData = response.data;
 
-                const base_date_mid = formatWeatherMidDate(date);
 
-                try{
-                    const response = await axios.get(`http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey=${API_KEY}&numOfRows=809&pageNo=1&base_date=${base_date}&base_time=${base_time}&nx=59&ny=74&dataType=JSON`);
-                    const data = response.data.response.body.items.item;
-                    processWeatherData(data);
-                }catch (e) {
-                    console.error(e)
+                    processMidWeatherData(midData);
+                } catch (error) {
+                    console.error('Error fetching weather data:', error);
                 }finally {
-                    try {
-                        const responseMid = await axios.get(`http://apis.data.go.kr/1360000/MidFcstInfoService/getMidLandFcst?serviceKey=${API_KEY}&numOfRows=10&pageNo=1&regId=11F20000&tmFc=${base_date_mid}0600&dataType=JSON`);
-                        const midData = responseMid.data.response.body.items.item[0];
-
-                        processMidWeatherData(midData);
-                    } catch (error) {
-                        console.error('Error fetching weather data:', error);
-                    }finally {
-                        setLoading(false); // 데이터 로드 완료 후 로딩 상태 false로 변경
-                    }
+                    setLoading(false); // 데이터 로드 완료 후 로딩 상태 false로 변경
                 }
 
             };
@@ -165,276 +150,36 @@ const TripCalendar = ({ route }) => {
 
 
 
-    // 날짜 표시 변경 -> 날씨 api
-    const formatWeatherDate = (date) => {
-        const hours = ('0' + date.getHours()).slice(-2);
-
-        if(hours < 2){
-            date.setDate(date.getDate() - 1);
-
-            const year = date.getFullYear();
-            const month = ('0' + (date.getMonth() + 1)).slice(-2);
-            const day = ('0' + date.getDate()).slice(-2);
-
-            return (year + month + day).toString();
-        }
-
-
-        const year = date.getFullYear();
-        const month = ('0' + (date.getMonth() + 1)).slice(-2);
-        const day = ('0' + date.getDate()).slice(-2);
-
-        return (year + month + day).toString();
-    };
-
-    // 날짜 표시 변경 -> 날씨 api
-    const formatWeatherMidDate = (date) => {
-        const hours = ('0' + date.getHours()).slice(-2);
-        console.log("hour",date)
-
-        if(hours < 6){
-            date.setDate(date.getDate() - 1);
-
-            const year = date.getFullYear();
-            const month = ('0' + (date.getMonth() + 1)).slice(-2);
-            const day = ('0' + date.getDate()).slice(-2);
-
-            return (year + month + day).toString();
-        }
-
-
-        const year = date.getFullYear();
-        const month = ('0' + (date.getMonth() + 1)).slice(-2);
-        const day = ('0' + date.getDate()).slice(-2);
-
-        return (year + month + day).toString();
-    };
-
-    // 시간 표시 변경 -> 날씨 api
-    const formatWeatherTime = (date) => {
-        const hours = ('0' + date.getHours()).slice(-2);
-        const minutes = ('0' + date.getMinutes()).slice(-2);
-
-        if(hours < 2){
-            return '2300';
-        } else if(hours < 5){
-            return '0200';
-        }else if(hours < 8){
-            return '0500';
-        }else if(hours < 11){
-            return '0800';
-        }else if (hours < 14){
-            return '1100';
-        }else if (hours < 17){
-            return '1400';
-        }else if ( hours < 20){
-            return '1700';
-        } else if (hours <23){
-            return '2000';
-        }else{
-            return '2300';
-        }
-
-        // if (minutes >= '45') {
-        //     return (hours + '45').toString();
-        // } else {
-        //     const getHoursTime = date.getHours() - 1;
-        //     const setHoursTime = ('0' + getHoursTime).slice(-2);
-        //
-        //     return (setHoursTime + '00').toString();
-        // }
-    };
-
-
-
-    const getCurrentTimeSlot = () => {
-        const now = new Date();
-        now.setHours(now.getHours() + 1); // 현재 시간에서 1시간 추가
-        let hours = now.getHours().toString().padStart(2, '0');
-        let minutes = '00'; // 시간대의 시작 시간을 "00"으로 설정
-        return `${hours}${minutes}`;
-    };
-
-    const filterWeatherData = (data, currentDate) => {
-        const currentTimeSlot = getCurrentTimeSlot(); // 현재 시간대 가져오기
-        const targetTimes = [currentTimeSlot]; // 동적으로 생성된 시간대
-        const targetDates = [
-            currentDate.format('YYYYMMDD'), // 오늘
-            currentDate.clone().add(1, 'day').format('YYYYMMDD'), // 내일
-            currentDate.clone().add(2, 'day').format('YYYYMMDD') // 모레
-        ];
-
-        // 데이터 필터링
-        const filteredData = data.filter(item =>
-            targetDates.includes(item.fcstDate) && targetTimes.includes(item.fcstTime)
-        );
-
-        // 날짜별로 데이터를 그룹화하여 카테고리별 값으로 정리
-        const groupedData = targetDates.map(date => {
-            const itemsForDate = filteredData.filter(item => item.fcstDate === date);
-
-            // 시간대별로 데이터를 묶음
-            return targetTimes.map(fcstTime => {
-                const filteredItems = itemsForDate.filter(item => item.fcstTime === fcstTime)
-                    .reduce((acc, item) => {
-                        acc[item.category] = item.fcstValue;
-                        return acc;
-                    }, {});
-
-                return { date, fcstTime, ...filteredItems };
-            });
-        }).flat();
-
-        return groupedData.filter(group => group !== null);
-    };
 
     // 날씨 아이콘 중기
     const processMidWeatherData = (data) =>{
         const currentDate = moment();
 
         const targetDates = [
+            currentDate.format('YYYY-MM-DD'), // 오늘
+            currentDate.clone().add(1, 'day').format('YYYY-MM-DD'), // 내일
+            currentDate.clone().add(2, 'day').format('YYYY-MM-DD'), // 모레
             currentDate.clone().add(3, 'day').format('YYYY-MM-DD'),
             currentDate.clone().add(4, 'day').format('YYYY-MM-DD'),
-            currentDate.clone().add(5, 'day').format('YYYY-MM-DD'),
-            currentDate.clone().add(6, 'day').format('YYYY-MM-DD'),
-            currentDate.clone().add(7, 'day').format('YYYY-MM-DD'),
-            currentDate.clone().add(8, 'day').format('YYYY-MM-DD'),
-            currentDate.clone().add(9, 'day').format('YYYY-MM-DD'),
-            currentDate.clone().add(10, 'day').format('YYYY-MM-DD'),
         ];
 
+        const weatherIcon = data.list;
+
+
         const targetWeather = {
-            [targetDates[0]]: getIcon(data.wf3Am),
-            [targetDates[1]]: getIcon(data.wf4Am),
-            [targetDates[2]]: getIcon(data.wf5Am),
-            [targetDates[3]]: getIcon(data.wf6Am),
-            [targetDates[4]]: getIcon(data.wf7Am),
-            [targetDates[5]]: getIcon(data.wf8),
-            [targetDates[6]]: getIcon(data.wf9),
-            [targetDates[7]]: getIcon(data.wf10),
+            [targetDates[0]]: weatherIcon[0].weather[0].icon,
+            [targetDates[1]]: weatherIcon[0].weather[0].icon,
+            [targetDates[2]]: weatherIcon[0].weather[0].icon,
+            [targetDates[3]]: weatherIcon[0].weather[0].icon,
+            [targetDates[4]]: weatherIcon[0].weather[0].icon,
         };
         console.log(targetWeather)
         setMidWeatherData(targetWeather)
     }
 
-    const getIcon = (data) =>{
-        let weatherName = '';
-        let iconName = '';
-        let IconComponent = null;
-
-        switch (data){
-            case '맑음':
-                weatherName = '맑음';
-                iconName = 'sun';
-                IconComponent = Feather;
-                break;
-            case '구름많음':
-                weatherName = '구름많음';
-                iconName = 'day-cloudy';
-                IconComponent = Fontisto;
-                break;
-            case '흐림':
-                weatherName = '흐림';
-                iconName = 'cloudy';
-                IconComponent = Fontisto;
-                break;
-            case '비/눈':
-            case '구름많고 비/눈':
-            case '흐리고 비/눈':
-                weatherName = '비 / 눈';
-                iconName = 'weather-snowy-rainy';
-                IconComponent = MaterialCommunityIcons;
-                break;
-            case '비':
-            case  '구름많고 비':
-            case '구름많고 소나기':
-            case '흐리고 비':
-            case '흐리고 소나기':
-                weatherName = '비';
-                iconName = 'weather-pouring';
-                IconComponent = MaterialCommunityIcons;
-                break;
-            case '눈':
-            case '구름많고 눈':
-            case '흐리고 눈':
-                weatherName = '눈';
-                iconName = 'weather-snowy';
-                IconComponent = MaterialCommunityIcons;
-                break;
-            default :
-                weatherName = '흐림';
-                iconName = 'cloudy';
-                IconComponent = Fontisto;
-                break;
-        }
-
-        return { weatherName:weatherName, iconName:iconName, IconComponent: IconComponent}
-    }
-
-    // 날씨 아이콘 단기
-    const processWeatherData = (data) => {
-        const weatherMap = {};
-        const currentDate = moment();
-        const filteredData = filterWeatherData(data, currentDate);
-
-        filteredData.forEach(dayWeather => {
-            const date = moment(dayWeather.date).format('YYYY-MM-DD');
-            const sky = dayWeather.SKY;
-            const pty = dayWeather.PTY;
-
-            let weatherName = '';
-            let iconName = '';
-            let IconComponent = null;
 
 
-            if(pty === '0'){
-                if(sky === '1'){
-                    // 맑음
-                    weatherName = '맑음';
-                    iconName = 'sun';
-                    IconComponent = Feather;
-                }else if (sky === '3'){
-                    //     구름 많음
-                    weatherName = '구름많음';
-                    iconName = 'day-cloudy';
-                    IconComponent = Fontisto;
-                }else {
-                    //     흐림
-                    weatherName = '흐림';
-                    iconName = 'cloudy';
-                    IconComponent = Fontisto;
-                }
-            } else if (pty === '1'){
-                //     비
-                weatherName = '비';
-                iconName = 'weather-pouring';
-                IconComponent = MaterialCommunityIcons;
-            }else if (pty === '2'){
-                //     비/눈
-                weatherName = '비 / 눈';
-                iconName = 'weather-snowy-rainy';
-                IconComponent = MaterialCommunityIcons;
-            }else if (pty === '3'){
-                //     눈
-                weatherName = '눈';
-                iconName = 'weather-snowy';
-                IconComponent = MaterialCommunityIcons;
-            }else if (pty === '4'){
-                //     소나기
-                weatherName = '소나기';
-                iconName = 'weather-pouring';
-                IconComponent = MaterialCommunityIcons;
-            } else{
-                weatherName = '흐림';
-                iconName = 'cloudy';
-                IconComponent = Fontisto;
-            }
 
-
-            weatherMap[date] = { weatherName, iconName, IconComponent };
-        });
-        setWeatherData(weatherMap);
-    };
 
 
     useEffect(() => {
@@ -559,7 +304,6 @@ const TripCalendar = ({ route }) => {
                                 const isMarked = markedDates[dateString]?.marked;
                                 const isToday = dateString === today;
                                 const plans = markedDates[dateString]?.plans || [];
-                                const weatherInfo = weatherData[dateString];
                                 const midWeatherInfo = midWeatherData[dateString];
 
                                 let isStart = false;
@@ -596,21 +340,8 @@ const TripCalendar = ({ route }) => {
                                                                 {day}
                                                             </Text>
                                                         )}
-                                                        {weatherInfo && (
-                                                            <weatherInfo.IconComponent
-                                                                name={weatherInfo.iconName}
-                                                                size={16}
-                                                                color="black"
-                                                                style={styles.weatherIcon}
-                                                            />
-                                                        )}
                                                         {midWeatherInfo && (
-                                                            <midWeatherInfo.IconComponent
-                                                                name={midWeatherInfo.iconName}
-                                                                size={16}
-                                                                color="black"
-                                                                style={styles.weatherIcon}
-                                                            />
+                                                            <Image style={styles.weatherIcon} source={{uri:`http://openweathermap.org/img/wn/${midWeatherInfo}@2x.png`}}/>
                                                         )}
                                                     </View>
                                                 </View>
@@ -966,7 +697,9 @@ const styles = StyleSheet.create({
         alignItems: 'center', // 아이콘과 텍스트의 수직 정렬을 맞춤
     },
     weatherIcon: {
-        marginLeft: 4, // 날짜와 아이콘 사이의 간격을 추가
+        marginLeft: 4, // 날짜와 아이콘 사이의 간격을 추가,
+        width:30,
+        height:30,
     },
 
 });
