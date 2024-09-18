@@ -215,17 +215,22 @@ const Betting = ({route}) => {
 
 
         return (
-            <View style={[styles.gameContainer, item.op_seq ? (item.op_seq === 1 ? styles.kiaBg : styles.opTeamBg) : null]}>
+            <View style={[styles.gameContainer, item.result ? (item.result == 1 ? styles.bettingPointGet : item.result==0?null:styles.bettingResult) : null]}>
                 <View style={styles.teamRow}>
                     <Image source={require('../assets/KIA.png')} style={{ width: 38, height: 28, marginTop: 5 }} />
-                    <Text style={styles.teamName}>KIA</Text>
+                    <Text style={[styles.teamName, item.op_seq ? (item.op_seq === 1 ? styles.kiaName : null) : null]}>KIA</Text>
 
                     <Text style={styles.percentageText}>{item.kiaBtPoint}p ({kiaRate}%)</Text>
                     <Text style={styles.versus}>VS</Text>
                     <Text style={styles.percentageText}>{item.opBtPoint}p ({opRate}%)</Text>
 
                     <Image source={logo[Number(item.logo_img)]} style={{ width: 38, height: 28, marginTop: 5 }} />
-                    <Text style={styles.teamName}>{item.op_team}</Text>
+                    {currentTab=='list'?(
+                        <Text style={[styles.teamName, item.op_seq ? (item.op_seq === 1 ? null : styles.opName) : null]}>{item.op_team}</Text>
+                    ):(
+                        <Text style={[styles.teamName, item.op_seq ? (item.op_seq === 1 ? null : styles.opName) : null]}>{item.team_name}</Text>
+                        )}
+
                 </View>
                 <Text style={styles.matchDate}>{item.match_date.split(' ')[0]}</Text>
                 <Text>현재 보유한 포인트 : {userInfo.user_point}</Text>
@@ -394,10 +399,10 @@ const styles = StyleSheet.create({
         shadowRadius: 8,
         elevation: 5,
     },
-    kiaBg: {
-        backgroundColor: '#ffcccc',
+    bettingResult: {
+        backgroundColor: '#e3e3e3',
     },
-    opTeamBg: {
+    bettingPointGet: {
         backgroundColor: '#cce5ff',
     },
     teamRow: {
@@ -408,6 +413,12 @@ const styles = StyleSheet.create({
     teamName: {
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    kiaName: {
+        color: 'red',
+    },
+    opName:{
+        color: 'red',
     },
     percentageText: {
         fontSize: 18,
