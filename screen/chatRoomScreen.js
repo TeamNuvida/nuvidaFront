@@ -189,7 +189,7 @@ const ChatRoomScreen = ({ route }) => {
                     </Text>
                 );
             }
-            return <Text key={index}>{part}</Text>;
+            return <Text key={index} style={styles.messageText}>{part}</Text>;
         });
     };
 
@@ -348,10 +348,6 @@ const styles = StyleSheet.create({
         alignItems: 'center', // 가로 정렬
         justifyContent: 'center', // 세로 정렬
 
-        // borderRadius: 50,
-        // borderColor:"black",
-        // borderWidth:2,
-        // padding:15
     },
     sendButton: {
         backgroundColor: '#FF5A5A',
@@ -371,9 +367,9 @@ const styles = StyleSheet.create({
         maxWidth: '80%',               // 컨테이너의 너비를 80%로 설정
         alignSelf: 'flex-start',        // 텍스트가 좌우로 꽉 차지 않도록 설정
         justifyContent: 'center',       // 컨테이너 안에서 수직 중앙 정렬
-        flexDirection: 'row',           // 텍스트가 수평으로 정렬되도록 설정
         marginTop: 10,
         flexWrap: 'wrap',               // 텍스트가 줄을 넘을 경우 자동으로 줄바꿈
+        flexDirection: 'row'
     },
     myNick: {
         alignSelf: 'flex-end',
@@ -398,14 +394,12 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 0,
         borderColor: "#E8E8E8",
         borderWidth: 1,
-        flexWrap: 'wrap',              // 텍스트가 줄을 넘을 경우 자동으로 줄바꿈
     },
     theirImage: {
         alignSelf: 'flex-start',
     },
     messageText: {
-        color: 'white',
-        alignSelf: 'center',
+        flexShrink: 1,
     },
     link: {
         color: '#0645AD',
