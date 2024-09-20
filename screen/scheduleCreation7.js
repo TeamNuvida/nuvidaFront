@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert, FlatList, Modal , ScrollView} from 'react-native';
-import {Entypo, Ionicons, Feather, MaterialIcons, FontAwesome} from '@expo/vector-icons';
+import {Entypo, Ionicons, Feather, MaterialIcons, FontAwesome, FontAwesome5} from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { WebView } from 'react-native-webview';
 import DraggableFlatList from 'react-native-draggable-flatlist';
@@ -60,6 +60,7 @@ export default function ScheduleCreation7({ route }) {
     };
 
     const handleAddPlace = (place) => {
+
         if (selectedDay) {
             setSchedule(prev => ({
                 ...prev,
@@ -67,6 +68,9 @@ export default function ScheduleCreation7({ route }) {
             }));
             setAvailablePlaces(prev => prev.filter(p => p.id !== place.id));
             setModalVisible(false);
+        }else{
+            Alert.alert('','여행 날짜를 선택해주세요.');
+            return setModalVisible(false);
         }
     };
 
@@ -116,14 +120,15 @@ export default function ScheduleCreation7({ route }) {
                 <View style={styles.iconTitleContainer}>
                     <MaterialIcons name={getIcon(item.contenttypeid)} size={24} color="black" />
                     <Text style={styles.titleText}>{item.name}</Text>
+                    <TouchableOpacity onPress={() => handleRemovePlace(item)} style={styles.deleteIcon}>
+                        <Entypo name="cross" size={24} color="red" />
+                    </TouchableOpacity>
                 </View>
                 {item.contenttypeid && <Text style={styles.categoryText}>{getCategory(item.contenttypeid)}</Text>}
                 <Text style={styles.addressText}>{item.addr}</Text>
                 {item.reservation && <Text style={styles.addressText}>예약 : {item.reservation}</Text>}
 
-                <TouchableOpacity onPress={() => handleRemovePlace(item)} style={styles.deleteIcon}>
-                    <Entypo name="cross" size={24} color="red" />
-                </TouchableOpacity>
+
             </View>
         </TouchableOpacity>
     );
@@ -206,194 +211,211 @@ export default function ScheduleCreation7({ route }) {
 
         return `
     <!DOCTYPE html>
-    <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Kakao Map</title>
-        <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=0d1aeb961589309735eb62b6b8eec500"></script>
-        <style>
-          #map {
-            width: 100%;
-            height: 100vh;
-          }
-          .markerLabel {
-            color: white;
-            border-radius: 50%;
-            padding: 3px;
-            text-align: center;
-            width: 20px;
-            height: 20px;
-            font-weight: bold;
-            font-size: 12px;
-            line-height: 20px;
-            position: relative;
-            top: -30px;
-            left: -10px;
-            background-color: black;
-          }
-        </style>
-      </head>
-      <body>
-        <div id="map"></div>
-        <script>
-          document.addEventListener("DOMContentLoaded", function() {
-            var container = document.getElementById('map');
-            var options = {
-              center: new kakao.maps.LatLng(35.1595454, 126.8526012),
-              level: 7
-            };
-            var map = new kakao.maps.Map(container, options);
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Kakao Map</title>
+    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=0d1aeb961589309735eb62b6b8eec500"></script>
+    <style>
+      #map {
+        width: 100%;
+        height: 100vh;
+      }
+      .markerLabel {
+        color: white;
+        border-radius: 50%;
+        padding: 3px;
+        text-align: center;
+        width: 20px;
+        height: 20px;
+        font-weight: bold;
+        font-size: 12px;
+        line-height: 20px;
+        position: relative;
+        top: -30px;
+        left: -10px;
+        background-color: black;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        var container = document.getElementById('map');
+        var initialCenter = new kakao.maps.LatLng(35.1595454, 126.8526012); // 초기 중심 좌표
+        var initialLevel = 7; // 초기 확대 정도
+        var options = {
+          center: initialCenter,
+          level: initialLevel
+        };
+        var map = new kakao.maps.Map(container, options);
 
-            var places = ${JSON.stringify(allMarkers)};
-            var polylinePath = [];
-            var order = 1; // 순서를 관리할 변수
+        var places = ${JSON.stringify(allMarkers)};
+        var polylinePath = [];
+        var order = 1; // 순서를 관리할 변수
 
-            function displayDistance(polyline, position) {
-              var length = polyline.getLength();
-              var message = '거리: ' + (length / 1000).toFixed(2) + ' km';
-              
-              var overlayContent = '<div style="padding:5px;background:white;border:1px solid black;">' + message + '</div>';
-              
-              var overlay = new kakao.maps.CustomOverlay({
-                content: overlayContent,
-                position: position,
-                yAnchor: 1
-              });
-              
-              overlay.setMap(map);
-              
-              setTimeout(function() {
-                overlay.setMap(null);
-              }, 3000);
-            }
+        var bounds = new kakao.maps.LatLngBounds(); // 지도의 경계 설정 객체
+        var markersAdded = false; // 마커가 추가되었는지 여부를 체크하는 변수
 
-            places.forEach(function(place) {
-              var markerPosition = new kakao.maps.LatLng(parseFloat(place.lat), parseFloat(place.lng));
-              
-              var marker = new kakao.maps.Marker({
-                position: markerPosition,
-                map: map,
-                title: place.name,
-                zIndex: 3
-              });
-              
-              // 마커 클릭 시 장소명과 주소를 오버레이로 표시
-                kakao.maps.event.addListener(marker, 'click', function() {
-                  var overlayContent = '<div style="padding:10px;background:white;border:1px solid black;">' +
-                                       '<strong>' + place.name + '</strong><br>' + 
-                                       '<span>' + place.addr + '</span>' +
-                                       '</div>';
-    
-                  var overlay = new kakao.maps.CustomOverlay({
-                    content: overlayContent,
-                    position: markerPosition,
-                    yAnchor: 1
-                  });
-    
-                  overlay.setMap(map);
-    
-                  // 3초 후 오버레이 제거
-                  setTimeout(function() {
-                    overlay.setMap(null);
-                  }, 3000);
-                });
-
-              if (place.color != "#0000FF") {
-                // 순서 라벨을 오버레이로 추가
-                var labelContent = '<div class="markerLabel" style="background-color:#FF0000;">' + order + '</div>';
-                var labelOverlay = new kakao.maps.CustomOverlay({
-                  content: labelContent,
-                  position: markerPosition,
-                  yAnchor: 1.5,
-                  xAnchor: 0.5,
-                  zIndex: 3
-                });
-                labelOverlay.setMap(map);
-
-                polylinePath.push(markerPosition);
-                order++; // 순서를 증가시켜 다음 장소에 적용
-              }
-
-              marker.setMap(map);
-            });
-
-            if (polylinePath.length > 1) {
-              var polyline = new kakao.maps.Polyline({
-                path: polylinePath,
-                strokeWeight: 5,
-                strokeColor: '#FF0000',
-                strokeOpacity: 0.7,
-                strokeStyle: 'solid'
-              });
-
-              polyline.setMap(map);
-
-              kakao.maps.event.addListener(polyline, 'click', function(mouseEvent) {
-                var clickPosition = mouseEvent.latLng;
-                displayDistance(polyline, clickPosition);
-              });
-            }
-            
-            
-            // 마커를 지도에 추가하는 함수
-            function addMarker(position, imageSrc, size, title, address, label, color) {
-              var imageSize = new kakao.maps.Size(size.width, size.height); // 마커 크기 설정
-              var markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize); // 마커 이미지 생성
-              var marker = new kakao.maps.Marker({
-                position: position, // 마커 위치
-                image: markerImage, // 마커 이미지 설정
-                map: map, // 마커를 표시할 지도 객체
-                zIndex: 3
-              });
-              marker.setMap(map); // 지도에 마커 추가
-              
-              // 마커에 순서 번호 라벨 추가
-              var labelContent = '<div class="markerLabel" style="background-color:' + color + ';">' + label + '</div>';
-              var labelOverlay = new kakao.maps.CustomOverlay({
-                content: labelContent,
-                position: position,
-                yAnchor: 1.5, // 라벨이 마커 위에 위치하도록 yAnchor 조정
-                xAnchor: 0.5,
-                zIndex: 3
-              });
-              labelOverlay.setMap(map);
-              
-              // 마커 클릭 시 커스텀 오버레이 표시
-              kakao.maps.event.addListener(marker, 'click', function() {
-                var overlayContent = '<div style="padding:10px;background:white;border:1px solid black;">' +
-                                     '<strong>' + title + '</strong><br>' + 
-                                     '<span>' + address + '</span>' +
-                                     '</div>';
-
-                var overlay = new kakao.maps.CustomOverlay({
-                  content: overlayContent,
-                  position: position,
-                  yAnchor: 1
-                });
-
-                overlay.setMap(map);
-
-                // 3초 후 오버레이 제거
-                setTimeout(function() {
-                  overlay.setMap(null);
-                }, 3000);
-              });
-
-              return marker;
-            }
-            
-
-            // 숙소 마커 추가
-            var accommodation = ${JSON.stringify(accommodation)};
-            accommodation.forEach(function(hotel) {
-              var markerPosition = new kakao.maps.LatLng(hotel.lat, hotel.lng ); // 숙소 위치 설정
-              addMarker(markerPosition, 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png', {width: 44, height: 55}, hotel.acc_name, hotel.addr, 'H', '#FFD700'); // 숙소 마커 추가 (금색)
-            });
-
+        // 거리 표시 함수
+        function displayDistance(polyline, position) {
+          var length = polyline.getLength();
+          var message = '거리: ' + (length / 1000).toFixed(2) + ' km';
+          var overlayContent = '<div style="padding:5px;background:white;border:1px solid black;">' + message + '</div>';
+          var overlay = new kakao.maps.CustomOverlay({
+            content: overlayContent,
+            position: position,
+            yAnchor: 1
           });
-        </script>
-      </body>
-    </html>
+          overlay.setMap(map);
+          setTimeout(function() {
+            overlay.setMap(null);
+          }, 3000);
+        }
+
+        // 마커 추가 함수
+        function addMarker(position, imageSrc, size, title, address, label, color) {
+          var imageSize = new kakao.maps.Size(size.width, size.height); // 마커 크기 설정
+          var markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize); // 마커 이미지 생성
+          var marker = new kakao.maps.Marker({
+            position: position, // 마커 위치
+            image: markerImage, // 마커 이미지 설정
+            map: map, // 마커를 표시할 지도 객체
+            zIndex: 3
+          });
+          marker.setMap(map); // 지도에 마커 추가
+
+          bounds.extend(position); // 마커의 위치를 경계에 추가
+          markersAdded = true; // 마커가 추가됨을 표시
+
+          // 마커에 순서 번호 라벨 추가
+          var labelContent = '<div class="markerLabel" style="background-color:' + color + ';">' + label + '</div>';
+          var labelOverlay = new kakao.maps.CustomOverlay({
+            content: labelContent,
+            position: position,
+            yAnchor: 1.5, // 라벨이 마커 위에 위치하도록 yAnchor 조정
+            xAnchor: 0.5,
+            zIndex: 3
+          });
+          labelOverlay.setMap(map);
+
+          // 마커 클릭 시 커스텀 오버레이 표시
+          kakao.maps.event.addListener(marker, 'click', function() {
+            var overlayContent = '<div style="padding:10px;background:white;border:1px solid black;">' +
+                                 '<strong>' + title + '</strong><br>' + 
+                                 '<span>' + address + '</span>' +
+                                 '</div>';
+
+            var overlay = new kakao.maps.CustomOverlay({
+              content: overlayContent,
+              position: position,
+              yAnchor: 1
+            });
+
+            overlay.setMap(map);
+
+            // 3초 후 오버레이 제거
+            setTimeout(function() {
+              overlay.setMap(null);
+            }, 3000);
+          });
+
+          return marker;
+        }
+
+        // 일반 장소 마커와 폴리라인 추가
+        places.forEach(function(place) {
+          var markerPosition = new kakao.maps.LatLng(parseFloat(place.lat), parseFloat(place.lng));
+          
+          var marker = new kakao.maps.Marker({
+            position: markerPosition,
+            map: map,
+            title: place.name,
+            zIndex: 3
+          });
+          
+          // 마커 클릭 시 장소명과 주소를 오버레이로 표시
+          kakao.maps.event.addListener(marker, 'click', function() {
+            var overlayContent = '<div style="padding:10px;background:white;border:1px solid black;">' +
+                                 '<strong>' + place.name + '</strong><br>' + 
+                                 '<span>' + place.addr + '</span>' +
+                                 '</div>';
+
+            var overlay = new kakao.maps.CustomOverlay({
+              content: overlayContent,
+              position: markerPosition,
+              yAnchor: 1
+            });
+
+            overlay.setMap(map);
+
+            // 3초 후 오버레이 제거
+            setTimeout(function() {
+              overlay.setMap(null);
+            }, 3000);
+          });
+
+          if (place.color != "#0000FF") {
+            // 순서 라벨을 오버레이로 추가
+            var labelContent = '<div class="markerLabel" style="background-color:#FF0000;">' + order + '</div>';
+            var labelOverlay = new kakao.maps.CustomOverlay({
+              content: labelContent,
+              position: markerPosition,
+              yAnchor: 1.5,
+              xAnchor: 0.5,
+              zIndex: 3
+            });
+            labelOverlay.setMap(map);
+
+            polylinePath.push(markerPosition);
+            order++; // 순서를 증가시켜 다음 장소에 적용
+          }
+
+          marker.setMap(map);
+          bounds.extend(markerPosition); // 마커 위치를 bounds에 추가
+          markersAdded = true; // 마커가 추가되었음을 표시
+        });
+
+        // 폴리라인 경로가 있을 때만 추가
+        if (polylinePath.length > 1) {
+          var polyline = new kakao.maps.Polyline({
+            path: polylinePath,
+            strokeWeight: 5,
+            strokeColor: '#FF0000',
+            strokeOpacity: 0.7,
+            strokeStyle: 'solid'
+          });
+
+          polyline.setMap(map);
+
+          // 폴리라인 클릭 시 거리 표시
+          kakao.maps.event.addListener(polyline, 'click', function(mouseEvent) {
+            var clickPosition = mouseEvent.latLng;
+            displayDistance(polyline, clickPosition);
+          });
+        }
+
+        // 숙소 마커 추가
+        var accommodation = ${JSON.stringify(accommodation)};
+        accommodation.forEach(function(hotel) {
+          var markerPosition = new kakao.maps.LatLng(hotel.lat, hotel.lng); // 숙소 위치 설정
+          addMarker(markerPosition, 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png', {width: 44, height: 55}, hotel.acc_name, hotel.addr, 'H', '#FFD700'); // 숙소 마커 추가 (금색)
+        });
+
+        // 마커가 추가되었으면 경계에 맞춰 지도 중심과 확대 수준 설정
+        if (markersAdded) {
+          map.setBounds(bounds);
+        } else {
+          // 마커가 없을 때는 초기 중심 좌표와 확대 정도로 설정
+          map.setCenter(initialCenter);
+          map.setLevel(initialLevel);
+        }
+      });
+    </script>
+  </body>
+</html>
+
   `;
     };
 
@@ -468,7 +490,7 @@ export default function ScheduleCreation7({ route }) {
 
             <TouchableOpacity style={styles.mapFold} onPress={()=>mapFold()}>
                 {mapFoldTF?
-                    (<Text style={styles.mapFoldText}>지도접기</Text>) : (<Text style={styles.mapFoldText}>지도열기</Text>)
+                    (<FontAwesome name="caret-up" size={24} color="black" />) : (<FontAwesome5 name="caret-down" size={24} color="black" />)
                 }
             </TouchableOpacity>
             {renderDayTabs()}
@@ -477,7 +499,7 @@ export default function ScheduleCreation7({ route }) {
             </View>
             <View style={styles.addButtonContainer}>
                 <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
-                    <Text style={styles.addButtonText}>장소 추가</Text>
+                    <Text style={styles.addButtonText}>보관함</Text>
                 </TouchableOpacity>
             </View>
             <PlaceSelectionModal
@@ -613,7 +635,6 @@ const styles = StyleSheet.create({
     scheduleContainer: {
         flex: 1,
         padding: 20,
-        paddingBottom: 120
     }, // paddingBottom 제거
 
     scheduleItem: {
@@ -670,33 +691,31 @@ const styles = StyleSheet.create({
     },
 
     deleteIcon: {
-        marginLeft: 10
+        right:0,
     },
 
     addButtonContainer: {
         position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        padding: 20,
-        paddingBottom: 60,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
+        bottom: 40,
+        right: 20,
+        backgroundColor: '#f35353',
+        borderRadius: 30,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        elevation: 5,
     },
 
     addButton: {
-        width: '100%',
-        padding: 15,
-        backgroundColor: '#f35353',
-        borderRadius: 10,
-        alignItems: 'center',
+        // width: '100%',
+        // padding: 15,
+        // backgroundColor: '#f35353',
+        // borderRadius: 10,
+        // alignItems: 'center',
     },
 
     addButtonText: {
-        color: '#fff',
+        color: 'white',
         fontSize: 16,
-        fontWeight: 'bold'
     },
 
     modalContainer: {

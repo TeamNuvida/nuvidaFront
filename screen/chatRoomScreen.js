@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, FlatList, Image, StyleSheet, TouchableOpacity, ScrollView, Alert, Modal, Keyboard, Linking  } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, TextInput, FlatList, Image, StyleSheet, TouchableOpacity, ScrollView, Alert, Modal, Keyboard, Linking } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { firestore, storage } from './firebase';
-import { collection, orderBy, query, onSnapshot, addDoc, doc, deleteDoc,  updateDoc, arrayRemove, getDoc } from 'firebase/firestore';
+import { collection, orderBy, query, onSnapshot, addDoc, doc, deleteDoc, updateDoc, arrayRemove, getDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useNavigation } from "@react-navigation/native";
-import { MaterialCommunityIcons, AntDesign , SimpleLineIcons, MaterialIcons, FontAwesome, Entypo} from '@expo/vector-icons';
+import { MaterialCommunityIcons, AntDesign, SimpleLineIcons, MaterialIcons, FontAwesome, Entypo } from '@expo/vector-icons';
 import axios from "axios";
 
 const ChatRoomScreen = ({ route }) => {
@@ -19,19 +19,20 @@ const ChatRoomScreen = ({ route }) => {
     const [modalVisible, setModalVisible] = useState(false); // 모달 표시 여부
     const [modalImage, setModalImage] = useState(null); // 모달에 표시할 이미지
     const navigation = useNavigation();
+    const flatListRef = useRef(null); // FlatList의 ref 생성
 
     const localhost = "54.180.146.203";
 
-    const getUserProfile = async (user_id)=>{
-        try{
-            const response = await axios.post(`http://${localhost}:8090/nuvida/setUser`, {user_id:user_id});
+    const getUserProfile = async (user_id) => {
+        try {
+            const response = await axios.post(`http://${localhost}:8090/nuvida/setUser`, { user_id: user_id });
 
-            if(response.data){
+            if (response.data) {
                 return response.data.profile_img;
-            }else{
+            } else {
                 return null;
             }
-        }catch (e) {
+        } catch (e) {
             console.error(e)
         }
     }
@@ -52,6 +53,9 @@ const ChatRoomScreen = ({ route }) => {
 
             // 가공된 메시지를 setMessages에 저장
             setMessages(result_msg);
+
+            // 메시지 목록이 업데이트될 때마다 스크롤을 가장 아래로 이동
+            flatListRef.current?.scrollToEnd({ animated: true });
         });
     };
 
@@ -134,6 +138,7 @@ const ChatRoomScreen = ({ route }) => {
                 setMessage('');
                 setSelectedImages([]);
                 Keyboard.dismiss(); // 메시지 전송 후 키보드를 내림
+                flatListRef.current?.scrollToEnd({ animated: true }); // 메시지 전송 후 스크롤 아래로 이동
             } catch (error) {
                 console.error("메시지 전송 중 오류 발생: ", error);
             }
@@ -198,23 +203,23 @@ const ChatRoomScreen = ({ route }) => {
         const isCurrentUser = item.userId === userInfo.user_id;
 
         return (
-            <View style={[ {marginBottom: 20}, !isCurrentUser&&{flexDirection: 'row'} ]}>
-                {!isCurrentUser&&(item.userProfile ? (
-                    <Image style={styles.profile} source={{uri:item.userProfile}}/>
-                        ):(
-                        <Image style={styles.profile} source={require("../assets/profile.png")}/>
-                    ))}
-                <View style={{marginLeft:10}}>
-                {!isCurrentUser&&(
-                    <View style={{flexDirection: 'row',   alignItems: 'center',}}>
-                        <Image style={styles.baseballImg} source={require('../assets/baseball.png')}/>
-                        <View style={{paddingHorizontal:5}}/>
-                        <Text style={[isCurrentUser ? styles.myNick : styles.theirNick]}>{item.userNick}</Text>
-                    </View>
-                )}
+            <View style={[{ marginBottom: 20 }, !isCurrentUser && { flexDirection: 'row' }]}>
+                {!isCurrentUser && (item.userProfile ? (
+                    <Image style={styles.profile} source={{ uri: item.userProfile }} />
+                ) : (
+                    <Image style={styles.profile} source={require("../assets/profile.png")} />
+                ))}
+                <View style={{ marginLeft: 10 }}>
+                    {!isCurrentUser && (
+                        <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                            <Image style={styles.baseballImg} source={require('../assets/baseball.png')} />
+                            <View style={{ paddingHorizontal: 5 }} />
+                            <Text style={[isCurrentUser ? styles.myNick : styles.theirNick]}>{item.userNick}</Text>
+                        </View>
+                    )}
 
 
-                    {item.text&&<View style={[styles.messageContainer, isCurrentUser ? styles.myMessage : styles.theirMessage]}>
+                    {item.text && <View style={[styles.messageContainer, isCurrentUser ? styles.myMessage : styles.theirMessage]}>
                         {renderMessageText(item.text)}
                     </View>}
                     {item.imageUrls && item.imageUrls.map((url, index) => (
@@ -257,6 +262,9 @@ const ChatRoomScreen = ({ route }) => {
                 keyExtractor={(item) => item.id}
                 renderItem={renderItem}
                 style={styles.messageList}
+                ref={flatListRef} // FlatList에 ref 추가
+                onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })} // 콘텐츠 크기 변경 시 스크롤 아래로 이동
+                onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })} // 레이아웃 변경 시 스크롤 아래로 이동
             />
 
             {/* 이미지 미리보기 */}
@@ -278,7 +286,7 @@ const ChatRoomScreen = ({ route }) => {
 
             <View style={styles.buttonContainer}>
                 <TouchableOpacity onPress={pickImage} >
-                    <MaterialCommunityIcons name="file-image-plus-outline" size={40} color="black" style={styles.imagePickerButton}/>
+                    <MaterialCommunityIcons name="file-image-plus-outline" size={40} color="black" style={styles.imagePickerButton} />
                 </TouchableOpacity>
                 {/* 메시지 입력 및 전송 */}
                 <TextInput
@@ -288,7 +296,7 @@ const ChatRoomScreen = ({ route }) => {
                     style={styles.input}
                 />
                 <TouchableOpacity onPress={sendMessage} >
-                    <FontAwesome name="send" size={24} color="white" style={styles.sendButton}/>
+                    <FontAwesome name="send" size={24} color="white" style={styles.sendButton} />
                 </TouchableOpacity>
             </View>
 
@@ -322,8 +330,8 @@ const styles = StyleSheet.create({
         padding: 10,
         marginVertical: 10,
         marginHorizontal: 10,
-        width:"70%",
-        borderRadius:50
+        width: "70%",
+        borderRadius: 50
     },
     shadowContainer: {
         shadowColor: '#000',
@@ -340,8 +348,8 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center', // 수직 중앙 정렬
         marginHorizontal: 10,
-        backgroundColor:"#FBFBFB",
-        paddingVertical:10,
+        backgroundColor: "#FBFBFB",
+        paddingVertical: 10,
 
     },
     imagePickerButton: {
@@ -376,7 +384,7 @@ const styles = StyleSheet.create({
     },
     theirNick: {
         alignSelf: 'flex-start',
-        fontWeight:"bold"
+        fontWeight: "bold"
     },
     myMessage: {
         backgroundColor: '#ff5a5a',
@@ -465,18 +473,18 @@ const styles = StyleSheet.create({
     flexRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginLeft:10
+        marginLeft: 10
     },
     headerText: {
         fontSize: 16,
         fontWeight: 'bold',
         color: '#000',
-        paddingLeft:10,
+        paddingLeft: 10,
         flex: 2,
     },
-    baseballImg:{
-        width:20,
-        height:20
+    baseballImg: {
+        width: 20,
+        height: 20
     },
     profile: {
         width: 45,                  // 프로필 이미지 너비
@@ -489,7 +497,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,          // 그림자 불투명도
         shadowRadius: 3.84,          // 그림자 반경
         elevation: 5,                // 안드로이드 그림자 (그림자 높이)
-        marginLeft:10
+        marginLeft: 10
     },
 
 });

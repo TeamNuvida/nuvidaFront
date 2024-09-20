@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ActivityIndicator, ScrollView, Alert } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ActivityIndicator, ScrollView, Alert, Modal,FlatList } from 'react-native';
 import { FontAwesome5, FontAwesome6, AntDesign, FontAwesome, Entypo, Ionicons, Feather, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
@@ -25,6 +25,10 @@ export default function ScheduleCreation6({ route }) {
 
     const [mapFoldTF, setMapFoldTF] = useState(true);
 
+    const [unselectedPlaces, setUnselectedPlaces] = useState([]); // 보관함에 저장할 미선택 장소들
+    const [isModalVisible, setIsModalVisible] = useState(false); // 보관함 모달 상태
+    const [currentDay, setCurrentDay] = useState(''); // 보관함에서 선택할 일차
+
     const accommodation = scheduleInfo.accommodation;
     console.log(scheduleInfo)
     console.log(accommodation)
@@ -36,6 +40,7 @@ export default function ScheduleCreation6({ route }) {
                 const response = await axios.post(`http://${localhost}:8000/route`, {
                     scheduleInfo: scheduleInfo,
                 });
+
                 console.log("이동루트", response.data.route)
                 setMoveRoute(response.data.route)
             } catch (error) {
@@ -52,6 +57,7 @@ export default function ScheduleCreation6({ route }) {
     useEffect(() => {
         const generateSchedule = () => {
             const scheduleData = {};
+            const unselectedPlacesList = [...scheduleInfo.selectedPlaces]; // 모든 선택된 장소 리스트
 
             moveRoute.forEach((dayRoute, dayIndex) => {
                 const dayKey = `${dayIndex + 1}일차`;
@@ -59,6 +65,12 @@ export default function ScheduleCreation6({ route }) {
                     const place = scheduleInfo.selectedPlaces.find(p => p.id === route.id);
 
                     if (place) {
+                        // 일정에 선택된 장소는 보관함 리스트에서 제거
+                        const index = unselectedPlacesList.findIndex(p => p.id === place.id);
+                        if (index !== -1) {
+                            unselectedPlacesList.splice(index, 1);
+                        }
+
                         return {
                             id: route.id, // 드래그 기능을 위해 ID 필요
                             time: formatTime(route.visit_start), // 방문 시작 시간 포맷
@@ -70,8 +82,8 @@ export default function ScheduleCreation6({ route }) {
                             lng: parseFloat(place.lng),
                             category: getCategory(place.contenttypeid), // 카테고리
                             transportation: null, // 이동 수단 정보가 있으면 추가
-                            firstimage:place.firstimage,
-                            contentid:place.contentid,
+                            firstimage: place.firstimage,
+                            contentid: place.contentid,
                             contenttypeid: place.contenttypeid,
                             travel_date: formatDay(route.visit_start),
                             reservation: place.reservation,
@@ -81,15 +93,35 @@ export default function ScheduleCreation6({ route }) {
                 }).filter(item => item !== null); // 유효하지 않은 항목을 제거
             });
 
+            // unselectedPlacesList의 형식을 변경하여 스케줄에 맞는 형식으로 변환
+            const formattedUnselectedPlacesList = unselectedPlacesList.map((place) => ({
+                id: place.id, // 드래그 기능을 위해 ID 필요
+                time: '오전 09:00', // 기본 방문 시작 시간 포맷
+                name: place.name,
+                details: '시간을 설정해주세요', // 기본 세부 시간 정보
+                addr: place.addr,
+                icon: getIcon(place.contenttypeid), // 카테고리에 맞는 아이콘 선택
+                lat: parseFloat(place.lat),
+                lng: parseFloat(place.lng),
+                category: getCategory(place.contenttypeid), // 카테고리
+                transportation: null, // 이동 수단 정보가 있으면 추가
+                firstimage: place.firstimage,
+                contentid: place.contentid,
+                contenttypeid: place.contenttypeid,
+                travel_date: '', // 방문 날짜 기본 값 (필요에 따라 수정)
+                reservation: place.reservation,
+            }));
+
             setSchedule(scheduleData);
+            setUnselectedPlaces(formattedUnselectedPlacesList);  // 보관함에 미선택 장소들 저장
         };
 
         if (moveRoute && scheduleInfo.selectedPlaces) {
             generateSchedule();
         }
     }, [moveRoute, scheduleInfo]);
-    
-    
+
+
     const getCategory = (contenttypeid) =>{
         switch (contenttypeid) {
             case '0': // 야구
@@ -183,9 +215,11 @@ export default function ScheduleCreation6({ route }) {
         <script>
           document.addEventListener("DOMContentLoaded", function() {
             var container = document.getElementById('map');
+            var initialCenter = new kakao.maps.LatLng(35.1595454, 126.8526012); // 초기 중심 좌표
+            var initialLevel = 7; // 초기 확대 정도
             var options = {
-              center: new kakao.maps.LatLng(35.1595454, 126.8526012), // 초기 중심 좌표 설정
-              level: 7 // 지도 레벨 설정 (확대 정도)
+              center: initialCenter, // 초기 중심 좌표 설정
+              level: initialLevel // 초기 지도 레벨 설정 (확대 정도)
             };
             var map = new kakao.maps.Map(container, options); // 지도 생성
     
@@ -194,10 +228,20 @@ export default function ScheduleCreation6({ route }) {
             var colors = {
               '1일차': '#FF0000', // 빨간색
               '2일차': '#0000FF', // 파란색
-              '3일차': '#008000'  // 초록색
+              '3일차': '#008000',  // 초록색
+              '4일차': '#FFBB00',
+              '5일차': '#5F00FF',
+              '6일차': '#FF00DD',
+              '7일차': '#5CD1E5',
+              '8일차': '#8C8C8C',
+              '9일차': '#F29661',
+              '10일차': '#BCE55C',
             };
     
             var daysToShow = selectedDay === '전체' ? Object.keys(schedule) : [selectedDay]; // 표시할 일차 결정
+    
+            var bounds = new kakao.maps.LatLngBounds(); // 지도의 경계 설정 객체
+            var markersAdded = false; // 마커가 추가되었는지 여부를 체크하는 변수
     
             // 마커를 지도에 추가하는 함수
             function addMarker(position, imageSrc, size, title, address, label, color) {
@@ -208,7 +252,10 @@ export default function ScheduleCreation6({ route }) {
                 image: markerImage // 마커 이미지 설정
               });
               marker.setMap(map); // 지도에 마커 추가
-
+    
+              bounds.extend(position); // 마커의 위치를 경계에 추가
+              markersAdded = true; // 마커가 추가됨을 표시
+    
               // 마커에 순서 번호 라벨 추가
               var labelContent = '<div class="markerLabel" style="background-color:' + color + ';">' + label + '</div>';
               var labelOverlay = new kakao.maps.CustomOverlay({
@@ -219,31 +266,31 @@ export default function ScheduleCreation6({ route }) {
                 zIndex: 3
               });
               labelOverlay.setMap(map);
-
+    
               // 마커 클릭 시 커스텀 오버레이 표시
               kakao.maps.event.addListener(marker, 'click', function() {
                 var overlayContent = '<div style="padding:10px;background:white;border:1px solid black;">' +
                                      '<strong>' + title + '</strong><br>' + 
                                      '<span>' + address + '</span>' +
                                      '</div>';
-
+    
                 var overlay = new kakao.maps.CustomOverlay({
                   content: overlayContent,
                   position: position,
                   yAnchor: 1
                 });
-
+    
                 overlay.setMap(map);
-
+    
                 // 3초 후 오버레이 제거
                 setTimeout(function() {
                   overlay.setMap(null);
                 }, 3000);
               });
-
+    
               return marker;
             }
-            
+    
             // 폴리라인의 거리를 표시하는 함수
             function displayDistance(polyline, position) {
               var length = polyline.getLength(); // 폴리라인의 길이(미터) 계산
@@ -265,7 +312,7 @@ export default function ScheduleCreation6({ route }) {
                 overlay.setMap(null);
               }, 3000);
             }
-
+    
             // 일반 장소 마커와 폴리라인 추가
             daysToShow.forEach(function(day) {
               var positions = schedule[day]; // 각 날짜의 위치 정보
@@ -300,24 +347,110 @@ export default function ScheduleCreation6({ route }) {
               var markerPosition = new kakao.maps.LatLng(hotel.lat, hotel.lng); // 숙소 위치 설정
               addMarker(markerPosition, 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png', {width: 44, height: 55}, hotel.acc_name, hotel.addr, 'H', '#FFD700'); // 숙소 마커 추가 (금색)
             });
+    
+            // 마커가 추가되었으면 경계에 맞춰 지도 중심과 확대 수준 설정
+            if (markersAdded) {
+              map.setBounds(bounds);
+            } else {
+              // 마커가 없을 때는 초기 중심 좌표와 확대 정도로 설정
+              map.setCenter(initialCenter);
+              map.setLevel(initialLevel);
+            }
           });
         </script>
       </body>
     </html>
+
   `;
 
 
 
+// 보관함 버튼 클릭 시 모달 열기
+    const openStorage = () => {
+        console.log(unselectedPlaces)
+        setIsModalVisible(true);
+    };
+
+    // 보관함 모달 닫기
+    const closeStorage = () => {
+        setIsModalVisible(false);
+    };
+
+    // 보관함 장소를 일정에 추가
+    const addPlaceToSchedule = (place, day) => {
+        console.log(day);
+
+        if (day === '전체') {
+            Alert.alert('', '여행 날짜를 선택해주세요.');
+            return closeStorage();
+        }
+
+        const updatedSchedule = { ...schedule };
+
+        // 선택된 day의 스케줄이 없는 경우 빈 배열로 초기화
+        if (!updatedSchedule[day]) {
+            updatedSchedule[day] = [];
+        }
+
+        updatedSchedule[day] = [...updatedSchedule[day], {
+            ...place
+        }];
+
+        // 보관함에서 선택된 장소 삭제
+        setUnselectedPlaces((prev) => prev.filter((item) => item.id !== place.id));
+
+        setSchedule(updatedSchedule);
+        closeStorage();
+    };
 
 
+    // 보관함 목록 렌더링
+    const renderStorageItem = ({ item }) => (
+        <TouchableOpacity style={styles.storageItem} onPress={() => addPlaceToSchedule(item, selectedDay)}>
+            <Text style={styles.storageItemText}>{item.name}</Text>
+            <Text style={styles.storageItemSubText}>{item.addr}</Text>
+        </TouchableOpacity>
+    );
+
+    const renderStorageModal = () => (
+        <Modal
+            visible={isModalVisible}
+            transparent={true}
+            animationType="slide"
+            onRequestClose={closeStorage}
+        >
+            <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>보관함 목록</Text>
+                    <FlatList
+                        data={unselectedPlaces}
+                        renderItem={renderStorageItem}
+                        keyExtractor={(item) => item.id.toString()}
+                    />
+                    <TouchableOpacity style={styles.modalCloseButton} onPress={closeStorage}>
+                        <Text style={styles.modalCloseButtonText}>닫기</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
+    );
 
 
+// 일정에서 보관함으로 장소 이동
+    const moveToStorage = (item, day) => {
+        const updatedSchedule = { ...schedule };
+        updatedSchedule[day] = updatedSchedule[day].filter((place) => place.id !== item.id);
+
+        // 보관함에 장소 추가
+        setUnselectedPlaces((prev) => [...prev, item]);
+        setSchedule(updatedSchedule);
+    };
 
 
     const renderDaySchedule = (day) => {
         return (
             <DraggableFlatList
-                data={schedule[day]}
+                data={schedule[day] || []}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item, index, drag, isActive }) => (
                     <TouchableOpacity
@@ -339,6 +472,10 @@ export default function ScheduleCreation6({ route }) {
                             <View style={styles.iconTitleContainer}>
                                 <MaterialIcons name={item.icon} size={24} color="black" />
                                 <Text style={styles.titleText}>{item.name}</Text>
+                                {/* 삭제 아이콘 추가 */}
+                                <TouchableOpacity onPress={() => moveToStorage(item, day)}>
+                                    <Entypo name="cross" size={24} color="red" />
+                                </TouchableOpacity>
                             </View>
                             {item.category && <Text style={styles.categoryText}>{item.category}</Text>}
                             {item.addr && <Text style={styles.addressText}>{item.addr}</Text>}
@@ -391,6 +528,10 @@ export default function ScheduleCreation6({ route }) {
                                 <View style={styles.iconTitleContainer}>
                                     <MaterialIcons name={item.icon} size={24} color="black" />
                                     <Text style={styles.titleText}>{item.name}</Text>
+                                    {/* 삭제 아이콘 추가 */}
+                                    <TouchableOpacity onPress={() => moveToStorage(item, item.day)}>
+                                        <Entypo name="cross" size={24} color="red" />
+                                    </TouchableOpacity>
                                 </View>
                                 {item.category && <Text style={styles.categoryText}>{item.category}</Text>}
                                 {item.addr && <Text style={styles.addressText}>{item.addr}</Text>}
@@ -484,27 +625,36 @@ export default function ScheduleCreation6({ route }) {
     );
 
     const renderDayTabs = () => {
-        const days = Object.keys(schedule);
+        const startDate = new Date(scheduleInfo.dateRange[0]); // 여행 시작 날짜
+        const endDate = new Date(scheduleInfo.dateRange[1]); // 여행 종료 날짜
+
+        // 총 여행 일수를 계산 (1일부터 시작하도록 조정)
+        const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+
+        // 전체 일차 배열을 생성
+        const allDays = Array.from({ length: totalDays }, (_, i) => `${i + 1}일차`);
+
         return (
             <View style={styles.dayTabs}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <TouchableOpacity
-                    style={selectedDay === '전체' ? styles.dayTabActive : styles.dayTab}
-                    onPress={() => setSelectedDay('전체')}>
-                    <Text style={selectedDay === '전체' ? styles.dayTabTextActive : styles.dayTabText}>전체</Text>
-                </TouchableOpacity>
-                {days.map((day, index) => (
                     <TouchableOpacity
-                        key={index}
-                        style={selectedDay === day ? styles.dayTabActive : styles.dayTab}
-                        onPress={() => setSelectedDay(day)}>
-                        <Text style={selectedDay === day ? styles.dayTabTextActive : styles.dayTabText}>{day}</Text>
+                        style={selectedDay === '전체' ? styles.dayTabActive : styles.dayTab}
+                        onPress={() => setSelectedDay('전체')}>
+                        <Text style={selectedDay === '전체' ? styles.dayTabTextActive : styles.dayTabText}>전체</Text>
                     </TouchableOpacity>
-                ))}
+                    {allDays.map((day, index) => (
+                        <TouchableOpacity
+                            key={index}
+                            style={selectedDay === day ? styles.dayTabActive : styles.dayTab}
+                            onPress={() => setSelectedDay(day)}>
+                            <Text style={selectedDay === day ? styles.dayTabTextActive : styles.dayTabText}>{day}</Text>
+                        </TouchableOpacity>
+                    ))}
                 </ScrollView>
             </View>
         );
     };
+
 
     // 날짜 포맷 함수
     const formatDateRange = (dateRange) => {
@@ -596,13 +746,21 @@ export default function ScheduleCreation6({ route }) {
 
             <TouchableOpacity style={styles.mapFold} onPress={()=>mapFold()}>
                 {mapFoldTF?
-                    (<Text style={styles.mapFoldText}>지도접기</Text>) : (<Text style={styles.mapFoldText}>지도열기</Text>)
+                    (<FontAwesome name="caret-up" size={24} color="black" />) : (<FontAwesome5 name="caret-down" size={24} color="black" />)
                 }
             </TouchableOpacity>
             {renderDayTabs()}
             <View style={styles.scheduleContainer}>
                 {renderSchedule()}
             </View>
+
+            {/* 보관함 버튼 */}
+            <TouchableOpacity style={styles.storageButton} onPress={() => openStorage()}>
+                <Text style={styles.storageButtonText}>보관함</Text>
+            </TouchableOpacity>
+
+            {/* 보관함 모달 */}
+            {renderStorageModal()}
         </View>
     );
 
@@ -777,5 +935,62 @@ const styles = StyleSheet.create({
     },
     mapFoldText:{
 
-    }
+    },
+    storageButton: {
+        position: 'absolute',
+        bottom: 40,
+        right: 20,
+        backgroundColor: '#f35353',
+        borderRadius: 30,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        elevation: 5,
+    },
+    storageButtonText: {
+        color: 'white',
+        fontSize: 16,
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        width: '80%',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+        elevation: 10,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    storageItem: {
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+    },
+    storageItemText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    storageItemSubText: {
+        fontSize: 14,
+        color: '#666',
+    },
+    modalCloseButton: {
+        alignSelf: 'center',
+        marginTop: 10,
+        backgroundColor: '#f35353',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 10,
+    },
+    modalCloseButtonText: {
+        color: 'white',
+        fontSize: 16,
+    },
 });

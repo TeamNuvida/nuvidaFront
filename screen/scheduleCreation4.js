@@ -17,6 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 
 const categories = [
+    { id: null, name: '전체' },
     { id: 12, name: '관광지' },
     { id: 14, name: '문화시설' },
     { id: 15, name: '축제공연행사' },
@@ -90,7 +91,13 @@ export default function ScheduleCreation4({ route }) {
 
                 const response = await axios.get(`http://apis.data.go.kr/B551011/KorService1/searchKeyword1?serviceKey=${API_KEY}&MobileApp=NUVIDA&MobileOS=AND&pageNo=1&numOfRows=${totalCount}&listYN=Y&arrange=A&keyword=${queryToSearch}&areaCode=5${categoryParam}&_type=JSON`);
                 const items = response.data.response.body.items.item;
-                setPlaceList(items);
+                console.log(items, "adsfasdf=============")
+                const placeItem = items?items.filter(item =>
+                    ['12', '14', '15', '28', '38', '39'].includes(item.contenttypeid)
+                ) : null;
+
+                // 필터링된 데이터를 setPlaceList에 설정
+                setPlaceList(placeItem);
             } catch (error) {
                 console.log('tour API error', error);
             }
@@ -134,6 +141,10 @@ export default function ScheduleCreation4({ route }) {
         // 기본 패턴: "HH:MM~HH:MM" 형식의 시간 추출
         const timePattern = /(\d{2}:\d{2})\s*~\s*(\d{2}:\d{2})/;
 
+        if(!timeString){
+            return { open_time: "09:00", close_time: "20:00" };
+        }
+
         // 정규식을 이용해 시간 추출
         const match = timeString.match(timePattern);
         if (match) {
@@ -153,6 +164,7 @@ export default function ScheduleCreation4({ route }) {
             const response = await axios.get(`http://apis.data.go.kr/B551011/KorService1/detailIntro1?serviceKey=${API_KEY}&numOfRows=10&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&contentId=${item.contentid}&contentTypeId=${item.contenttypeid}&_type=JSON`);
             const data = response.data.response.body.items.item[0];
 
+
             // 식당이면 opentimefood
             // 관광지면 usetime
             // 문화시설 usetimeculture
@@ -162,9 +174,9 @@ export default function ScheduleCreation4({ route }) {
             // 쇼핑 opentime
             const time = getTime(data,item)
 
-
-
             const { open_time, close_time } = extractTimes(time);
+
+            console.log("id확인", identifier)
 
             const selectedItem = {
                 id: identifier,
@@ -281,6 +293,13 @@ export default function ScheduleCreation4({ route }) {
         setShowSelectedPlaces(!showSelectedPlaces);
     };
 
+    const handleRemovePlace = (item) => {
+        setSelectedPlaces((prevSelected) =>
+            prevSelected.filter((place) => place.contentid !== item.contentid)
+        );
+    };
+
+
     const renderContent = () => (
         <View style={{ flex: 1, padding: 10 }}>
             <View style={{ flexDirection: 'row', width: '100%', height: 80 }}>
@@ -394,6 +413,12 @@ export default function ScheduleCreation4({ route }) {
                         renderItem={({ item }) => (
                             <View style={styles.selectedItemContainer}>
                                 <Text style={styles.selectedText}>{item.name}</Text>
+                                <TouchableOpacity
+                                    style={styles.removePlace}
+                                    onPress={() => handleRemovePlace(item)}
+                                >
+                                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>삭제</Text>
+                                </TouchableOpacity>
                             </View>
                         )}
                         ListEmptyComponent={<Text style={styles.noSelectionText}>선택된 장소가 없습니다.</Text>}
@@ -461,11 +486,13 @@ const styles = StyleSheet.create({
         padding: 10,
         backgroundColor: '#fbf1f1',
         borderRadius: 10,
+        maxHeight:'40%'
     },
     selectedItemContainer: {
         padding: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#ccc',
+        flexDirection: 'row',
     },
     selectedText: {
         fontSize: 18,
@@ -607,5 +634,12 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: 'bold',
     },
+    removePlace:{
+        backgroundColor:'#ff3b30',
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        borderRadius: 5,
+        marginLeft:10
+    }
 });
 
