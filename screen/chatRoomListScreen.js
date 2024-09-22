@@ -51,7 +51,9 @@ const ChatRoomListScreen = ({ route }) => {
         if (roomDoc.exists()) {
             const roomData = roomDoc.data();
 
-            if (password) {
+            if(roomData.members.includes(userInfo.user_id)){
+                navigation.navigate('ChatRoomScreen', { roomId, userInfo, createUser, name });
+            } else if (password) {
                 setSelectedRoomId(roomId);
                 setModalVisible(true);
             } else {

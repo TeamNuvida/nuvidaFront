@@ -87,7 +87,7 @@ export default function CommunityList({route}) {
             const response = await axios.post(`http://${localhost}:8090/nuvida/getCmtInfo`, {post_seq:post_seq});
             console.log(response.data);
             const intResponse = await axios.post(`http://${localhost}:8090/nuvida/getInt`, {post_seq:post_seq, user_id:userInfo.user_id});
-            navigation.navigate('CommunityInfo', {cmtInfo:response.data, intTF:intResponse.data})
+            navigation.navigate('CommunityInfo', {cmtInfo:response.data, intTF:intResponse.data, userInfo:userInfo})
         } catch (error) {
             console.error('Error fetching plan data:', error);
         }

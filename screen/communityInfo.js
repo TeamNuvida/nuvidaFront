@@ -52,7 +52,7 @@ const CommunityInfo = ({route}) => {
     const [intTF, setIntTF] = useState(route.params.intTF);
     const navigation = useNavigation();
     const localhost = "54.180.146.203";
-    const userInfo = {user_id:'test', user_nick:'test'}
+    const userInfo = route.params.userInfo;
 
     const openImageModal = (imageUri) => {
         setSelectedImageUri(imageUri);

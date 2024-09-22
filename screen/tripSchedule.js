@@ -437,7 +437,7 @@ const TripSchedule = ({ route }) => {
 
             return Object.keys(groupedByDay).map((dayKey, index) => (
                 <View key={index} style={{width: '100%', flex: 1}}>
-                    <View style={{justifyContent: 'center', width: '100%', height: '6%', marginBottom: '3%'}}>
+                    <View style={{justifyContent: 'center', width: '100%', marginBottom:10}}>
                         <Text style={{fontWeight: 'bold'}}>{dayKey}</Text>
                     </View>
                     {groupedByDay[dayKey].map((item, itemIndex) => (
