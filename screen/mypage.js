@@ -187,43 +187,18 @@ const Mypage = ({route}) => {
                 
                 <View style={styles.menuContainer}>
                     <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("Betting", {userInfo:userInfo})}>
-                        <Image
-                            style={styles.menuIcon}
-                            resizeMode="cover"
-                            source={require("../assets/ellipse-7.png")}
-                        />
                         <Text style={styles.menuText}>배팅 목록</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("MypostList", {userInfo:userInfo})}>
-                        <Image
-                            style={styles.menuIcon}
-                            resizeMode="cover"
-                            source={require("../assets/ellipse-7.png")}
-                        />
-                        <Text style={styles.menuText}>내가 쓴글</Text>
+                        <Text style={styles.menuText}>내가 쓴 글</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.menuItem} onPress={()=>navigation.navigate("FavoriteList", {userInfo:userInfo})}>
-                        <Image
-                            style={styles.menuIcon}
-                            resizeMode="cover"
-                            source={require("../assets/ellipse-7.png")}
-                        />
                         <Text style={styles.menuText}>관심 페이지</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.menuItem} onPress={()=>navigation.navigate("TravelLog", {userInfo:userInfo})}>
-                        <Image
-                            style={styles.menuIcon}
-                            resizeMode="cover"
-                            source={require("../assets/ellipse-7.png")}
-                        />
                         <Text style={styles.menuText}>여행 기록</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.menuItem} onPress={()=>navigation.navigate("FriendList", {userInfo:userInfo})}>
-                        <Image
-                            style={styles.menuIcon}
-                            resizeMode="cover"
-                            source={require("../assets/ellipse-7.png")}
-                        />
                         <Text style={styles.menuText}>친구관리</Text>
                     </TouchableOpacity>
                 </View>
@@ -284,6 +259,7 @@ const styles = StyleSheet.create({
     },
     menuText: {
         fontSize: 16,
+        marginLeft:10
     },
     logoutContainer: {
         marginBottom: 20,

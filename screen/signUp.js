@@ -106,7 +106,7 @@ const SignUp = () => {
                     "회원가입 성공",
                         [{
                         text: "확인",
-                        onPress: () => navigation.navigate("signin"),
+                        onPress: () => navigation.navigate("Signin"),
                         style:"cancel"
 
                     }],
