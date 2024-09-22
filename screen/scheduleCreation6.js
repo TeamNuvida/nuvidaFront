@@ -700,6 +700,7 @@ export default function ScheduleCreation6({ route }) {
 
                         } catch (error) {
                             console.error('Error fetching plan data:', error);
+                            navigation.navigate("TripCalendar",{userInfo:userInfo});
                         }
                     }}
             ]
