@@ -684,16 +684,28 @@ export default function ScheduleCreation6({ route }) {
         const members = scheduleInfo.friends_id;
         const traveltime = {start_time :scheduleInfo.start_date, end_time:scheduleInfo.end_date};
 
-        try {
-            const response = await axios.post(`http://${localhost}:8090/nuvida/insertPlan`,
-                {user_id:userInfo.user_id, plan_name:plan_name,start_date:start_date,
-                    end_date:end_date, route:route,members:members,traveltime:traveltime,accommodation:accommodation});
+        Alert.alert(
+            '','일정을 저장하시겠습니까?',
+            [
+                { text: "아니요", style: "cancel" },
+                { text: "예", onPress: async () => {
 
-            navigation.navigate('ScheduleCreation8', {scheduleInfo:scheduleInfo, plan_seq:response.data, userInfo:userInfo});
+                        try {
+                            const response = await axios.post(`http://${localhost}:8090/nuvida/insertPlan`,
+                                {user_id:userInfo.user_id, plan_name:plan_name,start_date:start_date,
+                                    end_date:end_date, route:route,members:members,traveltime:traveltime,accommodation:accommodation});
 
-        } catch (error) {
-            console.error('Error fetching plan data:', error);
-        }
+
+                            navigation.navigate('ScheduleCreation8', {scheduleInfo:scheduleInfo, plan_seq:response.data, userInfo:userInfo});
+
+                        } catch (error) {
+                            console.error('Error fetching plan data:', error);
+                        }
+                    }}
+            ]
+        )
+
+
 
     };
 

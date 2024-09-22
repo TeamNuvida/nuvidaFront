@@ -1391,7 +1391,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                 IconComponent = Fontisto;
             }
 
-            const rain = weatherData.rain ? weatherData.rain["1h"] : "강수없음";
+            const rain = weatherData.rain ? `${weatherData.rain["1h"]}mm/h` : "강수없음";
 
             return (
                 <View style={[styles.center, {height: '100%'}]}>
