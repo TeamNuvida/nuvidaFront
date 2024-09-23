@@ -20,6 +20,7 @@ const ChatRoomScreen = ({ route }) => {
     const [modalImage, setModalImage] = useState(null); // 모달에 표시할 이미지
     const navigation = useNavigation();
     const flatListRef = useRef(null); // FlatList의 ref 생성
+    const [warning, setWarning] = useState(true);
 
     const localhost = "54.180.146.203";
 
@@ -255,6 +256,16 @@ const ChatRoomScreen = ({ route }) => {
     return (
         <View style={styles.container}>
             {topHeader()}
+
+            {warning&&(
+                <View style={styles.warningContainer}>
+                    <AntDesign name="warning" size={15} color="red" />
+                    <ScrollView>
+                        <Text style={styles.warningText}>비방/욕설/음란/광고 등 불건전 행위는 운영 정책에 의거 제재 대상이 되며, 피해가 발생 할 수 있으므로 결제정보 및 개인정보는 절대 타인에게 공개하지 마시기 바랍니다.</Text>
+                    </ScrollView>
+                </View>
+            )}
+
 
             {/* 메시지 리스트 */}
             <FlatList
@@ -499,6 +510,22 @@ const styles = StyleSheet.create({
         elevation: 5,                // 안드로이드 그림자 (그림자 높이)
         marginLeft: 10
     },
+    warningContainer:{
+        flexDirection:"row",
+        borderRadius:5,
+        borderWidth:0.2,
+        width:"90%",
+        height:50,
+        padding:10,
+        alignSelf:"center",
+        alignItems:"center",
+        marginVertical:10,
+
+    },
+    warningText:{
+        fontSize:10,
+        paddingLeft:10
+    }
 
 });
 
