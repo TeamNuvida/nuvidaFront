@@ -372,12 +372,12 @@ const AroundViewInfo = () => {
 
             <TouchableOpacity style={styles.renderContainer} onPress={() => openPlaceInKakaoMap(item.place_url)}>
                 <View style={styles.textContainer}>
-                    <Text style={{fontWeight:"bold"}}>{item.place_name}</Text>
-                    <Text>{getCategorie(item.category_group_code)}</Text>
-                    <Text>{item.address_name}</Text>
-                    {item.category_group_code != 'event'&&(<Text>{item.distance}m</Text>)}
-                    {item.category_group_code === 'event'&&(<Text>시작날짜 : {formatDate(item.eventstartdate)}</Text>)}
-                    {item.category_group_code === 'event'&&(<Text>종료날짜 : {formatDate(item.eventenddate)}</Text>)}
+                    <Text style={{fontWeight:"bold", marginBottom:3}}>{item.place_name}</Text>
+                    <Text style={{color:"#787878", marginBottom:3}}>{getCategorie(item.category_group_code)}</Text>
+                    <Text style={{marginBottom:3}}>{item.address_name}</Text>
+                    {item.category_group_code != 'event'&&(<Text style={{fontSize:12, marginBottom:3}}>{item.distance}m</Text>)}
+                    {item.category_group_code === 'event'&&(<Text style={{fontSize:12}}>시작날짜 : {formatDate(item.eventstartdate)}</Text>)}
+                    {item.category_group_code === 'event'&&(<Text style={{fontSize:12}}>종료날짜 : {formatDate(item.eventenddate)}</Text>)}
 
 
                 </View>
@@ -423,6 +423,7 @@ const AroundViewInfo = () => {
                     </ScrollView>
                 </View>
             </View >
+
 
             <FlatList
                 data={places}
