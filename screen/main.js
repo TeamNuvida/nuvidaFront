@@ -610,7 +610,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                     <View style={{width: '90%',height: 0.5,margin: 'auto',marginVertical:10,backgroundColor: '#C2C2C2'}} />
                     {season ?(
                         season.map((data,index)=>(
-                            <View style={{alignItems: 'center',justifyContent: 'center'}}>
+                            <View key={index} style={{alignItems: 'center',justifyContent: 'center'}}>
                                 <View style={{flexDirection:"row"}}>
                                     <Text style={[styles.seasonText, {paddingLeft:"7%"}]}>{index+1}</Text>
                                     <View style={{flexDirection:"row"}}>
@@ -1645,7 +1645,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                 <View style={{width: '90%',height: 0.5,margin: 'auto',marginBottom:10,backgroundColor: '#C2C2C2'}} />
                 {betScore?(
                     betScore.map((data,index) =>(
-                        <View>
+                        <View key={index}>
                             <View style={[{flexDirection:"row", alignItems:"center"}, styles.ranking]}>
                                 <Text style={[styles.rankingText, { marginLeft:20}]}>{index+1}위</Text>
                                 <Text style={styles.rankingText}>{data.user_nick}</Text>
