@@ -26,6 +26,101 @@ const categories = [
     { id: 39, name: '음식점' }
 ];
 
+// 장소 추가 모달 컴포넌트
+const AddPlaceModal = ({ visible, onClose, onAdd }) => {
+    const [placeName, setPlaceName] = useState('');
+    const [placeAddress, setPlaceAddress] = useState('');
+
+     const apiKey = '9d8d1da9d46b7a0f17fa3c65c7654597';
+
+    const handleAddPlace = async () => {
+        const url = `https://dapi.kakao.com/v2/local/search/address.json?query==${placeAddress}`;
+
+        if (!placeName.trim() || !placeAddress.trim()) {
+            Alert.alert('오류', '장소 이름과 주소를 입력해주세요.');
+            return;
+        }
+
+        try{
+            const response = await axios.get(url, {
+                headers: {
+                    Authorization: `KakaoAK ${apiKey}`,
+                },
+            });
+
+            if(response.data.documents.length==0){
+                Alert.alert('오류', '존재하지 않는 주소입니다.');
+                return;
+            }
+
+            const data = response.data.documents[0];
+            console.log(data);
+
+            const newPlace = {
+                id: Date.now(),
+                name: placeName,
+                addr: placeAddress,
+                firstimage: null,
+                contentid: `0`, // 고유 ID 생성
+                contenttypeid: "12",
+                cat3: "A01",
+                open_time: "09:00",
+                close_time: "18:00",
+                reservation: null,
+                visit_duration: 2,
+                lat: data.y, // 수동 추가이므로 좌표는 null로 설정
+                lng: data.x // 수동 추가이므로 좌표는 null로 설정
+            };
+
+            onAdd(newPlace);
+            onClose();
+            setPlaceName('');
+            setPlaceAddress('');
+
+        }catch (e) {
+            console.error(e);
+        }
+
+
+    };
+
+    return (
+        <Modal
+            transparent={true}
+            visible={visible}
+            animationType="slide"
+            onRequestClose={onClose}
+        >
+            <View style={styles.modalContainer}>
+                <View style={styles.addModal}>
+                    <TouchableOpacity onPress={onClose} style={styles.detailModalCloseButton}>
+                        <Entypo name="cross" size={24} color="black" />
+                    </TouchableOpacity>
+                    <Text style={styles.addModalTitle}>직접 장소 추가</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="장소 이름"
+                        value={placeName}
+                        onChangeText={setPlaceName}
+                    />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="장소 주소"
+                        value={placeAddress}
+                        onChangeText={setPlaceAddress}
+                    />
+                    <TouchableOpacity
+                        style={styles.addModalButton}
+                        onPress={handleAddPlace}
+                    >
+                        <Text style={styles.addModalButtonText}>추가</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
+    );
+};
+
 const DetailModal = ({ visible, onClose, item, onAdd, itemInfo }) => {
     return (
         <Modal
@@ -79,7 +174,7 @@ export default function ScheduleCreation4({ route }) {
     const [selectedItemInfo, setSelectedItemInfo] = useState(null);
 
     const [showSelectedPlaces, setShowSelectedPlaces] = useState(true); // 리스트 보이기/숨기기 상태
-
+    const [addModalVisible, setAddModalVisible] = useState(false);
     useEffect(() => {
         const fetchPlace = async () => {
             if (queryToSearch.trim() === '') return;
@@ -299,6 +394,12 @@ export default function ScheduleCreation4({ route }) {
         );
     };
 
+    const addBtn = () =>{
+        setAddModalVisible(true);
+    }
+
+
+
 
     const renderContent = () => (
         <View style={{ flex: 1, padding: 10 }}>
@@ -351,6 +452,16 @@ export default function ScheduleCreation4({ route }) {
                         </Text>
                     </TouchableOpacity>
                 ))}
+                <TouchableOpacity
+                    style={styles.addButton}
+                    onPress={()=>addBtn()}
+                >
+                    <Text style={[
+                        styles.categoryText,
+                    ]}>
+                        +직접추가
+                    </Text>
+                </TouchableOpacity>
             </View>
 
             <FlatList
@@ -433,6 +544,15 @@ export default function ScheduleCreation4({ route }) {
                 onAdd={handleAddToSchedule}
                 itemInfo={selectedItemInfo}
             />
+
+            {/* 직접 추가 모달 */}
+            <AddPlaceModal
+                visible={addModalVisible}
+                onClose={() => setAddModalVisible(false)}
+                onAdd={(newPlace) => setSelectedPlaces((prev) => [...prev, newPlace])}
+            />
+
+
         </View>
     );
 
@@ -566,6 +686,14 @@ const styles = StyleSheet.create({
         marginRight: 10,
         marginBottom: 10,
     },
+    addButton: {
+        backgroundColor: '#f88888',
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        borderRadius: 5,
+        marginRight: 10,
+        marginBottom: 10,
+    },
     selectedCategoryButton: {
         backgroundColor: '#007bff',
     },
@@ -640,6 +768,39 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         borderRadius: 5,
         marginLeft:10
-    }
+    },
+    addModal: {
+        width: '80%',
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 20,
+        alignItems: 'center',
+    },
+    addModalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 20,
+    },
+    input: {
+        width: '100%',
+        height: 40,
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 5,
+        paddingHorizontal: 10,
+        marginBottom: 10,
+    },
+    addModalButton: {
+        backgroundColor: 'black',
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        borderRadius: 5,
+        marginTop: 10,
+        alignSelf: 'center',
+    },
+    addModalButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
 });
 

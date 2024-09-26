@@ -186,6 +186,7 @@ export default function ScheduleCreation7({ route }) {
         const members = scheduleInfo.friends_id;
         const traveltime = {start_time :scheduleInfo.start_date, end_time:scheduleInfo.end_date};
 
+        console.log(route)
 
         Alert.alert(
             '','일정을 저장하시겠습니까?',
