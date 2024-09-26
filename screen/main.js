@@ -592,48 +592,63 @@ export default function Main({ weather, particulateMatter, store, location }) {
         );
     };
 
-    const renderSeason = () =>{
+    const renderSeason = () => {
         return (
-            <View style={[styles.center, {width: '100%',}]}>
-                <View style={[styles.center, styles.matchDateContainer,]}>
+            <View style={[styles.center, {width: '100%'}]}>
+                <View style={[styles.center, styles.matchDateContainer]}>
                     <Image source={require('../assets/matchDate.png')} style={styles.matchDateImage} />
                     {season && <Text style={styles.matchDateText}>{season[0].ss_title} 순위</Text>}
                 </View>
-                <View style={[styles.seasonContainer,{alignItems: 'center',justifyContent: 'center'}]}>
-                    <View style={{flexDirection:"row"}}>
-                        <Text style={[styles.seasonContainerText, {fontWeight: 'bold', paddingLeft:"10%"}]}>순위</Text>
-                        <Text style={[styles.seasonContainerText, {fontWeight: 'bold'}]}>팀</Text>
-                        <Text style={[styles.seasonContainerText, {fontWeight: 'bold'}]}>승</Text>
-                        <Text style={[styles.seasonContainerText, {fontWeight: 'bold'}]}>패</Text>
-                        <Text style={[styles.seasonContainerText, {fontWeight: 'bold'}]}>무</Text>
+                <View style={[styles.seasonContainer, {alignItems: 'center', justifyContent: 'center'}]}>
+                    <View style={{width: '100%', flexDirection: "row", marginTop: '2%'}}>
+                        <View style={{width: '10%', alignItems: 'center', marginHorizontal: 5, marginLeft: '7%'}}>
+                            <Text style={[styles.seasonContainerText, {fontWeight: 'bold'}]}>순위</Text>
+                        </View>
+                        <View style={{width: '20%', alignItems: 'center', flexDirection: "row", justifyContent: 'center', marginHorizontal: 5}}>
+                            <Text style={[styles.seasonContainerText, {fontWeight: 'bold'}]}>팀</Text>
+                        </View>
+                        <View style={{width: '15%', alignItems: 'center', marginHorizontal: 5}}>
+                            <Text style={[styles.seasonContainerText, {fontWeight: 'bold'}]}>승</Text>
+                        </View>
+                        <View style={{width: '15%', alignItems: 'center', marginHorizontal: 5}}>
+                            <Text style={[styles.seasonContainerText, {fontWeight: 'bold'}]}>패</Text>
+                        </View>
+                        <View style={{width: '15%', alignItems: 'center', marginHorizontal: 5}}>
+                            <Text style={[styles.seasonContainerText, {fontWeight: 'bold'}]}>무</Text>
+                        </View>
                     </View>
-                    <View style={{width: '90%',height: 0.5,margin: 'auto',marginVertical:10,backgroundColor: '#C2C2C2'}} />
-                    {season ?(
-                        season.map((data,index)=>(
-                            <View key={index} style={{alignItems: 'center',justifyContent: 'center'}}>
-                                <View style={{flexDirection:"row"}}>
-                                    <Text style={[styles.seasonText, {paddingLeft:"7%"}]}>{index+1}</Text>
-                                    <View style={{flexDirection:"row"}}>
-                                        <Image source={logo[Number(data.logo_img)]} style={styles.seasonTeam} />
-                                        <Text style={[styles.seasonText, ]}>{data.team_name}</Text>
+                    <View style={{width: '90%', height: 0.5, marginVertical: 10, backgroundColor: '#C2C2C2'}} />
+                    {season ? (
+                        season.map((data, index) => (
+                            <View key={index} style={{alignItems: 'center', justifyContent: 'center'}}>
+                                <View style={{flexDirection: "row", width: '100%', alignItems: 'center', marginVertical: 5}}>
+                                    <View style={{width: '10%', alignItems: 'center', marginHorizontal: 5}}>
+                                        <Text style={[styles.seasonText]}>{index + 1}</Text>
                                     </View>
-
-                                    <Text style={[styles.seasonText, ]}>{data.win}</Text>
-                                    <Text style={[styles.seasonText, ]}>{data.lose}</Text>
-                                    <Text style={[styles.seasonText, ]}>{data.draw}</Text>
+                                    <View style={{width: '20%', flexDirection: "row", justifyContent: 'center', alignItems: 'center', marginHorizontal: 5}}>
+                                        <Image source={logo[Number(data.logo_img)]} style={styles.seasonTeam} />
+                                        <Text style={[styles.seasonText]}>{data.team_name}</Text>
+                                    </View>
+                                    <View style={{width: '15%', alignItems: 'center', marginHorizontal: 5}}>
+                                        <Text style={[styles.seasonText]}>{data.win}</Text>
+                                    </View>
+                                    <View style={{width: '15%', alignItems: 'center', marginHorizontal: 5}}>
+                                        <Text style={[styles.seasonText]}>{data.lose}</Text>
+                                    </View>
+                                    <View style={{width: '15%', alignItems: 'center', marginHorizontal: 5}}>
+                                        <Text style={[styles.seasonText]}>{data.draw}</Text>
+                                    </View>
                                 </View>
-                                <View style={{width: '90%',height: 0.5,margin: 'auto',marginVertical:10,backgroundColor: '#C2C2C2'}} />
+                                <View style={{width: '90%', height: 0.5, marginVertical: 10, backgroundColor: '#C2C2C2'}} />
                             </View>
-                        )
-
-                        )
-                    ):(
+                        ))
+                    ) : (
                         <Text style={[styles.seasonText]}>경기 결과가 없습니다.</Text>
-                        )}
+                    )}
                 </View>
             </View>
         );
-    }
+    };
 
     // 오늘의 경기
     const renderTodayMatch = () => {
@@ -1566,102 +1581,167 @@ export default function Main({ weather, particulateMatter, store, location }) {
     };
 
     // 주변 관광지
-    const renderLocationList = () =>{
-        return location.map((page) => (
-            <View key={page.contentid} style={{ alignItems: 'center', justifyContent: 'center' }}>
-                <View style={{
-                    width: 200,
-                    height: 300,
-                    marginHorizontal: 10,
-                    borderRadius: 10,
-                    elevation: 3,
-                    backgroundColor: '#fff',
-                    overflow: 'hidden' // 이미지가 컨테이너를 넘어가지 않도록 처리
-                }}>
-                    <ImageBackground
-                        source={page.firstimage && page.firstimage.length > 0 ? { uri: page.firstimage } : require('../assets/logo.png')}
-                        style={{
-                            width: '100%',
-                            height: '100%',
-                            justifyContent: 'flex-end'
-                        }}
-                    >
-                        <View style={{
-                            backgroundColor: 'rgba(0, 0, 0, 0.2)', // 반투명한 검정 배경
-                            padding: 10
-                        }}>
-                            <Text style={{
-                                color: '#fff',
-                                fontWeight: 'bold',
-                                fontSize: 16,
-                                height: 40, // 제목 영역의 고정 높이
-                                overflow: 'hidden'
-                            }}
-                                  numberOfLines={2} // 두 줄까지만 표시
-                                  ellipsizeMode="tail"
+    const renderLocationList = () => {
+        return location.map((page) => {
+            // 이미지 소스를 결정
+            const isLogo = !page.firstimage || page.firstimage.length === 0;
+            const imageSource = isLogo ? require('../assets/logo.png') : { uri: page.firstimage };
+
+            return (
+                <View key={page.contentid} style={{ alignItems: 'center', justifyContent: 'center' }}>
+                    <View style={{
+                        width: 200,
+                        height: 300, // 전체 컨테이너 크기는 동일하게 유지
+                        marginHorizontal: 10,
+                        borderRadius: 10,
+                        elevation: 3,
+                        backgroundColor: '#fff',
+                        overflow: 'hidden' // 이미지가 컨테이너를 넘어가지 않도록 처리
+                    }}>
+                        {isLogo ? (
+                            <View style={{ flex: 1 }}>
+                                <View style={{
+                                    flex: 1,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    backgroundColor: '#fff' // 로고일 때 배경 색상 지정
+                                }}>
+                                    <Image
+                                        source={imageSource}
+                                        style={{
+                                            width: 130, // 이미지의 고정 너비
+                                            height: 130, // 이미지의 고정 높이
+                                            resizeMode: 'contain' // 이미지가 컨테이너 안에 맞게 축소
+                                        }}
+                                    />
+                                </View>
+                                <View style={{
+                                    backgroundColor: 'rgba(0, 0, 0, 0.2)', // 반투명한 검정 배경
+                                    padding: 10
+                                }}>
+                                    <Text style={{
+                                        color: '#fff',
+                                        fontWeight: 'bold',
+                                        fontSize: 16,
+                                        height: 40, // 제목 영역의 고정 높이
+                                        overflow: 'hidden'
+                                    }}
+                                          numberOfLines={2} // 두 줄까지만 표시
+                                          ellipsizeMode="tail"
+                                    >
+                                        {page.title}
+                                    </Text>
+                                    <Text style={{
+                                        color: '#fff',
+                                        fontSize: 14,
+                                        marginBottom: 10,
+                                        height: 20, // 설명 영역의 고정 높이
+                                        overflow: 'hidden'
+                                    }}
+                                          numberOfLines={1} // 한 줄까지만 표시
+                                          ellipsizeMode="tail" // 말줄임표를 사용해 텍스트가 넘치는 경우 처리
+                                    >
+                                        {page.addr1} {page.addr2}
+                                    </Text>
+                                    <TouchableOpacity style={{
+                                        backgroundColor: '#000000',
+                                        paddingVertical: 5,
+                                        paddingHorizontal: 10,
+                                        borderRadius: 5,
+                                        alignSelf: 'flex-start' // 버튼을 왼쪽으로 정렬
+                                    }} onPress={() => handleNavi(page)}>
+                                        <Text style={{
+                                            color: '#fff',
+                                            fontWeight: 'bold'
+                                        }}>길찾기</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        ) : (
+                            <ImageBackground
+                                source={imageSource}
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    justifyContent: 'flex-end'
+                                }}
                             >
-                                {page.title}
-                            </Text>
-                            <Text style={{
-                                color: '#fff',
-                                fontSize: 14,
-                                marginBottom: 10,
-                                height: 20, // 설명 영역의 고정 높이
-                                overflow: 'hidden'
-                            }}
-                                  numberOfLines={1} // 한 줄까지만 표시
-                                  ellipsizeMode="tail" // 말줄임표를 사용해 텍스트가 넘치는 경우 처리
-                            >
-                                {page.addr1} {page.addr2}
-                            </Text>
-                            <TouchableOpacity style={{
-                                backgroundColor: '#000000',
-                                paddingVertical: 5,
-                                paddingHorizontal: 10,
-                                borderRadius: 5,
-                                alignSelf: 'flex-start' // 버튼을 왼쪽으로 정렬
-                            }} onPress={() => handleNavi(page)}>
-                                <Text style={{
-                                    color: '#fff',
-                                    fontWeight: 'bold'
-                                }}>길찾기</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </ImageBackground>
+                                <View style={{
+                                    backgroundColor: 'rgba(0, 0, 0, 0.2)', // 반투명한 검정 배경
+                                    padding: 10
+                                }}>
+                                    <Text style={{
+                                        color: '#fff',
+                                        fontWeight: 'bold',
+                                        fontSize: 16,
+                                        height: 40, // 제목 영역의 고정 높이
+                                        overflow: 'hidden'
+                                    }}
+                                          numberOfLines={2} // 두 줄까지만 표시
+                                          ellipsizeMode="tail"
+                                    >
+                                        {page.title}
+                                    </Text>
+                                    <Text style={{
+                                        color: '#fff',
+                                        fontSize: 14,
+                                        marginBottom: 10,
+                                        height: 20, // 설명 영역의 고정 높이
+                                        overflow: 'hidden'
+                                    }}
+                                          numberOfLines={1} // 한 줄까지만 표시
+                                          ellipsizeMode="tail" // 말줄임표를 사용해 텍스트가 넘치는 경우 처리
+                                    >
+                                        {page.addr1} {page.addr2}
+                                    </Text>
+                                    <TouchableOpacity style={{
+                                        backgroundColor: '#000000',
+                                        paddingVertical: 5,
+                                        paddingHorizontal: 10,
+                                        borderRadius: 5,
+                                        alignSelf: 'flex-start' // 버튼을 왼쪽으로 정렬
+                                    }} onPress={() => handleNavi(page)}>
+                                        <Text style={{
+                                            color: '#fff',
+                                            fontWeight: 'bold'
+                                        }}>길찾기</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </ImageBackground>
+                        )}
+                    </View>
                 </View>
-            </View>
-        ));
+            );
+        });
     };
 
     const renderBettingRanking = () => {
         return (
-            <View style={styles.rankingContainer}>
-                <View style={[{flexDirection:"row", alignItems:"center", marginTop:10}, styles.ranking]}>
-                    <Text style={[styles.rankingText, {fontWeight:"bold", marginLeft:20}]}>순위</Text>
-                    <Text style={[styles.rankingText, {fontWeight:"bold"}]}>닉네임</Text>
-                    <Text style={[styles.rankingText, {fontWeight:"bold"}]}>승리횟수</Text>
-                    <Text style={[styles.rankingText, {fontWeight:"bold"}]}>승률</Text>
+            <View style={{ paddingHorizontal: 20, backgroundColor: '#f9f9f9', marginTop: '3%' }}>
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: 'center', marginTop: 15, marginBottom: 5 }}>
+                    <Text style={{ width: '15%', fontWeight: "bold", textAlign: 'center' }}>순위</Text>
+                    <Text style={{ width: '35%', fontWeight: "bold", textAlign: 'center' }}>닉네임</Text>
+                    <Text style={{ width: '25%', fontWeight: "bold", textAlign: 'center' }}>승리횟수</Text>
+                    <Text style={{ width: '25%', fontWeight: "bold", textAlign: 'center' }}>승률</Text>
                 </View>
-                <View style={{width: '90%',height: 0.5,margin: 'auto',marginBottom:10,backgroundColor: '#C2C2C2'}} />
-                {betScore?(
-                    betScore.map((data,index) =>(
+                <View style={{ width: '100%', height: 0.5, alignSelf: 'center', marginBottom: 10, backgroundColor: '#C2C2C2' }} />
+                {betScore ? (
+                    betScore.map((data, index) => (
                         <View key={index}>
-                            <View style={[{flexDirection:"row", alignItems:"center"}, styles.ranking]}>
-                                <Text style={[styles.rankingText, { marginLeft:20}]}>{index+1}위</Text>
-                                <Text style={styles.rankingText}>{data.user_nick}</Text>
-                                <Text style={styles.rankingText}>{data.win}</Text>
-                                <Text style={styles.rankingText}>{data.score_ratio}%</Text>
+                            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: 'center', marginBottom: 15 }}>
+                                <Text style={{ width: '15%', textAlign: 'center' }}>{index + 1}위</Text>
+                                <Text style={{ width: '35%', textAlign: 'center' }}>{data.user_nick}</Text>
+                                <Text style={{ width: '25%', textAlign: 'center' }}>{data.win}</Text>
+                                <Text style={{ width: '25%', textAlign: 'center' }}>{data.score_ratio}%</Text>
                             </View>
                         </View>
-                        )
-
-                    )
-                ):(
-                    <Text>순위 결과가 없습니다.</Text>
-                    )}
+                    ))
+                ) : (
+                    <Text style={{ textAlign: 'center' }}>순위 결과가 없습니다.</Text>
+                )}
             </View>
-        )
-    }
+        );
+    };
 
     // 이번주 경기 일정
     const renderWeeklyMatchList = () => {
