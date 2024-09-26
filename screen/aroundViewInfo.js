@@ -16,8 +16,12 @@ const AroundViewInfo = () => {
 
     const apiKey = '9d8d1da9d46b7a0f17fa3c65c7654597'; // 실제 발급받은 API 키로 대체
 
+    const API_KEY = "q9%2BtR1kSmDAYUNoOjKOB3vkl1rLYVTSEVfg4sMDG2UYDAL4KiJo5GaFq9nfn%2FdUnUFjK%2FrOY3UfgJvHtOBAEmQ%3D%3D";
+
+
     const categories = [
         { id: "AT4", name: '관광지' },
+        { id: "event", name: '행사/공연/축제' },
         { id: "CT1", name: '문화시설' },
         { id: "CE7", name: '카페' },
         { id: "FD6", name: '음식점' },
@@ -34,6 +38,8 @@ const AroundViewInfo = () => {
         switch (id){
             case 'AT4' :
                 return "관광지";
+            case 'event':
+                return "행사/공연/축제";
             case 'CT1':
                 return "문화시설";
             case 'CE7':
@@ -62,6 +68,72 @@ const AroundViewInfo = () => {
                 return "기타";
         }
     };
+    
+    const getEvent = async (category)=> {
+        const date = new Date();
+        const formattedDate = date.toLocaleDateString('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        }).replace(/[^0-9]/g, '');
+
+        if (isLoading) return; // 이미 로딩 중이거나 마지막 페이지에 도달한 경우, 추가 요청 방지
+
+        setIsLoading(true); // 로딩 시작
+
+        try {
+            const eventListNum = await axios.get(`http://apis.data.go.kr/B551011/KorService1/searchFestival1?serviceKey=${API_KEY}&numOfRows=20&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&arrange=A&listYN=N&eventStartDate=${formattedDate}&_type=JSON&areaCode=5`)
+            const eventNum = eventListNum.data.response.body.items.item[0].totalCnt;
+            const response = await axios.get(`http://apis.data.go.kr/B551011/KorService1/searchFestival1?serviceKey=${API_KEY}&numOfRows=${eventNum}&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&arrange=A&listYN=Y&eventStartDate=${formattedDate}&_type=JSON&areaCode=5`)
+
+            const eventList = response.data.response.body.items.item;
+
+            const list = await Promise.all(eventList.map(async event => {
+                // getUrl 함수의 결과를 기다려야 하므로 await 사용
+                const placeUrl = await getUrl(event.contentid);
+
+                return {
+                    address_name: event.addr1,               // addr1 -> address_name
+                    category_group_code: 'event',            // contenttypeid -> category_group_code
+                    category_group_name: event.cat1,         // cat1 -> category_group_name
+                    category_name: `${event.cat1} > ${event.cat2} > ${event.cat3}`, // 카테고리 이름을 하나로 합침
+                    distance: "",                            // 기존 데이터에 없기 때문에 빈 문자열로 설정
+                    id: event.contentid,                     // contentid -> id
+                    place_name: event.title,                 // title -> place_name
+                    road_address_name: event.addr2,          // addr2 -> road_address_name
+                    x: event.mapx,                           // mapx -> x
+                    y: event.mapy,                           // mapy -> y
+                    firstimage: event.firstimage,
+                    eventstartdate: event.eventstartdate,
+                    eventenddate: event.eventenddate,
+                    place_url: placeUrl                      // 비동기 함수로부터 URL을 받아 설정
+                };
+            }));
+            setPlaces(list);
+
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false); // 로딩 종료
+        }
+
+    }
+
+    const getUrl = async (id) => {
+        const response = await axios.get(`http://apis.data.go.kr/B551011/KorService1/detailCommon1?serviceKey=${API_KEY}&numOfRows=10&pageNo=1&MobileOS=AND&MobileApp=NUVIDA&contentId=${id}&defaultYN=Y&_type=JSON&firstImageYN=Y&addrinfoYN=Y&overviewYN=Y&mapinfoYN=Y`)
+
+        const url = response.data.response.body.items.item[0].homepage;
+        // 정규식을 사용하여 href 속성 추출
+        const hrefMatch = url.match(/href="([^"]*)"/);
+
+        if (hrefMatch && hrefMatch[1]) {
+            // 필요에 따라 슬래시 제거 (슬래시가 포함된 경우)
+            const extractedUrl = hrefMatch[1].replace(/\/$/, ''); // 마지막 슬래시 제거
+            return extractedUrl;
+        }else {
+            return "";
+        }
+    }
 
     const getAround = async (category) =>{
         console.log(category)
@@ -277,17 +349,37 @@ const AroundViewInfo = () => {
         setPlaces([]);
         setPage(1);
         setIsEndReached(false); // 끝 도달 여부 초기화
-        getAround(category);
+        if(category=='event'){
+            getEvent(category);
+        }else{
+            getAround(category);
+        }
+        
+    };
+
+    const formatDate = (dateString) => {
+        // dateString에서 연도, 월, 일 부분을 각각 추출
+        const year = dateString.substring(0, 4); // "2024"
+        const month = dateString.substring(4, 6); // "10"
+        const day = dateString.substring(6, 8); // "10"
+
+        // 원하는 형식으로 결합하여 반환
+        return `${year}년 ${parseInt(month)}월 ${parseInt(day)}일`;
     };
 
     const RenderList = ({item}) => {
         return (
+
             <TouchableOpacity style={styles.renderContainer} onPress={() => openPlaceInKakaoMap(item.place_url)}>
                 <View style={styles.textContainer}>
                     <Text style={{fontWeight:"bold"}}>{item.place_name}</Text>
                     <Text>{getCategorie(item.category_group_code)}</Text>
                     <Text>{item.address_name}</Text>
-                    <Text>{item.distance}m</Text>
+                    {item.category_group_code != 'event'&&(<Text>{item.distance}m</Text>)}
+                    {item.category_group_code === 'event'&&(<Text>시작날짜 : {formatDate(item.eventstartdate)}</Text>)}
+                    {item.category_group_code === 'event'&&(<Text>종료날짜 : {formatDate(item.eventenddate)}</Text>)}
+
+
                 </View>
             </TouchableOpacity>
         );
@@ -408,7 +500,7 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         paddingHorizontal: 12,
         borderRadius: 50,
-        marginHorizontal: 5,
+        marginHorizontal: 3,
     },
     selectedCategoryButton: {
         backgroundColor: '#007bff',

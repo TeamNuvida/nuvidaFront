@@ -187,7 +187,7 @@ const Mypage = ({route}) => {
                 
                 <View style={styles.menuContainer}>
                     <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("Betting", {userInfo:userInfo})}>
-                        <Text style={styles.menuText}>배팅 목록</Text>
+                        <Text style={styles.menuText}>베팅 목록</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("MypostList", {userInfo:userInfo})}>
                         <Text style={styles.menuText}>내가 쓴 글</Text>

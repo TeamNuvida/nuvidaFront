@@ -50,9 +50,12 @@ export default function Main({ weather, particulateMatter, store, location }) {
     const [loadingUser, setLoadingUser] = useState(true); // 로딩 상태 추가
 
     const [notiState, setNotiState] = useState(false);
+    const [season, setSeasonScore] = useState(null);
+    const [betScore, setBetScore] = useState(null);
 
     // localhost 주소값
     const localhost = "54.180.146.203";
+    const localhost2 = "192.168.55.35";
 
     const logo = [
         require("../assets/KIA.png"),
@@ -166,6 +169,9 @@ export default function Main({ weather, particulateMatter, store, location }) {
         try {
             const response = await axios.post(`http://${localhost}:8090/nuvida/getMatch`);
             setMatches(response.data);
+
+            const getSession = await axios.post(`http://${localhost2}:8090/nuvida/getSeason`);
+            setSeasonScore(getSession.data);
         } catch (error) {
             console.error(error)
         }
@@ -177,7 +183,6 @@ export default function Main({ weather, particulateMatter, store, location }) {
             const matches = await axios.post(`http://${localhost}:8090/nuvida/getMatch`)
             const response = await axios.post(`http://${localhost}:8090/nuvida/getBtPoin`, {bs_seq:matches.data.bs_seq});
             setBetData(response.data);
-            console.log(response.data,"asdfasdfasdf")
         }catch (error) {
             console.error(error)
 
@@ -221,6 +226,9 @@ export default function Main({ weather, particulateMatter, store, location }) {
                 try{
                     const response = await axios.post(`http://${localhost}:8090/nuvida/getWeeklyMatchData`);
                     setWeeklyMatchData(response.data);
+
+                    const getBetScore = await axios.post(`http://${localhost2}:8090/nuvida/getBettingScore`);
+                    setBetScore(getBetScore.data);
                 }catch (error){
                     console.error(error)
                 }
@@ -584,6 +592,49 @@ export default function Main({ weather, particulateMatter, store, location }) {
             </TouchableOpacity>
         );
     };
+
+    const renderSeason = () =>{
+        return (
+            <View style={[styles.center, {width: '100%',}]}>
+                <View style={[styles.center, styles.matchDateContainer,]}>
+                    <Image source={require('../assets/matchDate.png')} style={styles.matchDateImage} />
+                    {season && <Text style={styles.matchDateText}>{season[0].ss_title} 순위</Text>}
+                </View>
+                <View style={[styles.seasonContainer,{alignItems: 'center',justifyContent: 'center'}]}>
+                    <View style={{flexDirection:"row"}}>
+                        <Text style={[styles.seasonContainerText, {fontWeight: 'bold', paddingLeft:"10%"}]}>순위</Text>
+                        <Text style={[styles.seasonContainerText, {fontWeight: 'bold'}]}>팀</Text>
+                        <Text style={[styles.seasonContainerText, {fontWeight: 'bold'}]}>승</Text>
+                        <Text style={[styles.seasonContainerText, {fontWeight: 'bold'}]}>패</Text>
+                        <Text style={[styles.seasonContainerText, {fontWeight: 'bold'}]}>무</Text>
+                    </View>
+                    <View style={{width: '90%',height: 0.5,margin: 'auto',marginVertical:10,backgroundColor: '#C2C2C2'}} />
+                    {season ?(
+                        season.map((data,index)=>(
+                            <View style={{alignItems: 'center',justifyContent: 'center'}}>
+                                <View style={{flexDirection:"row"}}>
+                                    <Text style={[styles.seasonText, {paddingLeft:"7%"}]}>{index+1}</Text>
+                                    <View style={{flexDirection:"row"}}>
+                                        <Image source={logo[Number(data.logo_img)]} style={styles.seasonTeam} />
+                                        <Text style={[styles.seasonText, ]}>{data.team_name}</Text>
+                                    </View>
+
+                                    <Text style={[styles.seasonText, ]}>{data.win}</Text>
+                                    <Text style={[styles.seasonText, ]}>{data.lose}</Text>
+                                    <Text style={[styles.seasonText, ]}>{data.draw}</Text>
+                                </View>
+                                <View style={{width: '90%',height: 0.5,margin: 'auto',marginVertical:10,backgroundColor: '#C2C2C2'}} />
+                            </View>
+                        )
+
+                        )
+                    ):(
+                        <Text style={[styles.seasonText]}>경기 결과가 없습니다.</Text>
+                        )}
+                </View>
+            </View>
+        );
+    }
 
     // 오늘의 경기
     const renderTodayMatch = () => {
@@ -1583,6 +1634,36 @@ export default function Main({ weather, particulateMatter, store, location }) {
         ));
     };
 
+    const renderBettingRanking = () => {
+        return (
+            <View style={styles.rankingContainer}>
+                <View style={[{flexDirection:"row", alignItems:"center", marginTop:10}, styles.ranking]}>
+                    <Text style={[styles.rankingText, {fontWeight:"bold", marginLeft:20}]}>순위</Text>
+                    <Text style={[styles.rankingText, {fontWeight:"bold"}]}>닉네임</Text>
+                    <Text style={[styles.rankingText, {fontWeight:"bold"}]}>승리횟수</Text>
+                    <Text style={[styles.rankingText, {fontWeight:"bold"}]}>승률</Text>
+                </View>
+                <View style={{width: '90%',height: 0.5,margin: 'auto',marginBottom:10,backgroundColor: '#C2C2C2'}} />
+                {betScore?(
+                    betScore.map((data,index) =>(
+                        <View>
+                            <View style={[{flexDirection:"row", alignItems:"center"}, styles.ranking]}>
+                                <Text style={[styles.rankingText, { marginLeft:20}]}>{index+1}위</Text>
+                                <Text style={styles.rankingText}>{data.user_nick}</Text>
+                                <Text style={styles.rankingText}>{data.win}</Text>
+                                <Text style={styles.rankingText}>{data.score_ratio}%</Text>
+                            </View>
+                        </View>
+                        )
+
+                    )
+                ):(
+                    <Text>순위 결과가 없습니다.</Text>
+                    )}
+            </View>
+        )
+    }
+
     // 이번주 경기 일정
     const renderWeeklyMatchList = () => {
         return weeklyMatchData.map((page) => (
@@ -1725,7 +1806,11 @@ export default function Main({ weather, particulateMatter, store, location }) {
             <ScrollView style={{ backgroundColor: "#fff"}}>
                 {renderMainPlan()}
                 <View style={styles.line} />
-                {renderTodayMatch()}
+                {matches ? (
+                 renderTodayMatch()
+                    ):(
+                        renderSeason()
+                    )}
                 <View style={[styles.line]} />
                 <View style={{flexDirection: 'row'}}>
                     <Ionicons name="baseball-outline" size={24} color="black" style={{marginLeft: '5%'}}/>
@@ -1743,13 +1828,25 @@ export default function Main({ weather, particulateMatter, store, location }) {
                 </ScrollView>
 
                 <View style={styles.line} />
-                <View style={{flexDirection: 'row'}}>
-                    <Ionicons name="baseball-outline" size={24} color="black" style={{marginLeft: '5%'}}/>
-                    <Text style={{marginLeft: '2%', fontSize: 16, fontWeight: 'bold'}}>이번주 경기 일정</Text>
-                </View>
+                {weeklyMatchData&&weeklyMatchData.length>0?(
+                    <View style={{flexDirection: 'row'}}>
+                        <Ionicons name="baseball-outline" size={24} color="black" style={{marginLeft: '5%'}}/>
+                        <Text style={{marginLeft: '2%', fontSize: 16, fontWeight: 'bold'}}>이번주 경기 일정</Text>
+                    </View>
+                ):(
+                    <TouchableOpacity style={{flexDirection: 'row'}} onPress={() => goBetting()}>
+                        <Ionicons name="baseball-outline" size={24} color="black" style={{marginLeft: '5%'}}/>
+                        <Text style={{marginLeft: '2%', fontSize: 16, fontWeight: 'bold'}}>베팅 순위 Top10</Text>
+                        <MaterialCommunityIcons name="arrow-right" size={24} color="black" />
+                    </TouchableOpacity>
+                    )}
+                {weeklyMatchData&&weeklyMatchData.length>0?(
                 <PagerView style={styles.weeklyContainer}>
                     {renderWeeklyMatchList()}
                 </PagerView>
+                    ):(
+                    renderBettingRanking()
+                    )}
                 <View style={styles.line} />
                 <Text style={styles.subTitle}>인기 글</Text>
                 {renderBoard()}
@@ -1902,6 +1999,17 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3,
+    },
+seasonContainer: {
+        width: "90%",
+        backgroundColor: '#0E1923',
+        borderRadius: 10,
+        marginTop: '-7.5%',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3,
+        paddingTop:35,
     },
 
     teamLogo: {
@@ -2069,7 +2177,8 @@ const styles = StyleSheet.create({
 
     boardIcon: {
         width: '20%',
-        height: '100%'
+        height: '100%',
+
     },
 
     boardCount: {
@@ -2078,6 +2187,7 @@ const styles = StyleSheet.create({
         fontSize: 13,
         justifyContent: 'center',
         paddingLeft: '3%',
+
     },
 
     boardTitle: {
@@ -2201,6 +2311,37 @@ const styles = StyleSheet.create({
     batText:{
         fontSize: 14,
         fontWeight: 'bold',
+    },
+    seasonContainerText:{
+        fontSize:14,
+        color:"#ffffff",
+        marginRight:"16%"
+    },
+    seasonText:{
+        fontSize:14,
+        color:"#ffffff",
+        marginRight:"12%"
+    },
+    seasonTeam:{
+        width:30,
+        height:30,
+        marginRight:10
+    },
+    rankingContainer:{
+        width: "90%",
+        alignSelf:"center",
+        borderRadius:5,
+        borderWidth:1,
+        borderColor:"#0E1923",
+        marginTop:15,
+
+    },
+    ranking:{
+        marginBottom:20
+    },
+    rankingText:{
+        fontSize:15,
+        marginRight:"12%"
     }
 });
 

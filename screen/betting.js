@@ -347,7 +347,7 @@ const Betting = ({route}) => {
                         </TouchableOpacity>
                     </View>
                 </View>
-                {filteredList?
+                {filteredList&&filteredList.length>0?
                     (
                         <FlatList
                             data={filteredList}
