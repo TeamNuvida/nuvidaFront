@@ -55,7 +55,6 @@ export default function Main({ weather, particulateMatter, store, location }) {
 
     // localhost 주소값
     const localhost = "54.180.146.203";
-    const localhost2 = "192.168.55.35";
 
     const logo = [
         require("../assets/KIA.png"),
@@ -170,7 +169,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
             const response = await axios.post(`http://${localhost}:8090/nuvida/getMatch`);
             setMatches(response.data);
 
-            const getSession = await axios.post(`http://${localhost2}:8090/nuvida/getSeason`);
+            const getSession = await axios.post(`http://${localhost}:8090/nuvida/getSeason`);
             setSeasonScore(getSession.data);
         } catch (error) {
             console.error(error)
@@ -227,7 +226,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                     const response = await axios.post(`http://${localhost}:8090/nuvida/getWeeklyMatchData`);
                     setWeeklyMatchData(response.data);
 
-                    const getBetScore = await axios.post(`http://${localhost2}:8090/nuvida/getBettingScore`);
+                    const getBetScore = await axios.post(`http://${localhost}:8090/nuvida/getBettingScore`);
                     setBetScore(getBetScore.data);
                 }catch (error){
                     console.error(error)

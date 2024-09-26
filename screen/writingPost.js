@@ -50,6 +50,7 @@ const uploadImageAsync = async (uri) => {
 // 메인 앱 컴포넌트
 export default function WritingPost({route}) {
     const [images, setImages] = useState([]);
+    const [category, setCategory] = useState(1);
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [contentHeight, setContentHeight] = useState(100); // 초기 높이 설정
@@ -57,6 +58,11 @@ export default function WritingPost({route}) {
     const [isUploading, setIsUploading] = useState(false); // 업로드 상태 관리
     const navigation = useNavigation();
     const userInfo = route.params.userInfo;
+
+    const categories = [
+        { id: 1, name: '야구' },
+        { id: 2, name: '여행' },
+    ];
 
     const localhost = "54.180.146.203";
 
@@ -103,7 +109,7 @@ export default function WritingPost({route}) {
         console.log('Content:', content.length);
 
         try {
-            const response = await axios.post(`http://${localhost}:8090/nuvida/insertPost`, {user_id:userInfo.user_id, post_title:title, details:content, imageList:imageUrls});
+            const response = await axios.post(`http://${localhost}:8090/nuvida/insertPost`, {user_id:userInfo.user_id, post_title:title, details:content, imageList:imageUrls, category:category});
             
             Alert.alert('게시물 등록이 완료되었습니다.');
             navigation.navigate('CommunityList', {userInfo: userInfo})
@@ -111,6 +117,13 @@ export default function WritingPost({route}) {
         } catch (error) {
             console.error('Error submitting post:', error);
         }
+    };
+
+    const handleCategorySelect = (select) => {
+        if(select===category){
+            return;
+        }
+        setCategory(select);
     };
 
     return (
@@ -122,6 +135,30 @@ export default function WritingPost({route}) {
                 <Text style={styles.headerTitle}>NUVIDA</Text>
                 <View style={{ width: 24 }} />
             </View>
+
+            <View style={styles.categoryContainer}>
+                <Text style={{fontSize:15, fontWeight:"bold"}}>category : </Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {categories.map((select) => (
+                        <TouchableOpacity
+                            key={select.id}
+                            style={[
+                                styles.categoryButton,
+                                category === select.id ? styles.selectedCategoryButton : null
+                            ]}
+                            onPress={() => handleCategorySelect(select.id)}
+                        >
+                            <Text style={[
+                                styles.categoryText,
+                                category === select.id ? { color: '#fff' } : null
+                            ]}>
+                                {select.name}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
+            </View>
+
             <TextInput
                 style={[styles.input, { height: Math.max(50, contentHeight) }]} // 최소 높이를 100으로 설정
                 placeholder="제목을 입력해주세요."
@@ -159,6 +196,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
+        backgroundColor: '#fff',
     },
     input: {
         borderColor: 'gray',
@@ -213,5 +251,27 @@ const styles = StyleSheet.create({
         color: 'red',
         textAlign: 'center',
         flex: 1, // 중앙 정렬을 위해 추가
+    },
+    categoryContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 10,
+        width: '100%',
+    },
+    categoryButton: {
+        backgroundColor: '#f0f0f0',
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 50,
+        marginHorizontal: 3,
+    },
+    selectedCategoryButton: {
+        backgroundColor: '#ff3131',
+    },
+    categoryText: {
+        color: '#000',
+        fontWeight: 'bold',
+        fontSize:13
     },
 });

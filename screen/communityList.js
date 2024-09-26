@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, ScrollView,FlatList, Image, Modal, TextInput, Alert, ActivityIndicator  } from "react-native";
+import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, ScrollView,FlatList, Image, Modal, TextInput, Alert, ActivityIndicator, Keyboard  } from "react-native";
 import { MaterialCommunityIcons, AntDesign, FontAwesome, Entypo, Ionicons, Feather, Fontisto } from '@expo/vector-icons';
 import axios from 'axios';
 
@@ -11,22 +11,61 @@ export default function CommunityList({route}) {
     const [userInfo, setUserInfo] = useState(route.params.userInfo)
 
     const [notiState, setNotiState] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState(0);
+
+    const [searchQuery, setSearchQuery] = useState(''); // 검색어 상태 관리
+
 
     const localhost = "54.180.146.203";
-    
+
+    const categories = [
+        { id: 0, name: '전체' },
+        { id: 1, name: '야구' },
+        { id: 2, name: '여행' },
+    ];
+
+    const getCmtList = async () => {
+        try {
+            const response = await axios.post(`http://${localhost}:8090/nuvida/getCmtList`);
+            console.log(response.data);
+            setCmtList(response.data);
+        } catch (error) {
+            console.error('Error fetching plan data:', error);
+        }
+    };
+
+    const getCategoryCmt = async (category) => {
+        try {
+            const response = await axios.post(`http://${localhost}:8090/nuvida/getCategoryCmt`,{category:category});
+            console.log(response.data);
+            setCmtList(response.data);
+        } catch (error) {
+            console.error('Error fetching plan data:', error);
+        }
+    };
+
+
+    const filterCmtList = () => {
+        // 검색어가 비어있으면 전체 리스트 반환
+        if (searchQuery.trim() === '') {
+            if(selectedCategory==0){
+                getCmtList();
+            }else{
+                getCategoryCmt(selectedCategory);
+            }
+            return;
+        }
+
+        // 검색어를 기준으로 게시물 제목을 필터링하여 새로운 리스트 생성
+        const filteredList = cmtList.filter(item => item.post_title.toLowerCase().includes(searchQuery.toLowerCase()));
+        setCmtList(filteredList);
+
+        // 검색 후 키보드를 숨깁니다.
+        Keyboard.dismiss();
+    };
 
     useFocusEffect(
         useCallback(() => {
-            const getCmtList = async () => {
-                try {
-                    const response = await axios.post(`http://${localhost}:8090/nuvida/getCmtList`);
-                    console.log(response.data);
-                    setCmtList(response.data);
-                } catch (error) {
-                    console.error('Error fetching plan data:', error);
-                }
-            };
-
             getCmtList();
         }, [])
     );
@@ -185,6 +224,20 @@ export default function CommunityList({route}) {
         }
     };
 
+    const handleCategorySelect = (category) => {
+        if(category===selectedCategory){
+            return;
+        }
+        setSearchQuery('');
+        setSelectedCategory(category);
+        if(category==0){
+            getCmtList();
+        }else{
+            getCategoryCmt(category);
+        }
+
+    };
+
     const handleWriteIngPost = () => {
         if(userInfo){
             navigation.navigate('WritingPost', {userInfo:userInfo});
@@ -201,6 +254,41 @@ export default function CommunityList({route}) {
                     <Text style={styles.newPostText}>글작성</Text>
                 </View>
             </TouchableOpacity>
+
+            {/* 검색창 추가 */}
+            <View style={styles.searchContainer}>
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="게시물 제목 검색..."
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                />
+                <TouchableOpacity style={styles.searchButton} onPress={filterCmtList}>
+                    <Text style={styles.searchButtonText}>검색</Text>
+                </TouchableOpacity>
+            </View>
+
+            <View style={styles.categoryContainer}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {categories.map((category) => (
+                    <TouchableOpacity
+                        key={category.id}
+                        style={[
+                            styles.categoryButton,
+                            selectedCategory === category.id ? styles.selectedCategoryButton : null
+                        ]}
+                        onPress={() => handleCategorySelect(category.id)}
+                    >
+                        <Text style={[
+                            styles.categoryText,
+                            selectedCategory === category.id ? { color: '#fff' } : null
+                        ]}>
+                            {category.name}
+                        </Text>
+                    </TouchableOpacity>
+                ))}
+            </ScrollView>
+            </View>
             {cmtList?(
                 <FlatList
                     data={cmtList}
@@ -332,5 +420,53 @@ const styles = StyleSheet.create({
     },
     nullItem:{
         alignItems: 'center',
+    },
+    categoryContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.8)', // 반투명 배경색으로 카테고리 강조
+        paddingVertical: 10,
+        width: '100%',
+    },
+    categoryButton: {
+        backgroundColor: '#f0f0f0',
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 50,
+        marginHorizontal: 3,
+    },
+    selectedCategoryButton: {
+        backgroundColor: '#ff0000',
+    },
+    categoryText: {
+        color: '#000',
+        fontWeight: 'bold',
+        fontSize:12
+    },
+    searchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+    },
+    searchInput: {
+        flex: 1,
+        height: 40,
+        borderColor: '#ddd',
+        borderWidth: 1,
+        borderRadius: 20,
+        paddingHorizontal: 15,
+        marginRight: 10,
+    },
+    searchButton: {
+        backgroundColor: '#ff2e2e',
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        borderRadius: 20,
+    },
+    searchButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
     }
 });
