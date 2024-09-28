@@ -12,7 +12,7 @@ import {
     Image,
     ScrollView, Keyboard
 } from 'react-native';
-import { FontAwesome, Entypo, Ionicons, Feather } from '@expo/vector-icons';
+import {FontAwesome, Entypo, Ionicons, Feather, AntDesign} from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 
@@ -31,7 +31,7 @@ const AddPlaceModal = ({ visible, onClose, onAdd }) => {
     const [placeName, setPlaceName] = useState('');
     const [placeAddress, setPlaceAddress] = useState('');
 
-     const apiKey = '9d8d1da9d46b7a0f17fa3c65c7654597';
+    const apiKey = '9d8d1da9d46b7a0f17fa3c65c7654597';
 
     const handleAddPlace = async () => {
         const url = `https://dapi.kakao.com/v2/local/search/address.json?query==${placeAddress}`;
@@ -457,9 +457,9 @@ export default function ScheduleCreation4({ route }) {
                     onPress={()=>addBtn()}
                 >
                     <Text style={[
-                        styles.categoryText,
+                        {color: '#2ab7c1', fontWeight: "400"}
                     ]}>
-                        +직접추가
+                        + 직접추가
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -485,10 +485,12 @@ export default function ScheduleCreation4({ route }) {
                                         paddingHorizontal: 10,
                                         borderRadius: 5,
                                         marginRight: 10,
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
                                     }}
                                     onPress={() => handleSelect(item)}
                                 >
-                                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>
+                                    <Text style={{ color: '#fff', fontSize: 12 }}>
                                         {selectedPlaces.some(place => place.contentid === item.contentid) ? '삭제' : '추가'}
                                     </Text>
                                 </TouchableOpacity>
@@ -498,10 +500,12 @@ export default function ScheduleCreation4({ route }) {
                                         paddingVertical: 5,
                                         paddingHorizontal: 10,
                                         borderRadius: 5,
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
                                     }}
                                     onPress={() => handleDetailButtonPress(item)}
                                 >
-                                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>상세보기</Text>
+                                    <Text style={{ color: '#fff', fontSize: 12 }}>상세보기</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -509,34 +513,93 @@ export default function ScheduleCreation4({ route }) {
                 )}
             />
 
-            {/* 추가된 장소 목록을 보이거나 숨기는 버튼 */}
-            <TouchableOpacity onPress={toggleSelectedPlaces} style={styles.toggleButton}>
-                <Text style={styles.toggleButtonText}>
-                    {showSelectedPlaces ? '장소 목록 숨기기' : '장소 목록 보기'}
-                </Text>
-            </TouchableOpacity>
-
-            {showSelectedPlaces && (
-                <View style={styles.selectedContainer}>
-                    <FlatList
-                        data={selectedPlaces}
-                        keyExtractor={(item) => item.contentid.toString()}
-                        renderItem={({ item }) => (
-                            <View style={styles.selectedItemContainer}>
-                                <Text style={styles.selectedText}>{item.name}</Text>
-                                <TouchableOpacity
-                                    style={styles.removePlace}
-                                    onPress={() => handleRemovePlace(item)}
-                                >
-                                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>삭제</Text>
-                                </TouchableOpacity>
-                            </View>
-                        )}
-                        ListEmptyComponent={<Text style={styles.noSelectionText}>선택된 장소가 없습니다.</Text>}
-                    />
+            <View style={{borderTopRightRadius: 30, borderTopLeftRadius: 30, borderColor: '#808080', borderTopWidth: 1, borderRightWidth: 1, borderLeftWidth: 1, backgroundColor: '#F6F6F6', marginLeft: -10, marginRight: -10, marginBottom: -10, maxHeight: '50%'}}>
+                {/* 추가된 장소 목록을 보이거나 숨기는 버튼 */}
+                <TouchableOpacity onPress={toggleSelectedPlaces} style={[styles.toggleButton]}>
+                    <View style={{alignItems: 'center',}}>
+                        <FontAwesome
+                            name={showSelectedPlaces ? "caret-down" : "caret-up"} // 상태에 따라 아이콘 변경
+                            size={24} // 아이콘 크기
+                            color="black" // 아이콘 색상
+                        />
+                    </View>
+                </TouchableOpacity>
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-start'}}>
+                    {/* FontAwesome 아이콘 추가 */}
+                    <Text style={{fontSize: 16, fontWeight: 'bold', marginRight: '2%', marginLeft: '5%'}}>
+                        선택한 장소
+                    </Text>
+                    {/* 개수 표시 원 추가 */}
+                    <View style={{backgroundColor: 'black', width: 22, height: 22, borderRadius: 50, alignItems: 'center', justifyContent: 'center'}}>
+                        <Text style={{fontWeight: 'bold', color: '#fff', fontSize: 12}}>{selectedPlaces.length}</Text>
+                    </View>
                 </View>
-            )}
 
+                <View style={{alignItems: 'center'}}>
+                    {showSelectedPlaces && (
+                        <View style={{
+                            padding: 10,
+                            backgroundColor: '#f9f9f9',
+                            borderRadius: 10,
+                            width: '95%',
+                        }}>
+                            <FlatList
+                                style={{ maxHeight: '90%' }} // 최대 높이 설정
+                                data={selectedPlaces}
+                                keyExtractor={(item) => item.contentid.toString()}
+                                renderItem={({ item }) => (
+                                    <View style={{
+                                        flexDirection: 'row',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        backgroundColor: '#ffffff', // 하얀 박스 배경색
+                                        padding: 15,
+                                        marginTop: '1%',
+                                        marginBottom: 10, // 아이템 간 간격
+                                        borderRadius: 8, // 모서리 둥글게
+                                        shadowColor: '#000', // 그림자 색상
+                                        shadowOffset: { width: 0, height: 2 }, // 그림자 오프셋
+                                        shadowOpacity: 0.1, // 그림자 투명도
+                                        shadowRadius: 4, // 그림자 반경
+                                        elevation: 2, // 안드로이드 그림자
+                                    }}>
+                                        <Text style={{
+                                            fontSize: 15,
+                                            fontWeight: "500",
+                                            color: '#333',
+                                            flex: 1, // flex를 1로 설정하여 공간 확보
+                                            marginRight: 10, // 삭제 버튼과의 간격
+                                            overflow: 'hidden', // 텍스트가 넘어갈 경우 숨김
+                                            textOverflow: 'ellipsis', // 생략 표시 (...) 적용 (웹에서만 적용, React Native에서는 효과가 없음)
+                                            whiteSpace: 'nowrap', // 줄 바꿈 하지 않음 (웹에서만 적용, React Native에서는 효과가 없음)
+                                        }}>
+                                            {item.name}
+                                        </Text>
+                                        <TouchableOpacity
+                                            style={{
+                                                paddingVertical: 6, // 세로 여백
+                                                paddingHorizontal: 10, // 가로 여백
+                                                borderRadius: 5, // 모서리 둥글게
+                                            }}
+                                            onPress={() => handleRemovePlace(item)}
+                                        >
+                                            <AntDesign name="closesquare" size={22} color="black" />
+                                            {/*<Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 13 }}>삭제</Text>*/}
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+                                ListEmptyComponent={<Text style={{
+                                    textAlign: 'center',
+                                    color: '#999',
+                                    fontSize: 14,
+                                    marginTop: 10,
+                                    marginBottom: 10,
+                                }}>선택된 장소가 없습니다.</Text>}
+                            />
+                        </View>
+                    )}
+                </View>
+            </View>
             <DetailModal
                 visible={showDetailModal}
                 onClose={() => setShowDetailModal(false)}
@@ -551,8 +614,6 @@ export default function ScheduleCreation4({ route }) {
                 onClose={() => setAddModalVisible(false)}
                 onAdd={(newPlace) => setSelectedPlaces((prev) => [...prev, newPlace])}
             />
-
-
         </View>
     );
 
@@ -604,9 +665,8 @@ const styles = StyleSheet.create({
     selectedContainer: {
         marginTop: 10,
         padding: 10,
-        backgroundColor: '#fbf1f1',
         borderRadius: 10,
-        maxHeight:'40%'
+        maxHeight:'100%'
     },
     selectedItemContainer: {
         padding: 10,
@@ -615,7 +675,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
     },
     selectedText: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 'bold',
         color: 'black',
     },
@@ -679,27 +739,29 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     categoryButton: {
-        backgroundColor: '#f0f0f0',
-        paddingVertical: 10,
+        backgroundColor: '#eaf6f6',
+        paddingVertical: 8,
         paddingHorizontal: 15,
-        borderRadius: 5,
+        borderRadius: 12,
         marginRight: 10,
         marginBottom: 10,
     },
     addButton: {
-        backgroundColor: '#f88888',
-        paddingVertical: 10,
+        backgroundColor: '#fff',
+        paddingVertical: 8,
         paddingHorizontal: 15,
-        borderRadius: 5,
+        borderRadius: 12,
         marginRight: 10,
         marginBottom: 10,
+        borderColor: '#2ab7c1',
+        borderWidth: 1,
     },
     selectedCategoryButton: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#000000',
     },
     categoryText: {
-        color: '#000',
-        fontWeight: 'bold',
+        color: '#2ab7c1',
+        fontWeight: "400"
     },
     modalContainer: {
         flex: 1,
@@ -751,12 +813,9 @@ const styles = StyleSheet.create({
         height: 100,
     },
     toggleButton: {
-        marginTop: 20,
-        backgroundColor: 'black',
         paddingVertical: 10,
         paddingHorizontal: 15,
         borderRadius: 5,
-        alignItems: 'center',
     },
     toggleButtonText: {
         color: '#fff',
@@ -764,10 +823,12 @@ const styles = StyleSheet.create({
     },
     removePlace:{
         backgroundColor:'#ff3b30',
-        paddingVertical: 5,
+        paddingVertical: 4,
         paddingHorizontal: 10,
         borderRadius: 5,
-        marginLeft:10
+        marginLeft: 10,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     addModal: {
         width: '80%',
