@@ -90,7 +90,7 @@ const MypostList = ({route}) => {
             const response = await axios.post(`http://${localhost}:8090/nuvida/getCmtInfo`, {post_seq:post_seq});
             console.log(response.data);
             const intResponse = await axios.post(`http://${localhost}:8090/nuvida/getInt`, {post_seq:post_seq, user_id:userInfo.user_id});
-            navigation.navigate('CommunityInfo', {cmtInfo:response.data, intTF:intResponse.data})
+            navigation.navigate('CommunityInfo', {cmtInfo:response.data, intTF:intResponse.data, userInfo:userInfo})
         } catch (error) {
             console.error('Error fetching plan data:', error);
         }
@@ -114,8 +114,8 @@ const MypostList = ({route}) => {
                         )}
                         <View style={styles.textContainer}>
                             <View style={styles.titleRow}>
-                                <Text style={styles.titleText}>{item.post_title}</Text>
-                                <TouchableOpacity onPress={() => deletePost(item.post_seq)}>
+                                <Text style={[styles.titleText]}>{item.post_title}</Text>
+                                <TouchableOpacity onPress={() => deletePost(item.post_seq)}  >
                                     <Feather name="trash-2" size={24} color="red" />
                                 </TouchableOpacity>
                             </View>
@@ -335,6 +335,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 5,
+        width:"90%"
     },
     subtitleText: {
         fontSize: 16,
@@ -354,9 +355,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+
     },
     nullItem:{
-    alignItems: 'center',
+        alignItems: 'center',
 },
 
 });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback  } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import {
     StyleSheet,
@@ -53,6 +53,8 @@ export default function Main({ weather, particulateMatter, store, location }) {
     const [season, setSeasonScore] = useState(null);
     const [betScore, setBetScore] = useState(null);
 
+    const scrollViewRef = useRef(null);
+
     // localhost 주소값
     const localhost = "54.180.146.203";
 
@@ -70,6 +72,14 @@ export default function Main({ weather, particulateMatter, store, location }) {
         require("../assets/question.png"),
     ];
 
+    useFocusEffect(
+        useCallback(() => {
+            // 화면이 포커스를 받을 때마다 스크롤을 최상단으로 이동시킵니다.
+            if (scrollViewRef.current) {
+                scrollViewRef.current.scrollTo({ y: 0, animated: true });
+            }
+        }, [])
+    );
 
     // 유저 정보 테스트용 데이터, 나중에 스토리지에 있는 로그인 정보로 가져오기
     useFocusEffect(
@@ -1883,7 +1893,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
 
         <SafeAreaView style={styles.container}>
             {renderHeader()}
-            <ScrollView style={{ backgroundColor: "#fff"}}>
+            <ScrollView ref={scrollViewRef} style={{ backgroundColor: "#fff"}}>
                 {renderMainPlan()}
                 <View style={styles.line} />
                 {matches ? (

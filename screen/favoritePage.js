@@ -46,7 +46,7 @@ const FavoriteList = ({route}) => {
             const response = await axios.post(`http://${localhost}:8090/nuvida/getCmtInfo`, {post_seq:post_seq});
             console.log(response.data);
             const intResponse = await axios.post(`http://${localhost}:8090/nuvida/getInt`, {post_seq:post_seq, user_id:userInfo.user_id});
-            navigation.navigate('CommunityInfo', {cmtInfo:response.data, intTF:intResponse.data})
+            navigation.navigate('CommunityInfo', {cmtInfo:response.data, intTF:intResponse.data, userInfo:userInfo})
         } catch (error) {
             console.error('Error fetching plan data:', error);
         }
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
         alignItems: 'center', // 수직 정렬
     },
     iconStyle: {
-        marginLeft: 10, // 텍스트와 아이콘 사이의 간격 조정 (선택 사항)
+        // marginLeft: 10, // 텍스트와 아이콘 사이의 간격 조정 (선택 사항)
     },
 
     textContainer: {
@@ -263,6 +263,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         paddingRight: 10,
+        width:"90%"
     },
     description: {
         fontSize: 14,
