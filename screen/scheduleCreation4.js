@@ -410,7 +410,7 @@ export default function ScheduleCreation4({ route }) {
                         height: 40,
                         borderColor: '#ccc',
                         borderWidth: 1,
-                        borderRadius: 5,
+                        borderRadius: 35,
                         paddingHorizontal: 10,
                         marginRight: 10,
                     }}
@@ -425,7 +425,7 @@ export default function ScheduleCreation4({ route }) {
                         backgroundColor: 'black',
                         paddingVertical: 10,
                         paddingHorizontal: 15,
-                        borderRadius: 5,
+                        borderRadius: 7,
                         height: 40,
                     }}
                     onPress={handleSearch}
@@ -648,15 +648,15 @@ export default function ScheduleCreation4({ route }) {
 const styles = StyleSheet.create({
     itemContainer: {
         flexDirection: 'row',
-        padding: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
+        padding: 15,
+        borderBottomWidth: 0.5,
+        borderBottomColor: '#dddddd',
     },
     resultImage: {
         width: 80,
         height: 80,
         borderRadius: 5,
-        marginRight: 10,
+        marginRight: 20,
     },
     itemContent: {
         flex: 1,

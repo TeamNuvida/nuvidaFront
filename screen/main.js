@@ -2050,8 +2050,8 @@ const styles = StyleSheet.create({
     },
 
     matchDateImage: {
-        width: '100%',
-        height: 39,
+        width: 220,
+        height: 42,
     },
 
     matchDateText: {
