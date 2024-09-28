@@ -101,6 +101,11 @@ export default function WritingPost({route}) {
             return;
         }
 
+        if (title.length >30 ) {
+            Alert.alert('내용을 확인해주세요.', '제목을 30글자 이내로 작성해주세요.');
+            return;
+        }
+
         if (title.length == 0 || content.length == 0) {
             Alert.alert('내용을 확인해주세요.', '제목 혹은 내용을 입력해주세요.');
             return;

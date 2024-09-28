@@ -135,23 +135,32 @@ export default function CommunityList({route}) {
     }
 
     const PostItem = ({ item }) => (
-        <TouchableOpacity style={styles.postContainer} onPress={() => communityInfo(item.post_seq)}>
-            {item.image ? <Image source={{ uri: item.image }} style={styles.image} /> : <Image source={require('../assets/logo.png')} style={styles.nullImage} />}
-            <View style={styles.textContainer}>
-                <Text style={styles.title}>{item.post_title}</Text>
-                <Text style={styles.description}>{item.details}</Text>
-                <View style={styles.iconContainer}>
-                    <View style={styles.iconGroup}>
-                        <FontAwesome name="heart-o" size={20} color="red" />
-                        <Text style={styles.iconText}>{item.intCount}</Text>
+        <View style={{alignItems: 'center'}}>
+            <TouchableOpacity style={styles.postContainer} onPress={() => communityInfo(item.post_seq)}>
+                <View style={{width: '100%', flexDirection: 'row'}}>
+                    <View style={{width: '30%', alignItems: 'center', marginRight: '5%', marginLeft: '-6%'}}>
+                        {item.image ? <Image source={{ uri: item.image }} style={styles.image} /> : <Image source={require('../assets/logo.png')} style={styles.nullImage} />}
                     </View>
-                    <View style={[styles.icon, styles.iconGroup]}>
-                        <FontAwesome name="comment-o" size={20} color="black" />
-                        <Text style={styles.iconText}>{item.cmtCount}</Text>
+                    <View style={{width: '70%'}}>
+                        <View style={[styles.textContainer]}>
+                            <Text style={styles.title}>{item.post_title}</Text>
+                            <Text style={styles.description}>{item.details}</Text>
+                            <View style={styles.iconContainer}>
+                                <View style={styles.iconGroup}>
+                                    <FontAwesome name="heart-o" size={18} color="red" />
+                                    <Text style={styles.iconText}>{item.intCount}</Text>
+                                </View>
+                                <View style={[styles.icon, styles.iconGroup]}>
+                                    <FontAwesome name="comment-o" size={18} color="black" />
+                                    <Text style={styles.iconText}>{item.cmtCount}</Text>
+                                </View>
+                            </View>
+                        </View>
                     </View>
                 </View>
-            </View>
-        </TouchableOpacity>
+
+            </TouchableOpacity>
+        </View>
     );
 
 
@@ -269,8 +278,7 @@ export default function CommunityList({route}) {
                 </TouchableOpacity>
             </View>
 
-            <View style={styles.categoryContainer}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={[styles.categoryContainer]}>
                 {categories.map((category) => (
                     <TouchableOpacity
                         key={category.id}
@@ -288,8 +296,8 @@ export default function CommunityList({route}) {
                         </Text>
                     </TouchableOpacity>
                 ))}
-            </ScrollView>
             </View>
+
             {cmtList?(
                 <FlatList
                     data={cmtList}
@@ -315,9 +323,10 @@ const styles = StyleSheet.create({
     postContainer: {
         flexDirection: 'row',
         padding: 20,
-        borderBottomWidth: 1,
+        borderBottomWidth: 0.5,
         borderBottomColor: '#ddd',
         paddingHorizontal:30,
+        width: '95%'
     },
     image: {
         width: 80,
@@ -332,7 +341,6 @@ const styles = StyleSheet.create({
     },
     textContainer: {
         flex: 1,
-        marginLeft: 10,
     },
     title: {
         fontSize: 16,
@@ -424,16 +432,14 @@ const styles = StyleSheet.create({
     },
     categoryContainer: {
         flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
+        marginLeft: '5%',
         backgroundColor: 'rgba(255, 255, 255, 0.8)', // 반투명 배경색으로 카테고리 강조
         paddingVertical: 10,
-        width: '100%',
     },
     categoryButton: {
         backgroundColor: '#f0f0f0',
         paddingVertical: 8,
-        paddingHorizontal: 12,
+        paddingHorizontal: 15,
         borderRadius: 50,
         marginHorizontal: 3,
     },

@@ -25,6 +25,8 @@ export default function BaseballSchedule() {
         require("../assets/nc_dinos.png"),
         require("../assets/samsung_lions.png") ,
         require("../assets/ssg_landers.png"),
+        require("../assets/question.png"),
+
     ];
 
     useEffect(() => {

@@ -67,6 +67,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
         require("../assets/nc_dinos.png"),
         require("../assets/samsung_lions.png") ,
         require("../assets/ssg_landers.png"),
+        require("../assets/question.png"),
     ];
 
 
@@ -403,7 +404,7 @@ export default function Main({ weather, particulateMatter, store, location }) {
                 const response = await axios.post(`http://${localhost}:8090/nuvida/getCmtInfo`, {post_seq:postSeq});
                 console.log(response.data);
                 const intResponse = await axios.post(`http://${localhost}:8090/nuvida/getInt`, {post_seq:postSeq, user_id:userInfo.user_id});
-                navigation.navigate('CommunityInfo', {cmtInfo:response.data, intTF:intResponse.data})
+                navigation.navigate('CommunityInfo', {cmtInfo:response.data, intTF:intResponse.data, userInfo:userInfo})
             } catch (error) {
                 console.error('Error fetching plan data:', error);
             }
