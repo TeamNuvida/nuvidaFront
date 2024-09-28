@@ -62,6 +62,7 @@ export default function WritingPost({route}) {
     const categories = [
         { id: 1, name: '야구' },
         { id: 2, name: '여행' },
+        { id: 3, name: '방문후기' },
     ];
 
     const localhost = "54.180.146.203";
@@ -110,8 +111,13 @@ export default function WritingPost({route}) {
 
         try {
             const response = await axios.post(`http://${localhost}:8090/nuvida/insertPost`, {user_id:userInfo.user_id, post_title:title, details:content, imageList:imageUrls, category:category});
-            
-            Alert.alert('게시물 등록이 완료되었습니다.');
+
+            if(category!=3){
+                Alert.alert('','게시물 등록이 완료되었습니다.');
+            }else{
+                Alert.alert('','게시물 등록이 완료되었습니다.\n포인트는 7일 안에 적립됩니다.');
+            }
+
             navigation.navigate('CommunityList', {userInfo: userInfo})
 
         } catch (error) {

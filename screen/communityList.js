@@ -22,6 +22,7 @@ export default function CommunityList({route}) {
         { id: 0, name: '전체' },
         { id: 1, name: '야구' },
         { id: 2, name: '여행' },
+        { id: 3, name: '방문후기' },
     ];
 
     const getCmtList = async () => {
