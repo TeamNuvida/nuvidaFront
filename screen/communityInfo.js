@@ -11,7 +11,7 @@ import {
     TextInput,
     ScrollView,
     ActivityIndicator,
-    Modal
+    Modal, Keyboard
 } from 'react-native';
 import { FontAwesome, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
 import axios from 'axios';
@@ -70,7 +70,7 @@ const CommunityInfo = ({route}) => {
             <>
                 <View style={styles.commentContainer}>
                     <View style={styles.commentHeader}>
-                        {item.profile_img ? <Image source={{ uri: item.profile_img }} style={styles.commentProfile} /> : <Image source={{ uri: 'https://firebasestorage.googleapis.com/v0/b/high-service-431903-t6.appspot.com/o/imgtest%2Fprofile.png?alt=media&token=668cdcff-3447-406d-a46c-de24b34235e0' }} style={styles.commentProfile} />}
+                        {item.profile ? <Image source={{ uri: item.profile }} style={styles.commentProfile} /> : <Image source={{ uri: 'https://firebasestorage.googleapis.com/v0/b/high-service-431903-t6.appspot.com/o/imgtest%2Fprofile.png?alt=media&token=668cdcff-3447-406d-a46c-de24b34235e0' }} style={styles.commentProfile} />}
                         <Text style={styles.commentNick}>{item.user_nick}</Text>
                         <Text style={styles.commentDate}>{item.regi_at}</Text>
                         <View style={{paddingLeft:10}}></View>
@@ -83,7 +83,7 @@ const CommunityInfo = ({route}) => {
                 {item.replies && item.replies.map(reply => (
                     <View key={reply.cmt_seq} style={[styles.commentContainer, { marginLeft: 30 }]}>
                         <View style={styles.commentHeader}>
-                            {reply.profile_img ? <Image source={{ uri: reply.profile_img }} style={styles.commentProfile} /> : <Image source={{ uri: 'https://firebasestorage.googleapis.com/v0/b/high-service-431903-t6.appspot.com/o/imgtest%2Fprofile.png?alt=media&token=668cdcff-3447-406d-a46c-de24b34235e0' }} style={styles.commentProfile} />}
+                            {reply.profile ? <Image source={{ uri: reply.profile }} style={styles.commentProfile} /> : <Image source={{ uri: 'https://firebasestorage.googleapis.com/v0/b/high-service-431903-t6.appspot.com/o/imgtest%2Fprofile.png?alt=media&token=668cdcff-3447-406d-a46c-de24b34235e0' }} style={styles.commentProfile} />}
                             <Text style={styles.commentNick}>{reply.user_nick}</Text>
                             <Text style={styles.commentDate}>{reply.regi_at}</Text>
                             <View style={{paddingLeft:10}}></View>
@@ -105,7 +105,7 @@ const CommunityInfo = ({route}) => {
         <View style={styles.postContainer}>
             <View style={styles.postHeader}>
 
-                {cmtInfo.profile ? <Image source={{ uri: cmtInfo.profile }} style={styles.profileImage} /> : <Image source={{ uri: 'https://firebasestorage.googleapis.com/v0/b/high-service-431903-t6.appspot.com/o/imgtest%2Fprofile.png?alt=media&token=668cdcff-3447-406d-a46c-de24b34235e0' }} style={styles.profileImage} />}
+                {cmtInfo.profile_img ? <Image source={{ uri: cmtInfo.profile_img }} style={styles.profileImage} /> : <Image source={{ uri: 'https://firebasestorage.googleapis.com/v0/b/high-service-431903-t6.appspot.com/o/imgtest%2Fprofile.png?alt=media&token=668cdcff-3447-406d-a46c-de24b34235e0' }} style={styles.profileImage} />}
 
                 {/*<Image source={{ uri: cmtInfo.profile }} style={styles.profileImage} />*/}
                 <View style={styles.postHeaderText}>
@@ -166,6 +166,7 @@ const CommunityInfo = ({route}) => {
     };
 
     const handleCommentSubmit = async() => {
+        Keyboard.dismiss();
         if (comment.trim() === '') {
             return;
         }
