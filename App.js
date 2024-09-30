@@ -47,7 +47,7 @@ const Stack = createStackNavigator();
 export default function App() {
 
     // API KEY
-    const API_KEY = "";
+    const API_KEY = "q9%2BtR1kSmDAYUNoOjKOB3vkl1rLYVTSEVfg4sMDG2UYDAL4KiJo5GaFq9nfn%2FdUnUFjK%2FrOY3UfgJvHtOBAEmQ%3D%3D";
 
     const [isReady, setIsReady] = useState(false);
 
@@ -67,7 +67,7 @@ export default function App() {
             console.log(base_date, base_time)
 
             try {
-               const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=35.1682414234&lon=126.8890596255&appid=d2a5f95e3472b4ebac1cd08e6268c4f6&lang=kr&units=metric`);
+               const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=35.1682414234&lon=126.8890596255&appid=&lang=kr&units=metric`);
 
                 console.log("날씨", response.data)
                 const items = response.data;
