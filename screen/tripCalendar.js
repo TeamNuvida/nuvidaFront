@@ -128,7 +128,7 @@ const TripCalendar = ({ route }) => {
             const fetchWeatherData = async () => {
 
                 try {
-                    const response = await axios.get(`https://api.openweathermap.org/data/2.5/forecast?lat=35.1682414234&lon=126.8890596255&appid=d2a5f95e3472b4ebac1cd08e6268c4f6&lang=kr&units=metric`);
+                    const response = await axios.get(`https://api.openweathermap.org/data/2.5/forecast?lat=35.1682414234&lon=126.8890596255&appid=&lang=kr&units=metric`);
                     const midData = response.data;
 
 
