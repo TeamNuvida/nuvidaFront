@@ -14,9 +14,9 @@ const AroundViewInfo = () => {
 
     const [selectedCategory, setSelectedCategory] = useState("AT4");
 
-    const apiKey = '9d8d1da9d46b7a0f17fa3c65c7654597'; // 실제 발급받은 API 키로 대체
+    const apiKey = ''; // 실제 발급받은 API 키로 대체
 
-    const API_KEY = "q9%2BtR1kSmDAYUNoOjKOB3vkl1rLYVTSEVfg4sMDG2UYDAL4KiJo5GaFq9nfn%2FdUnUFjK%2FrOY3UfgJvHtOBAEmQ%3D%3D";
+    const API_KEY = "";
 
 
     const categories = [

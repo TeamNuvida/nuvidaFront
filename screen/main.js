@@ -23,7 +23,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function Main({ weather, particulateMatter, store, location }) {
 
     // API KEY
-    const API_KEY = "q9%2BtR1kSmDAYUNoOjKOB3vkl1rLYVTSEVfg4sMDG2UYDAL4KiJo5GaFq9nfn%2FdUnUFjK%2FrOY3UfgJvHtOBAEmQ%3D%3D";
+    const API_KEY = "";
 
     const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태
     const [userInfo, setUserInfo] = useState(null);  // 로그인 정보

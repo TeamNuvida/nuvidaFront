@@ -5,7 +5,7 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 
 export default function ScheduleCreationAccommodation({ route }) {
-    const API_KEY = "q9%2BtR1kSmDAYUNoOjKOB3vkl1rLYVTSEVfg4sMDG2UYDAL4KiJo5GaFq9nfn%2FdUnUFjK%2FrOY3UfgJvHtOBAEmQ%3D%3D";
+    const API_KEY = "";
     const navigation = useNavigation();
     const userInfo = route.params.userInfo;
 
